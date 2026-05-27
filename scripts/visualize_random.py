@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 
 import gymnasium as gym
+import numpy as np
 
 import two_wheel_robot.env  # noqa: F401  (side-effect: registers Gym ID)
 
@@ -20,7 +21,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 
-    env = gym.make("TwoWheelGoal-v0", render_mode="human")
+    env = gym.make("TwoWheelGoal-v0", render_mode="human", action_bounds=((10.0, 20.0), (-np.pi / 6, np.pi / 6)))
     try:
         for ep in range(args.episodes):
             _, info = env.reset(seed=args.seed + ep)
