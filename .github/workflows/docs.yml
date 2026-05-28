@@ -1,22 +1,40 @@
-name: docs
+name: two-wheel-exp Docs
 
 on:
+  release:
+    types: [published]
   push:
-    branches: [main]
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs.yml'
+      - 'two_wheel_robot/**/*.py'
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
 
 permissions:
   contents: write
 
+# Avoid concurrent mike pushes to gh-pages.
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install uv
+      - name: Setup uv
         uses: astral-sh/setup-uv@v4
         with:
           enable-cache: true
@@ -25,13 +43,44 @@ jobs:
         run: uv python install 3.12
 
       - name: Install dependencies
-        # Docs deps live in [dependency-groups].dev (PEP 735), not [project.optional-dependencies].
+        # Docs deps live in [dependency-groups].dev (PEP 735).
         run: uv sync --all-groups
 
-      - name: Build and deploy to gh-pages
-        run: uv run mkdocs gh-deploy --force --clean --verbose
-        env:
-          GIT_AUTHOR_NAME: github-actions[bot]
-          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-          GIT_COMMITTER_NAME: github-actions[bot]
-          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+      - name: Print environment info
+        run: |
+          uv run python --version
+          uv pip list
+
+      - name: Configure Git for deployment
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine version
+        id: version
+        if: github.event_name == 'push'
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "version=prod" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy documentation (release)
+        if: github.event_name == 'release'
+        run: |
+          VERSION=${{ github.event.release.tag_name }}
+          uv run mike deploy --push --update-aliases "$VERSION" latest
+          uv run mike set-default --push latest
+
+      - name: Deploy documentation (branch)
+        if: github.event_name == 'push' && steps.version.outputs.version != ''
+        run: |
+          uv run mike deploy --push --update-aliases ${{ steps.version.outputs.version }}
+
+      - name: Set default version to prod
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          uv run mike set-default --push prod
+
+      - name: Build documentation (manual / PR)
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
+        run: uv run mkdocs build --strict
