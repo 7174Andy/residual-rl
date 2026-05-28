@@ -1,8 +1,8 @@
-site_name: two-wheel-exp
+site_name: two-wheeled-experiment
 site_description: Two-wheel kinematic-unicycle goal-reaching env, DeePC controller, and the decision log behind both.
-site_url: https://7174andy.github.io/two-wheel-exp/
-repo_url: https://github.com/7174Andy/two-wheel-exp
-repo_name: 7174Andy/two-wheel-exp
+site_url: https://7174andy.github.io/two-wheeled-experiment/
+repo_url: https://github.com/7174Andy/two-wheeled-experiment
+repo_name: 7174Andy/two-wheeled-experiment
 edit_uri: edit/main/docs/
 
 theme:
