@@ -1,0 +1,76 @@
+# 07. Library switching — local linearization via 4 quadrants
+
+## Decision
+
+Build **four `DeePC` instances**, one per heading-quadrant data library. At each step, the wrapper picks the controller whose anchor heading is closest to the robot's current heading and runs *its* QP.
+
+## Context
+
+The previous entry [Why one library isn't enough](06-single-library-fails.md) explained the structural problem: the unicycle's bilinear `cos(δ)·v` term cannot be represented by a single linear behavioral predictor across all orientations. The fix is piecewise linearization — fit a separate local model in each "operating region" and route the controller through whichever region you're in.
+
+The paper does exactly this. From [arXiv:2603.07395](https://arxiv.org/abs/2603.07395) Appendix D:
+
+> *"For each prediction horizon W, we construct 4 corresponding data libraries Hd with Tini = 5, each approximately representing the local behavior of the nonlinear system within orientation intervals [0, π/2), [π/2, π), [π, 3π/2), and [3π/2, 2π). During online tracking, the data library associated with the robot's current orientation is selected to improve tracking performance."*
+
+So four libraries cover the heading circle, each anchored at the midpoint of its quadrant.
+
+## Why local linearization works
+
+Within a fixed heading region — say `δ ≈ π/4` — both `cos(δ)` and `sin(δ)` are nearly constant (`≈ 0.71` each). The dynamics behave locally like:
+
+$$
+\Delta x \approx \Delta t \cdot 0.71 \cdot v, \qquad \Delta y \approx \Delta t \cdot 0.71 \cdot v
+$$
+
+This is **linear in `v`** with fixed slope. A linear behavioral predictor trained on data collected while the robot was near heading `π/4` will correctly capture this slope and produce confident, non-degenerate predictions.
+
+By collecting one library *starting from each of four orientations* (the paper's `π/4, 3π/4, 5π/4, 7π/4`), each library's data is concentrated in a roughly π/2-wide heading region around its anchor. At runtime we always have **the right library for the current heading**.
+
+## Considered
+
+1. **One library** — failed structurally (previous entry).
+2. **Many libraries** — diminishing returns past 4; the local linearity holds well over π/2-wide quadrants. 4 matches the paper.
+3. **Continuous gain scheduling** — interpolate between libraries based on heading. More work; the paper's discrete switch is enough.
+4. **Lift the state via Koopman (`sin δ`, `cos δ` in `y`)** — alternative path that would let one library suffice. Bigger refactor (env's `y` becomes dim 4, `Q` becomes 4×4). Sidelined for now in favor of switching.
+
+## Implementation
+
+A `LibrarySwitchingDeePC` wrapper class:
+
+- Holds N `DeePC` instances + their anchor headings.
+- Maintains **one shared past-`(u, y)` buffer** — the robot's actual history is the same regardless of which controller predicts the future.
+- On each `act(y_current, y_ref)`:
+    1. `idx = argmin_i |wrap(y_current[2] − anchor_i)|`.
+    2. Copy shared buffer into `controllers[idx]`'s buffer.
+    3. Call `controllers[idx].act(...)`.
+    4. Copy the updated buffer back to the shared one.
+
+`scripts/run_deepc.py` builds all four libraries by default and prints **per-episode library usage** so you can see when switching actually triggered:
+
+```text
+episode 1: REACHED   after 107 steps  final_dist=0.43
+  library usage: [0, 0, 17, 90]    # Q3 → Q2 mid-flight
+```
+
+## Outcome
+
+Closed-loop test on broad-`w` data with the switcher:
+
+| Episode | Outcome | Steps | Final dist |
+|---|---|---|---|
+| 0 | truncated | 200 | 16.96 |
+| 1 | **REACHED** | 107 | **0.43** |
+| 2 | **REACHED** | 36 | **0.50** |
+| 3 | QP-fail @ 89 | — | 1.49 (was approaching) |
+
+This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where `v` was stuck at zero in all four episodes.
+
+## Caveats
+
+- Switching only helps if the robot **actually crosses quadrant boundaries** during an episode. With narrow `w` data the turn rate is too low and switching becomes a no-op.
+- Library 0 fails on some seeds (episode 0 above). Diagnosing these one-off failures would benefit from logging the QP's `σ_y` and the controller's predicted vs actual trajectory.
+- Occasional QP solver `user_limit` failures suggest the SCS default iteration cap is sometimes too low; CLARABEL might be more reliable for this problem class.
+
+## Code
+
+`two_wheel_robot/controllers/deepc.py::LibrarySwitchingDeePC` — ~50 lines. See [library switching reference](../controllers/library-switching.md).
