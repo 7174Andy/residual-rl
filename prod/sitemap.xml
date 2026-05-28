@@ -81,15 +81,15 @@
          <lastmod>2026-05-28</lastmod>
     </url>
     <url>
-         <loc>https://7174andy.github.io/two-wheeled-experiment/prod/journey/08-bearing-reference/</loc>
-         <lastmod>2026-05-28</lastmod>
-    </url>
-    <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/reference/</loc>
          <lastmod>2026-05-28</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/reference/cli/</loc>
+         <lastmod>2026-05-28</lastmod>
+    </url>
+    <url>
+         <loc>https://7174andy.github.io/two-wheeled-experiment/prod/superpowers/specs/2026-05-28-single-parametric-deepc-design/</loc>
          <lastmod>2026-05-28</lastmod>
     </url>
 </urlset>
