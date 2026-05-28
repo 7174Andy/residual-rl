@@ -11,7 +11,7 @@ The underlying dynamics are adapted from Appendix D of Pai, Shang, Qian, Zheng, 
 Repo plan:
 
 1. Gymnasium env for goal-reaching (`TwoWheelGoal-v0`).
-2. Classical controller baselines — **Deep-LCC / DeePC-style data-driven predictive control** (same family as the paper's DDPC).
+2. Classical controller baselines — **DeePC** (data-EnablEd predictive control, Coulson/Lygeros/Dörfler 2019; same family as the paper's DDPC).
 3. RL baselines via **stable-baselines3**.
 
 The env is the product; controllers are baselines that consume it.
@@ -31,15 +31,17 @@ z_δ,t+1 = z_δ,t + Δt · w_t
 - Default action bounds (broadened from paper): `v ∈ [0, 20]`, `w ∈ [-π/2, π/2]`. Paper's bounds `v ∈ [10, 20]`, `w ∈ [-π/6, π/6]` are forward-only and unsuitable for point-to-point reaching; configurable via `action_bounds`.
 - Workspace: continuous box, default `[-10, 10]²`. Position is wall-clipped to the box on every step (heading is not affected).
 
-The unicycle is *not* globally Koopman-linearizable. Any DeePC-family controller built here should expect orientation-keyed local-linear data libraries (the paper's strategy).
+The unicycle is *not* globally Koopman-linearizable. DeePC built here should expect orientation-keyed local-linear data libraries (the paper's strategy).
 
-## Stage cost / reward
+## Stage cost / reward (DeePC form)
 
 ```
-r_t = -(p_t - g)ᵀ Q (p_t - g) - u_tᵀ R u_t + reach_bonus · [reached this step]
+r_t = -(y_t - y_ref)ᵀ Q (y_t - y_ref) - u_tᵀ R u_t + reach_bonus · [reached this step]
 ```
 
-Defaults: `Q = diag(1, 1)` (position only; heading at goal unconstrained), `R = 1.3e-3 · I₂` (paper value), `reach_bonus = 100`.
+where `y = (x, y, δ)` is the 3-D output and `y_ref = (g_x, g_y, 0)`. Defaults: `Q = diag(1, 1, 0)` (heading not penalized, but still in `y` so behavioral predictors see it), `R = 1.3e-3 · I₂` (paper value), `reach_bonus = 100`.
+
+Termination uses position-only error (`‖p − g‖ < goal_tolerance`); heading is irrelevant to "reached".
 
 ## Planned layout (Option A — flat by role)
 
@@ -52,7 +54,7 @@ two_wheel_robot/
         rendering.py       # PygameRenderer (handles "human" and "rgb_array")
     controllers/
         base.py            # Controller protocol: reset(obs), act(obs) -> u
-        deep_lcc.py        # data-driven predictive controller (CVXPY QP)
+        deepc.py           # DeePC data-driven predictive controller (CVXPY QP)
         data_collection.py # offline rollouts to build Hankel data libraries
     rl/
         train_sb3.py       # PPO / SAC training entrypoint
@@ -81,6 +83,11 @@ Boundary rules:
 - `goal` — `(g_x, g_y)` ndarray.
 - `step_idx` — int step counter.
 - `last_action` — clipped action from the previous step (zeros after `reset`).
+- `y` — DeePC output measurement, `(x, y, δ)`, dim 3. For this fully-observed unicycle, `y == state`.
+- `y_ref` — DeePC reference, `(g_x, g_y, 0)`, dim 3.
+- `Q`, `R` — cost matrices (3×3 and 2×2).
+
+DeePC contract: `u = action_space` (dim 2), `y` (dim 3), no disturbance `e`. The controller maintains its own past-trajectory buffer `(u_ini, y_ini)` of length `T_ini` and Hankel matrices built from offline data; the env stays stateless from the controller's perspective beyond exposing `y` each step.
 
 Predictive controllers should read these directly rather than reverse-engineering from the body-frame observation.
 
