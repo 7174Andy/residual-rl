@@ -34,7 +34,14 @@ class UnicycleGoalEnv(gym.Env):
         self.max_steps = int(max_steps)
         self.dt = float(dt)
         self.action_bounds = np.asarray(action_bounds, dtype=np.float64)
-        self.Q = np.eye(2, dtype=np.float64) if Q is None else np.asarray(Q, dtype=np.float64)
+        # DeePC-style cost on the 3-D output y = (x, y, delta). Heading entry
+        # is zero by default (don't-care at the goal) but Q stays 3x3 so heading
+        # remains visible to the behavioral predictor.
+        self.Q = (
+            np.diag([1.0, 1.0, 0.0])
+            if Q is None
+            else np.asarray(Q, dtype=np.float64)
+        )
         self.R = (
             1.3e-3 * np.eye(2, dtype=np.float64)
             if R is None
@@ -50,8 +57,17 @@ class UnicycleGoalEnv(gym.Env):
         dx = self.workspace_bounds[0, 1] - self.workspace_bounds[0, 0]
         dy = self.workspace_bounds[1, 1] - self.workspace_bounds[1, 0]
         max_dist = float(np.hypot(dx, dy))
-        obs_low = np.array([0.0, -1.0, -1.0, a_low[0], a_low[1]], dtype=np.float32)
-        obs_high = np.array([max_dist, 1.0, 1.0, a_high[0], a_high[1]], dtype=np.float32)
+        # v_prev/w_prev are zero on reset; widen their bounds to include 0 so
+        # the post-reset obs is always inside observation_space even when
+        # action_bounds excludes zero (e.g., paper bounds v ∈ [10, 20]).
+        obs_low = np.array(
+            [0.0, -1.0, -1.0, min(0.0, float(a_low[0])), min(0.0, float(a_low[1]))],
+            dtype=np.float32,
+        )
+        obs_high = np.array(
+            [max_dist, 1.0, 1.0, max(0.0, float(a_high[0])), max(0.0, float(a_high[1]))],
+            dtype=np.float32,
+        )
         self.observation_space = spaces.Box(low=obs_low, high=obs_high, dtype=np.float32)
 
         # State holders — populated by reset()
@@ -61,6 +77,22 @@ class UnicycleGoalEnv(gym.Env):
         self.step_idx: int = 0
 
         self._renderer = None  # lazy
+
+    # ----- DeePC-compatible accessors ----------------------------------------
+    # u = action (the env's action_space), dim 2.
+    # y = output measurement, dim 3. For this fully-observed unicycle, y == state.
+    # y_ref = constant reference the DeePC controller drives `y - y_ref` to zero.
+    # Buffer/Hankel management lives in the controller, not the env.
+
+    @property
+    def y(self) -> np.ndarray:
+        """Current output measurement: (x, y, delta). Returns a copy."""
+        return self.state.copy()
+
+    @property
+    def y_ref(self) -> np.ndarray:
+        """Reference output: (g_x, g_y, 0). Heading reference is zero (don't-care)."""
+        return np.array([self.goal[0], self.goal[1], 0.0], dtype=np.float64)
 
     def _sample_position(self, rng: np.random.Generator) -> np.ndarray:
         x = rng.uniform(*self.workspace_bounds[0])
@@ -86,12 +118,14 @@ class UnicycleGoalEnv(gym.Env):
         )
 
     def _build_info(self, reached: bool) -> dict[str, Any]:
-        err = self.state[:2] - self.goal
+        pos_err = self.state[:2] - self.goal
         return {
             "state": self.state.copy(),
             "goal": self.goal.copy(),
-            "pos_error": err.copy(),
-            "distance": float(np.linalg.norm(err)),
+            "y": self.y,
+            "y_ref": self.y_ref,
+            "pos_error": pos_err.copy(),
+            "distance": float(np.linalg.norm(pos_err)),
             "action": self.last_action.copy(),
             "step_idx": self.step_idx,
             "reached": bool(reached),
@@ -104,6 +138,8 @@ class UnicycleGoalEnv(gym.Env):
 
         if "state" in options:
             self.state = np.asarray(options["state"], dtype=np.float64).reshape(3).copy()
+            # Wrap caller-supplied heading so subsequent step()s don't see a jump.
+            self.state[2] = float(wrap_to_pi(self.state[2]))
         else:
             x, y = self._sample_position(rng)
             delta = rng.uniform(-np.pi, np.pi)
@@ -147,11 +183,14 @@ class UnicycleGoalEnv(gym.Env):
         self.last_action = clipped
         self.step_idx += 1
 
-        err = self.state[:2] - self.goal
-        distance = float(np.linalg.norm(err))
+        # Termination criterion is position-only (matches goal_tolerance contract).
+        pos_err = self.state[:2] - self.goal
+        distance = float(np.linalg.norm(pos_err))
         reached = distance < self.goal_tolerance
 
-        cost = float(err @ self.Q @ err + clipped @ self.R @ clipped)
+        # Stage cost in DeePC form: ||y - y_ref||_Q^2 + ||u||_R^2.
+        err_y = self.y - self.y_ref
+        cost = float(err_y @ self.Q @ err_y + clipped @ self.R @ clipped)
         reward = -cost + (self.reach_bonus if reached else 0.0)
 
         terminated = bool(reached)

@@ -184,10 +184,28 @@ def test_position_clipped_to_workspace_bounds():
 
 
 def test_reward_is_negative_quadratic_when_not_reached():
-    # Place robot away from goal, take zero action: reward = -err^T Q err exactly.
-    env = UnicycleGoalEnv(Q=np.eye(2), R=np.zeros((2, 2)), reach_bonus=0.0)
+    # Place robot away from goal, take zero action: reward = -(y - y_ref)^T Q (y - y_ref).
+    # Use full-rank Q on the 3-D output; state has delta=0 so heading contributes 0
+    # to the cost regardless of Q's heading entry.
+    env = UnicycleGoalEnv(Q=np.eye(3), R=np.zeros((2, 2)), reach_bonus=0.0)
     env.reset(seed=0, options={"state": [3.0, 4.0, 0.0], "goal": [0.0, 0.0]})
     _, reward, terminated, _, _ = env.step(np.array([0.0, 0.0]))
     assert not terminated
-    # After zero-action step, position unchanged; cost = 3^2 + 4^2 = 25.
+    # After zero-action step, state unchanged; cost = 3^2 + 4^2 + 0^2 = 25.
     assert reward == pytest.approx(-25.0, abs=1e-9)
+
+
+def test_y_and_y_ref_exposed():
+    env = UnicycleGoalEnv()
+    env.reset(seed=0, options={"state": [1.0, 2.0, 0.3], "goal": [4.0, 5.0]})
+    np.testing.assert_allclose(env.y, [1.0, 2.0, 0.3])
+    np.testing.assert_allclose(env.y_ref, [4.0, 5.0, 0.0])
+    # info also surfaces them
+    _, _, _, _, info = env.step(np.array([0.0, 0.0]))
+    np.testing.assert_allclose(info["y_ref"], [4.0, 5.0, 0.0])
+
+
+def test_default_Q_is_3x3_with_zero_heading_entry():
+    env = UnicycleGoalEnv()
+    assert env.Q.shape == (3, 3)
+    assert env.Q[2, 2] == 0.0
