@@ -43,7 +43,7 @@ Everything the controller needs is reachable from `env.unwrapped`. The body-fram
 
 ## Reference handling at runtime
 
-The default `y_ref` is `(g_x, g_y, 0)` — heading 0 is a don't-care because `Q[2, 2] = 0`. For goal-reaching with `Q[2, 2] > 0`, you typically want **bearing-aware** reference instead:
+The default `y_ref` is `(g_x, g_y, 0)` — paper-faithful with `Q[2, 2] = 0`. `scripts/run_deepc.py` overrides this each step with a **bearing-aware** reference (`y_ref[2] = atan2(g_y − y, g_x − x)`) and bumps `Q[2, 2] > 0`:
 
 ```python
 dx = base.goal[0] - base.state[0]
@@ -53,4 +53,4 @@ y_ref_step = np.array([base.goal[0], base.goal[1], bearing])
 u_t = controller.act(base.y, y_ref_step)
 ```
 
-`scripts/run_deepc.py` does this by default. See the [bearing reference journey entry](../journey/08-bearing-reference.md) for why.
+The rationale is in [journey 08 — bearing-aware reference](../journey/08-bearing-reference.md).

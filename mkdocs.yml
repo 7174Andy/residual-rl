@@ -88,27 +88,30 @@ extra_javascript:
 
 nav:
   - Home: index.md
-  - Getting started: getting-started.md
-  - Environment:
-      - environment/index.md
-      - Dynamics & spaces: environment/dynamics.md
-      - Reward & episode: environment/reward.md
-      - DeePC interface: environment/deepc-interface.md
-      - API reference: environment/api.md
-  - Controllers:
-      - controllers/index.md
-      - DeePC: controllers/deepc.md
-      - Library switching: controllers/library-switching.md
-      - Data collection: controllers/data-collection.md
-      - API reference: controllers/api.md
-  - Journey (decision log):
+  - Guide:
+      - Getting started: getting-started.md
+  - Reference:
+      - reference/index.md
+      - Environment:
+          - environment/index.md
+          - Dynamics & spaces: environment/dynamics.md
+          - Reward & episode: environment/reward.md
+          - DeePC interface: environment/deepc-interface.md
+          - API: environment/api.md
+      - Controllers:
+          - controllers/index.md
+          - DeePC: controllers/deepc.md
+          - Library switching: controllers/library-switching.md
+          - Data collection: controllers/data-collection.md
+          - API: controllers/api.md
+      - CLI: reference/cli.md
+  - Journey:
       - journey/index.md
-      - 01. Task framing — tracking vs goal-reaching: journey/01-task-framing.md
-      - 02. Env design — observation, action, reward: journey/02-env-design.md
-      - 03. Action bounds — paper vs broad: journey/03-action-bounds.md
-      - 04. DeePC formulation — L1, L2, hybrid: journey/04-deepc-formulation.md
-      - 05. Cold-start bug — synthetic past: journey/05-cold-start.md
-      - 06. Single library fails — bilinear dynamics: journey/06-single-library-fails.md
-      - 07. Library switching — local linearization: journey/07-library-switching.md
+      - 01. Task framing: journey/01-task-framing.md
+      - 02. Env design: journey/02-env-design.md
+      - 03. Action bounds: journey/03-action-bounds.md
+      - 04. DeePC formulation: journey/04-deepc-formulation.md
+      - 05. Cold-start bug: journey/05-cold-start.md
+      - 06. Single library fails: journey/06-single-library-fails.md
+      - 07. Library switching: journey/07-library-switching.md
       - 08. Bearing-aware reference: journey/08-bearing-reference.md
-  - CLI reference: reference/cli.md

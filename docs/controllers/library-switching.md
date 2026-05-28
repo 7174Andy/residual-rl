@@ -1,8 +1,11 @@
 # Library switching
 
-The unicycle is *not* globally linearizable (the `cos(δ)·v`, `sin(δ)·v` terms are bilinear). A single linear behavioral predictor cannot represent these dynamics across all orientations. The paper's fix — and the one this repo implements — is **orientation-keyed library switching**: maintain four DeePC instances, one per heading quadrant, and pick the right one each step.
+`LibrarySwitchingDeePC` is a wrapper around `N` `DeePC` instances + a shared past-`(u, y)` buffer. Each step, it picks the instance whose anchor heading is closest to the robot's current heading and runs that controller's QP.
 
-The full reasoning is in the [library-switching journey entry](../journey/07-library-switching.md). This page is the reference for how the code is structured.
+This page is the **reference**. The "why" lives in two journey entries:
+
+- [Journey 06 — why one library isn't enough](../journey/06-single-library-fails.md): bilinear dynamics defeat a single linear predictor.
+- [Journey 07 — library switching](../journey/07-library-switching.md): how piecewise local linearization fixes it.
 
 ## How it works
 

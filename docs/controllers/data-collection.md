@@ -57,12 +57,12 @@ The sample bounds are stored inside the file under key `sample_bounds`, so `scri
 
 ## Choosing the PE bounds
 
-| Bounds | When to use |
-|---|---|
-| `v ∈ [10, 20]`, `w ∈ [-π/6, π/6]` (paper) | Reproducing the paper's trajectory tracking exactly. Robot is always moving forward at moderate speed. Forward-only — will not include data for slowing down or pivoting. |
-| `v ∈ [0, 20]`, `w ∈ [-π/2, π/2]` (broad) | Goal-reaching, where the robot must be able to slow/stop near the goal. Includes pivot-in-place and full-stop trajectories in the data. |
+Two canonical configurations:
 
-See the [action-bounds journey entry](../journey/03-action-bounds.md) for the longer story.
+- **`v ∈ [10, 20]`, `w ∈ [-π/6, π/6]`** — paper-faithful; for trajectory tracking.
+- **`v ∈ [0, 20]`, `w ∈ [-π/2, π/2]`** — broad; for goal-reaching (allows stop and pivot).
+
+Pick based on the task; the rationale is in [journey 03 — action bounds](../journey/03-action-bounds.md).
 
 ## Hankel construction
 

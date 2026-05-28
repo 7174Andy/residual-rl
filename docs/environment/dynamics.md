@@ -72,5 +72,5 @@ with $\text{bearing}_{\text{rel}} = \mathrm{wrap}\bigl(\mathrm{atan2}(g_y - z_y,
 
 The `min(0, ·)` widening on the action components ensures that the post-`reset()` zero-init of `v_prev`/`w_prev` always lies inside the obs space, even when `action_bounds` excludes zero.
 
-!!! tip "Why body-frame for the agent but world-frame internally?"
-    The body-frame encoding makes the optimal RL policy invariant to *where in the workspace* the goal is and *which way* the robot starts facing. Classical controllers like DeePC instead want absolute coordinates — they read directly from `env.unwrapped.state` and `env.unwrapped.goal` and ignore the body-frame `obs`. See [env-design journey entry](../journey/02-env-design.md).
+!!! info "State vs observation"
+    `env.unwrapped.state` (world frame) and the returned `obs` (body frame) are different views of the system. RL agents consume `obs`; classical controllers consume `state` directly via `env.unwrapped`. The rationale lives in [journey 02 — env design](../journey/02-env-design.md).
