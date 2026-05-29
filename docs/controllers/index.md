@@ -9,7 +9,7 @@ two_wheel_robot/controllers/
     __init__.py
     data_collection.py    # offline (u, y) trajectory generation
     hankel.py             # block-Hankel matrix construction
-    deepc.py              # DeePC + LibrarySwitchingDeePC
+    deepc.py              # DeePC (orientation-keyed library switching built in)
 ```
 
 A controller is anything implementing the `Controller` protocol:
@@ -20,7 +20,7 @@ class Controller(Protocol):
     def act(self, y_current: np.ndarray, y_ref: np.ndarray) -> np.ndarray: ...
 ```
 
-(The protocol isn't enforced as a literal `typing.Protocol`; both `DeePC` and `LibrarySwitchingDeePC` follow this shape.)
+(The protocol isn't enforced as a literal `typing.Protocol`; `DeePC` follows this shape.)
 
 ## The DeePC pipeline
 
@@ -40,7 +40,7 @@ Each box maps to a module:
 - [Data collection](data-collection.md) — `controllers/data_collection.py`
 - Block Hankel construction — `controllers/hankel.py`
 - [DeePC controller](deepc.md) — `controllers/deepc.py`
-- [Library switching](library-switching.md) — `controllers/deepc.py::LibrarySwitchingDeePC`
+- [Library switching](library-switching.md) — orientation-keyed switching built into `controllers/deepc.py::DeePC`
 
 ## Why this layered design
 

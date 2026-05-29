@@ -1,6 +1,9 @@
 # Library switching
 
-`LibrarySwitchingDeePC` is a wrapper around `N` `DeePC` instances + a shared past-`(u, y)` buffer. Each step, it picks the instance whose anchor heading is closest to the robot's current heading and runs that controller's QP.
+Orientation-keyed library switching is built **into** `DeePC`: a single
+controller holds `N` data libraries (one per heading region) and, each step,
+feeds the library whose anchor heading is closest to the robot's current
+heading into one cached QP. There is no separate switcher class.
 
 This page is the **reference**. The "why" lives in two journey entries:
 
@@ -9,15 +12,20 @@ This page is the **reference**. The "why" lives in two journey entries:
 
 ## How it works
 
-`LibrarySwitchingDeePC` wraps `N` `DeePC` instances plus a single shared past-`(u, y)` buffer. On every `act()`:
+`DeePC` holds `N` libraries' Hankel matrices and a single shared past-`(u, y)`
+buffer. The Hankel matrices of the *active* library live in `cp.Parameter`s, so
+switching libraries means swapping parameter values into the one compiled
+problem — not recompiling. On every `act()`:
 
 1. Read the robot's current heading from `y_current[heading_index]` (default index 2).
 2. Compute the **closest anchor** by shortest signed angular distance: `argmin |wrap(heading − anchor_i)|`.
-3. Copy the shared buffer into the chosen `DeePC`'s buffer.
-4. Run that controller's QP via its own `act()`.
-5. Copy the updated buffer back into the shared one.
+3. If the selected library changed since the previous step, clear the warm-start `g` (its columns indexed the previous library and are meaningless under the new one).
+4. Write the selected library's `(Up, Uf, Yp, Yf)` into the Hankel parameters and solve.
+5. Slide the single shared buffer with the applied `(u_t, y_current)`.
 
 Selecting by *closest anchor* is equivalent to selecting by *quadrant* when anchors are quadrant midpoints (the paper's choice: `π/4, 3π/4, -3π/4, -π/4`). Closest-anchor degrades gracefully if anchors aren't midpoints.
+
+With a single library (`len(libraries) == 1`), selection is trivially index 0 and `anchor_headings` / `heading_index` are not consulted — this is the plain single-library DeePC case.
 
 ## Anchors
 
@@ -36,27 +44,27 @@ These come from `controllers/data_collection.PAPER_INIT_HEADINGS` after the env'
 
 ```python
 import numpy as np
-from two_wheel_robot.controllers.deepc import DeePC, LibrarySwitchingDeePC
+from two_wheel_robot.controllers.deepc import DeePC
 from two_wheel_robot.controllers.hankel import build_hankel
 
-# Build 4 DeePCs, one per library
-controllers = []
-for i in range(4):
-    Up, Uf, Yp, Yf = build_hankel(data[f"u_{i}"], data[f"y_{i}"], T_ini=5, N=12)
-    controllers.append(DeePC(Up, Uf, Yp, Yf, Q=Q, R=R, T_ini=5, N=12, u_bounds=u_bounds))
-
-# Wrap with the switcher
+# One Hankel tuple per library
+libraries = [
+    build_hankel(data[f"u_{i}"], data[f"y_{i}"], T_ini=5, N=12)
+    for i in range(4)
+]
 anchors = [np.pi/4, 3*np.pi/4, -3*np.pi/4, -np.pi/4]
-switcher = LibrarySwitchingDeePC(controllers, anchors)
 
-switcher.reset(env.unwrapped.y, u_initial=midpoint)
+controller = DeePC(libraries, anchor_headings=anchors, Q=Q, R=R,
+                   T_ini=5, N=12, u_bounds=u_bounds)
+
+controller.reset(env.unwrapped.y, u_initial=midpoint)
 for _ in range(max_steps):
-    u_t = switcher.act(env.unwrapped.y, env.unwrapped.y_ref)
+    u_t = controller.act(env.unwrapped.y, env.unwrapped.y_ref)
     env.step(u_t)
-    # switcher.last_library_idx tells you which one fired
+    # controller.last_library_idx tells you which library fired
 ```
 
-`scripts/run_deepc.py` does exactly this by default. Use `--single_library N` to fall back to one library and see the contrast.
+`scripts/run_deepc.py` does exactly this by default. Use `--single_library N` to pass a one-element library list and see the single-library contrast.
 
 ## Diagnostic: library usage histogram
 
@@ -71,11 +79,4 @@ This episode started in quadrant Q3 (library 3, 17 steps), then switched to Q2 (
 
 ## Public API
 
-::: two_wheel_robot.controllers.deepc.LibrarySwitchingDeePC
-    options:
-      show_root_heading: false
-      heading_level: 3
-      members:
-        - __init__
-        - reset
-        - act
+Library switching is part of `DeePC` — see the [DeePC reference](deepc.md#public-api) for the full constructor (`libraries`, `anchor_headings`, `heading_index`) and the `last_library_idx` / `last_warm_started` diagnostics.

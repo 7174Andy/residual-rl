@@ -56,9 +56,33 @@ On `reset(y_initial, u_initial)`, both are filled with `T_ini` copies of the ini
 !!! warning "Cold-start gotcha"
     If `u_initial` is `0` and the data has only non-negative `v` (e.g., paper-PE collection or broad bounds with `v ≥ 0`), the QP gets locked into outputting `u ≈ 0`. The fix is to prime `u_initial` at the **midpoint of `action_bounds`** instead. `scripts/run_deepc.py` does this automatically. See [cold-start journey entry](../journey/05-cold-start.md).
 
+## Libraries and orientation switching
+
+`DeePC` holds one or more orientation-keyed data libraries. The constructor
+takes `libraries` (a list of `(Up, Uf, Yp, Yf)` Hankel tuples, e.g. from
+`build_hankel`) and a parallel `anchor_headings` array. Each step it selects the
+library whose anchor is closest to the robot's heading (read from
+`y_current[heading_index]`, default index 2) and feeds that library into the QP.
+
+A single library (`len(libraries) == 1`) is the plain single-library DeePC case:
+selection is trivially index 0 and `anchor_headings` / `heading_index` are not
+consulted. All libraries must share the same column count (`n_cols`), since they
+feed one shared set of Hankel parameters. See the [library switching
+reference](library-switching.md) for the switching details, anchor table, and
+the `last_library_idx` / `last_warm_started` diagnostics.
+
 ## Caching: DPP-compliant problem
 
-The CVXPY problem is built once at construction with `cp.Parameter`s for `u_ini`, `y_ini`, and `y_ref`. The cost is written as `cp.sum_squares(Q_sqrt @ y_err)` rather than `cp.quad_form(y_err, Q)` to keep the problem DPP-compliant — CVXPY caches the compiled solver and subsequent calls reuse it. Per-step solve times are dominated by the QP solver rather than CVXPY's canonicalization.
+The CVXPY problem is built once at construction with `cp.Parameter`s for the
+active library's Hankel matrices (`Up`, `Uf`, `Yp`, `Yf`) and for `u_ini`,
+`y_ini`, and `y_ref`. The cost is written as `cp.sum_squares(Q_sqrt @ y_err)`
+rather than `cp.quad_form(y_err, Q)` to keep the problem DPP-compliant — and
+`sum_squares(F @ g)` with a parameter `F` is itself DPP, which is what lets the
+Hankel matrices be parameters. CVXPY caches the compiled solver and subsequent
+calls reuse it, so switching libraries swaps parameter values rather than
+recompiling. On a library switch the warm-start `g` is cleared, since its
+columns indexed the previous library. Per-step solve times are dominated by the
+QP solver rather than CVXPY's canonicalization.
 
 ## Public API
 

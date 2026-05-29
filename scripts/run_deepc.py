@@ -31,7 +31,7 @@ from two_wheel_robot.controllers.data_collection import (
     PAPER_INIT_HEADINGS,
     PAPER_SAMPLE_BOUNDS,
 )
-from two_wheel_robot.controllers.deepc import DeePC, LibrarySwitchingDeePC
+from two_wheel_robot.controllers.deepc import DeePC
 from two_wheel_robot.controllers.hankel import build_hankel
 from two_wheel_robot.env.dynamics import wrap_to_pi
 from two_wheel_robot.env.env import UnicycleGoalEnv
@@ -78,10 +78,11 @@ def main() -> int:
     parser.add_argument(
         "--Q_heading",
         type=float,
-        default=1.0,
+        default=2.0,
         help=(
-            "weight on heading deviation in Q (default 1.0). Set to 0 to "
-            "reproduce paper's 'heading don't-care' Q = diag(1, 1, 0)."
+            "weight on heading deviation in Q (default 2.0, matching the "
+            "paper's Q_z = diag(1, 1, 2)). Set to 0 for a 'heading don't-care' "
+            "Q = diag(1, 1, 0)."
         ),
     )
     parser.add_argument(
@@ -128,32 +129,23 @@ def main() -> int:
 
     u_bounds = (base.action_bounds[:, 0], base.action_bounds[:, 1])
 
-    def _build_deepc(u_data: np.ndarray, y_data: np.ndarray) -> DeePC:
-        Up, Uf, Yp, Yf = build_hankel(u_data, y_data, T_ini=args.T_ini, N=args.N)
-        return DeePC(
-            Up, Uf, Yp, Yf,
-            Q=Q, R=base.R,
-            T_ini=args.T_ini, N=args.N,
-            lambda_g=args.lambda_g, lambda_y=args.lambda_y,
-            u_bounds=u_bounds,
-        )
+    def _hankels(u_data: np.ndarray, y_data: np.ndarray):
+        return build_hankel(u_data, y_data, T_ini=args.T_ini, N=args.N)
+
+    # Anchor headings = paper init states wrapped to [-pi, pi].
+    anchors = np.asarray(
+        [float(wrap_to_pi(h)) for h in PAPER_INIT_HEADINGS], dtype=np.float64
+    )
 
     if args.single_library is None:
-        # Build all 4 libraries → 4 DeePCs → orientation-keyed switcher.
-        sub_controllers = [
-            _build_deepc(data[f"u_{i}"], data[f"y_{i}"]) for i in range(4)
-        ]
-        # Anchor headings = paper init states wrapped to [-pi, pi].
-        anchors = np.asarray(
-            [float(wrap_to_pi(h)) for h in PAPER_INIT_HEADINGS], dtype=np.float64
-        )
-        controller = LibrarySwitchingDeePC(sub_controllers, anchors)
+        # All 4 orientation-keyed libraries fed into one parametric controller.
+        libraries = [_hankels(data[f"u_{i}"], data[f"y_{i}"]) for i in range(4)]
+        controller_anchors = anchors
         print(
             f"library-switching DeePC: 4 libraries, anchors = "
             f"{[round(a, 3) for a in anchors]}"
         )
-        Up0 = sub_controllers[0].Up
-        Uf0 = sub_controllers[0].Uf
+        Up0, Uf0 = libraries[0][0], libraries[0][1]
         print(
             f"Hankels per library (T_ini={args.T_ini}, N={args.N}): "
             f"Up {Up0.shape}, Uf {Uf0.shape}"
@@ -162,8 +154,19 @@ def main() -> int:
         i = args.single_library
         u_data = data[f"u_{i}"]
         y_data = data[f"y_{i}"]
-        controller = _build_deepc(u_data, y_data)
+        libraries = [_hankels(u_data, y_data)]
+        controller_anchors = anchors[i : i + 1]
         print(f"single-library DeePC: library {i} (u {u_data.shape}, y {y_data.shape})")
+
+    n_lib = len(libraries)
+    controller = DeePC(
+        libraries,
+        anchor_headings=controller_anchors,
+        Q=Q, R=base.R,
+        T_ini=args.T_ini, N=args.N,
+        lambda_g=args.lambda_g, lambda_y=args.lambda_y,
+        u_bounds=u_bounds,
+    )
 
     # Prime the controller's past-action buffer at the midpoint of action_bounds.
     # Zero-initialization makes the QP try to satisfy Up·g = 0, which (for data
@@ -181,7 +184,7 @@ def main() -> int:
             terminated = truncated = False
             qp_failed = False
             applied = []
-            lib_usage = np.zeros(4, dtype=np.int64)
+            lib_usage = np.zeros(n_lib, dtype=np.int64)
             while not (terminated or truncated):
                 if args.no_bearing_ref:
                     y_ref_step = base.y_ref
@@ -199,8 +202,7 @@ def main() -> int:
                     print(f"  QP failure at step {steps}: {exc}")
                     qp_failed = True
                     break
-                if isinstance(controller, LibrarySwitchingDeePC):
-                    lib_usage[controller.last_library_idx] += 1
+                lib_usage[controller.last_library_idx] += 1
                 _, reward, terminated, truncated, info = env.step(u_t)
                 applied.append(u_t.copy())
                 total_reward += float(reward)
@@ -226,7 +228,7 @@ def main() -> int:
                     f"  w: min={w_col.min():+.3f} max={w_col.max():+.3f} "
                     f"mean={w_col.mean():+.3f} std={w_col.std():.3f}"
                 )
-                if isinstance(controller, LibrarySwitchingDeePC):
+                if n_lib > 1:
                     print(f"  library usage: {lib_usage.tolist()}")
         # Hold the final frame briefly so the last state is visible.
         time.sleep(1.5)

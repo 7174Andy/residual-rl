@@ -38,7 +38,7 @@ class UnicycleGoalEnv(gym.Env):
         # is zero by default (don't-care at the goal) but Q stays 3x3 so heading
         # remains visible to the behavioral predictor.
         self.Q = (
-            np.diag([1.0, 1.0, 0.0])
+            np.diag([1.0, 1.0, 2.0])
             if Q is None
             else np.asarray(Q, dtype=np.float64)
         )

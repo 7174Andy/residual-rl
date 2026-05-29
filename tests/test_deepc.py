@@ -1,247 +1,255 @@
-"""Tests for two_wheel_robot.controllers.deepc.DeePC and LibrarySwitchingDeePC."""
+"""Tests for the single parametric DeePC controller.
+
+The controller holds all orientation-keyed libraries, builds one cached QP with
+the Hankel matrices as `cp.Parameter`s, and swaps which library feeds the
+predictor each step based on heading. These tests pin:
+
+- equivalence with the legacy two-class implementation (golden fixtures in
+  `fixtures/deepc_golden.npz`, generated from the old `DeePC` /
+  `LibrarySwitchingDeePC`),
+- constructor validation,
+- the public API (reset/act, shapes, buffer sliding, bounds),
+- orientation routing and warm-start-reset-on-switch behavior.
+"""
 
 from __future__ import annotations
+
+import pathlib
+import sys
 
 import numpy as np
 import pytest
 
-from two_wheel_robot.controllers.deepc import DeePC, LibrarySwitchingDeePC
-from two_wheel_robot.controllers.hankel import build_hankel
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import deepc_scenarios as S  # noqa: E402
+
+from two_wheel_robot.controllers.deepc import DeePC  # noqa: E402
+from two_wheel_robot.controllers.hankel import build_hankel  # noqa: E402
+
+_FIXTURE = np.load(pathlib.Path(__file__).resolve().parent / "fixtures" / "deepc_golden.npz")
 
 
-# ---- Helpers -----------------------------------------------------------------
+# ---- Builders from shared scenarios -----------------------------------------
 
 
-def _scalar_lti_data(T: int = 200, a: float = 0.9, y0: float = 5.0, seed: int = 0):
-    """Generate (u, y) from `y_{t+1} = a*y_t + u_t` with PE inputs."""
+def _defaults(**override) -> dict:
+    params = dict(
+        Q=S.Q, R=S.R, T_ini=S.T_INI, N=S.N,
+        lambda_g=S.LAMBDA_G, lambda_y=S.LAMBDA_Y, solver=S.SOLVER,
+    )
+    params.update(override)
+    return params
+
+
+def _build_single(**kw) -> DeePC:
+    u, y = S.single_library()
+    lib = build_hankel(u, y, T_ini=S.T_INI, N=S.N)
+    return DeePC([lib], anchor_headings=[0.0], **_defaults(**kw))
+
+
+def _build_multi(n: int = 4, **kw) -> DeePC:
+    libs = [build_hankel(u, y, T_ini=S.T_INI, N=S.N) for (u, y) in S.multi_libraries(n)]
+    return DeePC(libs, anchor_headings=S.ANCHORS[:n], **_defaults(**kw))
+
+
+def _scalar_lti(T: int, a: float, y0: float, seed: int):
     rng = np.random.default_rng(seed)
     u = rng.standard_normal((T, 1))
     y = np.zeros((T, 1))
     y[0] = y0
     for t in range(T - 1):
         y[t + 1] = a * y[t] + u[t]
-    return u, y, a
+    return u, y
 
 
-# ---- Construction / validation ----------------------------------------------
+# ---- Equivalence with legacy implementation ---------------------------------
 
 
-def test_constructor_validates_shapes():
-    T = 50
-    u = np.random.randn(T, 2)
-    y = np.random.randn(T, 3)
-    Up, Uf, Yp, Yf = build_hankel(u, y, T_ini=5, N=12)
-    Q = np.eye(3)
-    R = np.eye(2)
-    # Wrong Q shape
+def test_single_library_matches_legacy_golden():
+    c = _build_single()
+    seq = S.single_input_sequence()
+    c.reset(seq[0][0])
+    got = np.array([c.act(yc, yr) for yc, yr in seq])
+    np.testing.assert_allclose(got, _FIXTURE["single_u"], atol=1e-5, rtol=1e-4)
+
+
+def test_multi_library_matches_legacy_golden_outputs_and_routing():
+    c = _build_multi()
+    seq = S.multi_input_sequence()
+    c.reset(seq[0][0])
+    got, idx = [], []
+    for yc, yr in seq:
+        got.append(c.act(yc, yr))
+        idx.append(c.last_library_idx)
+    np.testing.assert_allclose(np.array(got), _FIXTURE["multi_u"], atol=1e-5, rtol=1e-4)
+    assert idx == _FIXTURE["multi_idx"].tolist()
+
+
+# ---- Constructor validation -------------------------------------------------
+
+
+def test_rejects_empty_library_list():
     with pytest.raises(ValueError):
-        DeePC(Up, Uf, Yp, Yf, Q=np.eye(2), R=R, T_ini=5, N=12)
-    # Wrong R shape
+        DeePC([], anchor_headings=[], Q=S.Q, R=S.R, T_ini=S.T_INI, N=S.N)
+
+
+def test_rejects_mismatched_ncols_across_libraries():
+    u0, y0 = S.library_data(0, T=200)
+    u1, y1 = S.library_data(1, T=180)  # different length -> different n_cols
+    libA = build_hankel(u0, y0, T_ini=S.T_INI, N=S.N)
+    libB = build_hankel(u1, y1, T_ini=S.T_INI, N=S.N)
     with pytest.raises(ValueError):
-        DeePC(Up, Uf, Yp, Yf, Q=Q, R=np.eye(3), T_ini=5, N=12)
-    # Mismatched T_ini vs Hankel rows
+        DeePC([libA, libB], anchor_headings=[0.0, np.pi], Q=S.Q, R=S.R,
+              T_ini=S.T_INI, N=S.N, solver=S.SOLVER)
+
+
+def test_rejects_wrong_Q_shape():
     with pytest.raises(ValueError):
-        DeePC(Up, Uf, Yp, Yf, Q=Q, R=R, T_ini=4, N=12)
+        _build_single(Q=np.eye(2))
+
+
+def test_rejects_wrong_R_shape():
+    with pytest.raises(ValueError):
+        _build_single(R=np.eye(3))
+
+
+def test_rejects_mismatched_Tini_vs_hankel():
+    u, y = S.single_library()
+    lib = build_hankel(u, y, T_ini=S.T_INI, N=S.N)
+    with pytest.raises(ValueError):
+        DeePC([lib], anchor_headings=[0.0], Q=S.Q, R=S.R,
+              T_ini=S.T_INI - 1, N=S.N, solver=S.SOLVER)
+
+
+def test_rejects_mismatched_anchor_count():
+    libs = [build_hankel(u, y, T_ini=S.T_INI, N=S.N) for (u, y) in S.multi_libraries(2)]
+    with pytest.raises(ValueError):
+        DeePC(libs, anchor_headings=[0.0, 1.0, 2.0], Q=S.Q, R=S.R,
+              T_ini=S.T_INI, N=S.N, solver=S.SOLVER)
+
+
+def test_rejects_out_of_range_heading_index_multi():
+    with pytest.raises(ValueError):
+        _build_multi(n=2, heading_index=5)
+
+
+# ---- API surface ------------------------------------------------------------
 
 
 def test_act_before_reset_raises():
-    u, y, _ = _scalar_lti_data(T=60)
-    Up, Uf, Yp, Yf = build_hankel(u, y, T_ini=3, N=5)
-    c = DeePC(Up, Uf, Yp, Yf, Q=np.eye(1), R=0.01 * np.eye(1), T_ini=3, N=5)
+    c = _build_single()
     with pytest.raises(RuntimeError):
-        c.act(np.array([1.0]), np.array([0.0]))
-
-
-# ---- API surface -------------------------------------------------------------
+        c.act(np.array([0.0, 0.0, 0.0]), np.zeros(3))
 
 
 def test_act_returns_action_of_correct_shape():
-    u, y, _ = _scalar_lti_data(T=80)
-    Up, Uf, Yp, Yf = build_hankel(u, y, T_ini=3, N=5)
-    c = DeePC(Up, Uf, Yp, Yf, Q=np.eye(1), R=0.01 * np.eye(1), T_ini=3, N=5)
-    c.reset(y_initial=np.array([5.0]))
-    u_t = c.act(np.array([5.0]), y_ref=np.array([0.0]))
-    assert u_t.shape == (1,)
-    assert np.isfinite(u_t).all()
-
-
-def test_y_ref_per_step_horizon_accepted():
-    u, y, _ = _scalar_lti_data(T=80)
-    Up, Uf, Yp, Yf = build_hankel(u, y, T_ini=3, N=5)
-    c = DeePC(Up, Uf, Yp, Yf, Q=np.eye(1), R=0.01 * np.eye(1), T_ini=3, N=5)
-    c.reset(np.array([5.0]))
-    y_ref_window = np.linspace(5.0, 0.0, 5).reshape(5, 1)
-    u_t = c.act(np.array([5.0]), y_ref=y_ref_window)
-    assert u_t.shape == (1,)
-
-
-def test_buffer_slides_after_act():
-    u, y, _ = _scalar_lti_data(T=60)
-    Up, Uf, Yp, Yf = build_hankel(u, y, T_ini=3, N=5)
-    c = DeePC(Up, Uf, Yp, Yf, Q=np.eye(1), R=0.01 * np.eye(1), T_ini=3, N=5)
-    c.reset(np.array([5.0]))
-    # After reset, y_buf is [5, 5, 5].
-    assert c._y_buf is not None
-    np.testing.assert_array_equal(c._y_buf.flatten(), [5.0, 5.0, 5.0])
-    # Call act with y_current = 4.0; afterwards y_buf should be [5, 5, 4].
-    c.act(np.array([4.0]), np.array([0.0]))
-    np.testing.assert_array_equal(c._y_buf.flatten(), [5.0, 5.0, 4.0])
-    # Another act with y_current = 3.0; y_buf should become [5, 4, 3].
-    c.act(np.array([3.0]), np.array([0.0]))
-    np.testing.assert_array_equal(c._y_buf.flatten(), [5.0, 4.0, 3.0])
-
-
-# ---- Closed-loop behavior on simple LTI -------------------------------------
-
-
-def test_closed_loop_drives_scalar_lti_to_reference():
-    """Sanity: control a known scalar LTI system, observe y → 0 over a horizon."""
-    u, y, a = _scalar_lti_data(T=400, a=0.9, y0=5.0, seed=0)
-    Up, Uf, Yp, Yf = build_hankel(u, y, T_ini=4, N=8)
-    c = DeePC(
-        Up, Uf, Yp, Yf,
-        Q=np.array([[1.0]]),
-        R=np.array([[0.01]]),
-        T_ini=4, N=8,
-        lambda_g=1.0,
-        lambda_y=1e4,
-    )
-    y_current = np.array([5.0])
-    y_ref = np.array([0.0])
-    c.reset(y_current)
-    for _ in range(50):
-        u_t = c.act(y_current, y_ref)
-        y_current = a * y_current + u_t
-    assert abs(y_current[0]) < 0.5, f"final y={y_current[0]:.3f} should be near 0"
-
-
-def _build_3d_controller(seed: int, T_ini: int = 5, N: int = 8) -> DeePC:
-    """Build a small DeePC with m_u=2, p_y=3 for use in switcher tests."""
-    rng = np.random.default_rng(seed)
-    T = 200
-    u = rng.uniform(-1, 1, size=(T, 2))
-    y = rng.standard_normal((T, 3))
-    Up, Uf, Yp, Yf = build_hankel(u, y, T_ini=T_ini, N=N)
-    return DeePC(
-        Up, Uf, Yp, Yf,
-        Q=np.eye(3), R=0.01 * np.eye(2),
-        T_ini=T_ini, N=N,
-        lambda_g=1.0, lambda_y=1e3,
-    )
-
-
-# ---- LibrarySwitchingDeePC selection logic ----------------------------------
-
-
-def test_switcher_selects_quadrant_anchor():
-    controllers = [_build_3d_controller(seed=i) for i in range(4)]
-    anchors = [np.pi / 4, 3 * np.pi / 4, -3 * np.pi / 4, -np.pi / 4]
-    sw = LibrarySwitchingDeePC(controllers, anchors)
-    # Headings inside each quadrant route to that quadrant's anchor.
-    assert sw._select_index(0.1) == 0       # Q0: [0, π/2)
-    assert sw._select_index(np.pi / 3) == 0
-    assert sw._select_index(2.0) == 1       # Q1: [π/2, π), 2.0 ≈ 0.64π
-    assert sw._select_index(-2.0) == 2      # Q2: [-π, -π/2)
-    assert sw._select_index(-0.3) == 3      # Q3: [-π/2, 0)
-
-
-def test_switcher_wraps_around_pi():
-    controllers = [_build_3d_controller(seed=i) for i in range(4)]
-    anchors = [np.pi / 4, 3 * np.pi / 4, -3 * np.pi / 4, -np.pi / 4]
-    sw = LibrarySwitchingDeePC(controllers, anchors)
-    # Heading just below +π is closer to the -3π/4 anchor than 3π/4 (going the
-    # other way round). 3.0 rad: distance to 3π/4 ≈ 0.71, to -3π/4 ≈ -0.71 (also
-    # 0.71 abs); to π/4 ≈ 2.21; to -π/4 ≈ -3π or ≈ 2.93 → wraps to ~ -0.21... wait
-    # actually need to be careful. Use a clearer case: 3.13 ≈ +π.
-    # +π and -π are the same point. -3π/4 = -2.36 is closer (distance ≈ 0.78)
-    # than 3π/4 = 2.36 (also distance 0.78 the other way). Tie — argmin picks the
-    # first. Pick a heading slightly less than π: should still hit 3π/4 (Q1).
-    assert sw._select_index(np.pi - 0.1) == 1
-    # Heading slightly more than -π (i.e., +π side after wrap): hits -3π/4 (Q2).
-    assert sw._select_index(-np.pi + 0.1) == 2
-
-
-# ---- LibrarySwitchingDeePC API ----------------------------------------------
-
-
-def test_switcher_act_before_reset_raises():
-    controllers = [_build_3d_controller(seed=i) for i in range(2)]
-    sw = LibrarySwitchingDeePC(controllers, [0.0, np.pi])
-    with pytest.raises(RuntimeError):
-        sw.act(np.array([0.0, 0.0, 0.0]), np.zeros(3))
-
-
-def test_switcher_reset_and_act_returns_correct_shape():
-    controllers = [_build_3d_controller(seed=i) for i in range(2)]
-    sw = LibrarySwitchingDeePC(controllers, [0.0, np.pi])
-    sw.reset(y_initial=np.array([0.0, 0.0, 0.1]))
-    u_t = sw.act(np.array([0.0, 0.0, 0.1]), y_ref=np.array([1.0, 1.0, 0.1]))
+    c = _build_single()
+    c.reset(np.array([0.0, 0.0, 0.1]))
+    u_t = c.act(np.array([0.0, 0.0, 0.1]), np.array([1.0, 1.0, 0.0]))
     assert u_t.shape == (2,)
     assert np.isfinite(u_t).all()
 
 
-def test_switcher_buffer_syncs_after_act():
-    controllers = [_build_3d_controller(seed=i) for i in range(2)]
-    sw = LibrarySwitchingDeePC(controllers, [0.0, np.pi])
-    sw.reset(y_initial=np.array([0.0, 0.0, 0.1]))
-    # Drive a step with heading near 0 → controller 0 is used.
-    sw.act(np.array([0.0, 0.0, 0.1]), y_ref=np.array([1.0, 1.0, 0.1]))
-    assert sw.last_library_idx == 0
-    # The shared y_buf's most recent entry is the y_current we just passed in.
-    assert sw._y_buf is not None
-    np.testing.assert_allclose(sw._y_buf[-1], [0.0, 0.0, 0.1])
-    # Now drive a step with heading near +π → controller 1 is used. Its buffer
-    # must inherit what was just built on controller 0.
-    sw.act(np.array([1.0, 1.0, np.pi - 0.1]), y_ref=np.array([1.0, 1.0, 0.1]))
-    assert sw.last_library_idx == 1
-    np.testing.assert_allclose(sw._y_buf[-1], [1.0, 1.0, np.pi - 0.1])
-    # The most-recent-but-one slot still holds the previous y_current (proves
-    # the buffer continued sliding through the library switch).
-    np.testing.assert_allclose(sw._y_buf[-2], [0.0, 0.0, 0.1])
+def test_y_ref_per_step_horizon_accepted():
+    c = _build_single()
+    c.reset(np.array([0.0, 0.0, 0.1]))
+    y_ref_window = np.tile(np.array([1.0, 1.0, 0.0]), (S.N, 1))
+    u_t = c.act(np.array([0.0, 0.0, 0.1]), y_ref_window)
+    assert u_t.shape == (2,)
 
 
-# ---- LibrarySwitchingDeePC validation ---------------------------------------
+def test_buffer_slides_after_act():
+    c = _build_single()
+    c.reset(np.array([0.0, 0.0, 0.1]))
+    assert c._y_buf is not None
+    np.testing.assert_array_equal(c._y_buf[-1], [0.0, 0.0, 0.1])
+    c.act(np.array([1.0, 2.0, 0.2]), np.array([1.0, 1.0, 0.0]))
+    np.testing.assert_array_equal(c._y_buf[-1], [1.0, 2.0, 0.2])
+    c.act(np.array([3.0, 4.0, 0.3]), np.array([1.0, 1.0, 0.0]))
+    np.testing.assert_array_equal(c._y_buf[-1], [3.0, 4.0, 0.3])
+    np.testing.assert_array_equal(c._y_buf[-2], [1.0, 2.0, 0.2])
 
 
-def test_switcher_rejects_empty_controllers():
-    with pytest.raises(ValueError):
-        LibrarySwitchingDeePC([], [])
+def test_last_library_idx_is_negative_before_first_act():
+    c = _build_multi()
+    assert c.last_library_idx == -1
 
 
-def test_switcher_rejects_mismatched_anchor_count():
-    controllers = [_build_3d_controller(seed=i) for i in range(2)]
-    with pytest.raises(ValueError):
-        LibrarySwitchingDeePC(controllers, [0.0, 1.0, 2.0])
+# ---- Orientation routing ----------------------------------------------------
 
 
-def test_switcher_rejects_mismatched_inner_shapes():
-    c1 = _build_3d_controller(seed=0, T_ini=5)
-    c2 = _build_3d_controller(seed=1, T_ini=4)  # different T_ini
-    with pytest.raises(ValueError):
-        LibrarySwitchingDeePC([c1, c2], [0.0, 1.0])
+def test_select_index_routes_by_quadrant():
+    c = _build_multi()
+    assert c._select_index(0.1) == 0
+    assert c._select_index(2.0) == 1
+    assert c._select_index(-2.0) == 2
+    assert c._select_index(-0.3) == 3
+
+
+def test_select_index_wraps_around_pi():
+    c = _build_multi()
+    assert c._select_index(np.pi - 0.1) == 1
+    assert c._select_index(-np.pi + 0.1) == 2
+
+
+def test_select_index_single_library_always_zero():
+    c = _build_single()
+    assert c._select_index(123.4) == 0
+    assert c._select_index(-50.0) == 0
+
+
+# ---- Warm-start reset on library switch -------------------------------------
+
+
+def test_warm_start_retained_within_library_and_cleared_on_switch():
+    c = _build_multi()
+    seq = S.multi_input_sequence()  # routing: 0,0,1,2,3,0,1,2
+    c.reset(seq[0][0])
+    flags = []
+    for yc, yr in seq:
+        c.act(yc, yr)
+        flags.append(c.last_warm_started)
+    assert flags[0] is False          # first solve: nothing to warm-start from
+    assert flags[1] is True           # stayed in library 0
+    assert flags[2] is False          # switched 0 -> 1, warm-start cleared
+    assert flags[3] is False          # switched 1 -> 2
+    assert flags[5] is False          # switched 3 -> 0
+
+
+# ---- Closed-loop behavior on a simple LTI system ----------------------------
+
+
+def test_single_library_closed_loop_drives_scalar_lti_to_reference():
+    u, y = _scalar_lti(T=400, a=0.9, y0=5.0, seed=0)
+    lib = build_hankel(u, y, T_ini=4, N=8)
+    c = DeePC(
+        [lib], anchor_headings=[0.0],
+        Q=np.array([[1.0]]), R=np.array([[0.01]]),
+        T_ini=4, N=8, lambda_g=1.0, lambda_y=1e4, solver=S.SOLVER,
+    )
+    y_cur = np.array([5.0])
+    y_ref = np.array([0.0])
+    c.reset(y_cur)
+    for _ in range(50):
+        u_t = c.act(y_cur, y_ref)
+        y_cur = 0.9 * y_cur + u_t
+    assert abs(y_cur[0]) < 0.5, f"final y={y_cur[0]:.3f} should be near 0"
 
 
 def test_u_bounds_respected():
-    """Control inputs returned by act() lie within u_bounds when set."""
-    u, y, a = _scalar_lti_data(T=200, a=0.9, y0=10.0, seed=1)
-    Up, Uf, Yp, Yf = build_hankel(u, y, T_ini=3, N=5)
-    u_min = np.array([-0.5])
-    u_max = np.array([0.5])
-    # Paper defaults (lambda_g=2, lambda_y=3e6) over-regularize this 1-D toy
-    # system under L1; use lighter weights so the QP is well-conditioned.
+    u, y = _scalar_lti(T=200, a=0.9, y0=10.0, seed=1)
+    lib = build_hankel(u, y, T_ini=3, N=5)
+    u_min, u_max = np.array([-0.5]), np.array([0.5])
     c = DeePC(
-        Up, Uf, Yp, Yf,
+        [lib], anchor_headings=[0.0],
         Q=np.eye(1), R=0.01 * np.eye(1),
-        T_ini=3, N=5,
-        lambda_g=1.0,
-        lambda_y=1e4,
-        u_bounds=(u_min, u_max),
+        T_ini=3, N=5, lambda_g=1.0, lambda_y=1e4,
+        u_bounds=(u_min, u_max), solver=S.SOLVER,
     )
-    y_current = np.array([10.0])
-    c.reset(y_current)
+    y_cur = np.array([10.0])
+    c.reset(y_cur)
     for _ in range(20):
-        u_t = c.act(y_current, np.array([0.0]))
-        # Allow small numerical slack.
-        assert u_t[0] >= u_min[0] - 1e-6, f"u={u_t[0]} below bound"
-        assert u_t[0] <= u_max[0] + 1e-6, f"u={u_t[0]} above bound"
-        y_current = a * y_current + u_t
+        u_t = c.act(y_cur, np.array([0.0]))
+        assert u_t[0] >= u_min[0] - 1e-6
+        assert u_t[0] <= u_max[0] + 1e-6
+        y_cur = 0.9 * y_cur + u_t

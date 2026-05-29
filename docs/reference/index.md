@@ -16,7 +16,7 @@ Pure reference for the env, controllers, and CLI scripts. No "why" — that live
 
     ---
 
-    `DeePC` and `LibrarySwitchingDeePC`, plus the offline data collection and Hankel construction.
+    `DeePC` (with orientation-keyed library switching), plus the offline data collection and Hankel construction.
 
     [:octicons-arrow-right-24: Controllers](../controllers/index.md)
 
