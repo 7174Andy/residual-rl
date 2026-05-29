@@ -53,4 +53,4 @@ y_ref_step = np.array([base.goal[0], base.goal[1], bearing])
 u_t = controller.act(base.y, y_ref_step)
 ```
 
-The rationale is in [journey 08 — bearing-aware reference](../journey/08-bearing-reference.md).
+Why this helps — and why disabling it (`--no_bearing_ref`) makes reaching worse — is covered in [journey 08 — stopping at the goal](../journey/08-stop-at-goal.md).
