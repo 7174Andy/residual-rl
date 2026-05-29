@@ -43,6 +43,20 @@ Two observed symptoms, one root cause:
 2. **Misses the goal by ~1 cm** — the constant ~0.25 units/step stride can't be
    shortened, so the robot overshoots the tolerance circle.
 
+<figure markdown>
+  <video controls loop muted playsinline width="480">
+    <source src="../videos/cannot-stop-overshoot.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <figcaption>
+    Can't-stop overshoot (<code>libraries.npz</code>, `v ∈ [10, 20]`, seed 42).
+    `v` stays floored at 10 (never brakes), so the robot skims the goal and orbits
+    at the ~6.4-unit minimum turning radius without landing. Reproduce:
+    <code>uv run python scripts/run_deepc.py --libraries data/libraries.npz
+    --seed 42 --episodes 3 --record docs/journey/videos</code> (episode 1).
+  </figcaption>
+</figure>
+
 ## Resolution — widen the data envelope to `v ∈ [0, 20]`
 
 The overshoot is a **stabilizability** fact, not a tuning issue. For the goal `p*`
