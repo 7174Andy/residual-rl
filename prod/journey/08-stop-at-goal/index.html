@@ -1356,6 +1356,50 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#resolution-widen-the-data-envelope-to-v-0-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution — widen the data envelope to v ∈ [0, 20]
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#new-problem-over-braking-pirouette-at-the-goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New problem — over-braking / pirouette at the goal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direction-combine-rl-with-deepc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direction — combine RL with DeePC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open questions
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1431,6 +1475,50 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#resolution-widen-the-data-envelope-to-v-0-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution — widen the data envelope to v ∈ [0, 20]
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#new-problem-over-braking-pirouette-at-the-goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New problem — over-braking / pirouette at the goal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direction-combine-rl-with-deepc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direction — combine RL with DeePC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open questions
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1452,11 +1540,13 @@
 
 
 <h1 id="08-stopping-at-the-goal-the-deceleration-overshoot-problem">08. Stopping at the goal — the deceleration / overshoot problem<a class="headerlink" href="#08-stopping-at-the-goal-the-deceleration-overshoot-problem" title="Permanent link">&para;</a></h1>
-<div class="admonition warning">
-<p class="admonition-title">Open problem</p>
+<div class="admonition note">
+<p class="admonition-title">Status: partially resolved (2026-05-29)</p>
 </div>
-<p>This entry records a <strong>known, unresolved</strong> failure mode rather than a settled
-decision. No fix is committed yet; the candidate fixes below are notes for later.</p>
+<p>The original <strong>overshoot</strong> problem below is resolved by widening the data
+envelope (see <em>Resolution</em>). Doing so surfaced a <strong>new</strong> failure — <em>over-braking</em>
+near the goal — whose proposed fix (RL + DeePC) is still open. Read top-to-bottom
+as a sequence: overshoot → fix → new problem → next direction.</p>
 <h2 id="problem-one-line">Problem (one line)<a class="headerlink" href="#problem-one-line" title="Permanent link">&para;</a></h2>
 <p>With forward-only speed bounds (<code>v_min &gt; 0</code>), the controller drives the robot to
 the goal's neighborhood but <strong>cannot decelerate to land inside the tolerance</strong> —
@@ -1503,6 +1593,171 @@ steps <em>over</em> the 0.5-radius circle instead of landing in it.</p>
 <li><strong>Misses the goal by ~1 cm</strong> — the constant ~0.25 units/step stride can't be
    shortened, so the robot overshoots the tolerance circle.</li>
 </ol>
+<h2 id="resolution-widen-the-data-envelope-to-v-0-20">Resolution — widen the data envelope to <code>v ∈ [0, 20]</code><a class="headerlink" href="#resolution-widen-the-data-envelope-to-v-0-20" title="Permanent link">&para;</a></h2>
+<p>The overshoot is a <strong>stabilizability</strong> fact, not a tuning issue. For the goal <code>p*</code>
+to be an equilibrium we need <code>p_{t+1} = p_t</code>, i.e. <code>Δt · v_t = 0 ⇒ v_t = 0</code>. With
+<code>v_min = 10 &gt; 0</code>, <strong>no admissible input makes the goal a fixed point</strong> — the robot
+is a Dubins vehicle with a forward-speed floor and physically cannot stop. Worse,
+its minimum turning radius is <code>r_min = v_min / w_max = 10 / (π/2) = 20/π ≈ 6.4</code>
+units — ~13× the <code>0.5</code> tolerance — so a near-miss can only be corrected by a wide
+loop, not a tight retry.</p>
+<p>Fix: recollect with the floor removed. <code>data/libraries_v0.npz</code> uses
+<code>v ∈ [0, 20]</code>, <code>w ∈ [±π/2]</code> (T=1500, 4 paper headings, seed 42), so the data span
+now contains stopping/slow motion and DeePC can represent deceleration.</p>
+<p>Closed-loop on the new data (<strong>seed 42, 3 episodes</strong>):</p>
+<table>
+<thead>
+<tr>
+<th>metric</th>
+<th>old <code>v ∈ [10, 20]</code></th>
+<th>new <code>v ∈ [0, 20]</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>success rate</td>
+<td>1 / 3</td>
+<td><strong>2 / 3</strong></td>
+</tr>
+<tr>
+<td><code>v</code> min observed</td>
+<td>+10.0 (floored)</td>
+<td><strong>+0.0 — it brakes</strong></td>
+</tr>
+<tr>
+<td><code>v</code> mean</td>
+<td>~11.5</td>
+<td>3.2 – 7.4</td>
+</tr>
+<tr>
+<td>worst <code>final_dist</code></td>
+<td>8 – 20 (spirals)</td>
+<td><strong>2.75 (lingers)</strong></td>
+</tr>
+</tbody>
+</table>
+<p>With <code>v_min = 0</code> the goal is a genuine equilibrium, the controller brakes, and a
+miss now <em>lingers near</em> the goal instead of spiraling across the box.</p>
+<h2 id="new-problem-over-braking-pirouette-at-the-goal">New problem — over-braking / pirouette at the goal<a class="headerlink" href="#new-problem-over-braking-pirouette-at-the-goal" title="Permanent link">&para;</a></h2>
+<p>The remaining failure (seed 42, ep 1: truncated at <code>final_dist = 2.75</code>, <code>w</code>
+saturated near <code>+1.1</code>) is the <strong>opposite</strong> of overshoot: the robot now slows down
+<em>too much</em> near the goal and gets stuck in a near-stationary spin.</p>
+<figure>
+<video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
+    <source src="videos/over-braking-pirouette.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+<figcaption>
+    Over-braking failure (<code>libraries_v0.npz</code>, seed 43). The robot
+    decelerates near the goal and locks into a stationary pirouette, never closing
+    the last ~2.8 units. Reproduce: <code>uv run python scripts/run_deepc.py
+    --libraries data/libraries_v0.npz --seed 43 --episodes 1
+    --record docs/journey/videos</code>.
+  </figcaption>
+</figure>
+<p>This is an <strong>objective mismatch</strong>, and <code>R</code> is not the cause — the position-vs-effort
+trade-off prefers speed <code>v* ≈ Q·d·Δt·N / R ≈ 230·d</code>, which saturates <code>v_max</code> at
+<code>d = 2.75</code>, i.e. it <em>wants</em> to push hard. The brake comes from the <strong>heading term</strong>:</p>
+<ol>
+<li><strong>Bearing reference is ill-conditioned as <code>d → 0</code>.</strong> With <code>y_ref</code> heading =
+   <code>atan2(g_y−y, g_x−x)</code>, its position-sensitivity is <code>‖∇ atan2‖ = 1/d</code> — the
+   heading target <em>spins</em> near the goal.</li>
+<li><strong>Heading is the heaviest-weighted coordinate</strong> (<code>Q = diag(1,1,2)</code>), so the QP
+   spends effort chasing that spinning target instead of translating in.</li>
+<li><strong>The position pull vanishes</strong> as <code>2Q·d → 0</code>. Heading screams (<code>∝ 1/d</code>) just as
+   drive-in goes quiet (<code>∝ d</code>) → optimum tips to <em>rotate, don't translate</em> → <code>v→0</code>.
+   Stationary robot ⇒ <code>d</code> fixed ⇒ bearing keeps demanding rotation ⇒ <strong>pirouette</strong>.</li>
+<li><strong>No terminal incentive in the QP.</strong> The env's <code>reach_bonus = 100</code> is <em>not</em> in
+   the controller's objective, and <code>N = 12</code> (~3–6 units lookahead) is too myopic to
+   value committing to land. A low-effort stop-and-turn is a valid QP solution.</li>
+</ol>
+<p>Note termination is <strong>position-only</strong> (heading is irrelevant to "reached"), yet
+the controller is penalized for heading error the task doesn't reward — so the
+heading tracking near the goal is actively counterproductive.</p>
+<p>A cheap, untested config fix exists: <code>--Q_heading 0</code> or <code>--no_bearing_ref</code> (or
+gate heading off inside a small radius). Try this <em>before</em> reaching for RL.</p>
+<h2 id="direction-combine-rl-with-deepc">Direction — combine RL with DeePC<a class="headerlink" href="#direction-combine-rl-with-deepc" title="Permanent link">&para;</a></h2>
+<p>For a robust <em>general</em> policy (and if the config fix plateaus), warm-start RL from
+DeePC. RL optimizes the <strong>true</strong> env reward (including <code>reach_bonus</code>), closing the
+exact gap that causes the stall. Two candidate architectures:</p>
+<ul>
+<li><strong>Residual RL</strong> — <code>u = u_DeePC + u_RL(obs)</code>, residual zero-initialized so initial
+  behavior ≈ DeePC; RL learns a near-goal correction. Conceptually clean, but keeps
+  the QP <em>in the training loop</em> (a solve per step → expensive).</li>
+<li><strong>BC warm-start → fine-tune</strong> — clone DeePC into a fast neural policy, then
+  PPO/SAC on env reward. Avoids QP-in-loop during RL, but risks <em>importing the
+  expert's flaw</em> (cloning DeePC near the goal clones the stall) — must down-weight
+  near-goal demos. The repo's body-frame observation is already designed for this.</li>
+</ul>
+<p>(Scaffolding note: no <code>rl/</code> dir and <code>stable_baselines3</code> not yet installed — this is
+greenfield. Item 3 of the repo plan.)</p>
+<h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Permanent link">&para;</a></h2>
+<p><strong>1. What metrics beyond success rate?</strong> Success rate alone hides <em>how</em> a run fails
+(overshoot vs stall vs diverge) and how efficient the successes are. Candidates:</p>
+<table>
+<thead>
+<tr>
+<th>group</th>
+<th>metric</th>
+<th>catches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>success</td>
+<td>success rate; success rate 95% CI</td>
+<td>headline + variance across seeds</td>
+</tr>
+<tr>
+<td>proximity</td>
+<td><strong>min distance</strong> ever reached; final dist</td>
+<td>near-miss (0.68/0.88) vs stall (2.75)</td>
+</tr>
+<tr>
+<td>efficiency</td>
+<td>steps-to-reach; <strong>path-length ratio</strong> (actual ÷ straight-line, optimal = 1)</td>
+<td>looping / pirouetting</td>
+</tr>
+<tr>
+<td>effort</td>
+<td>Σ‖u‖² (energy); Σ‖Δu‖ (smoothness/jerk)</td>
+<td>chattering, wasted control</td>
+</tr>
+<tr>
+<td>diagnostic</td>
+<td><code>w</code>-saturation fraction; mean <code>v</code> in final approach</td>
+<td>spin-stall vs overshoot</td>
+</tr>
+<tr>
+<td>settling</td>
+<td>dwell time inside tolerance</td>
+<td>can-it-stay (≈0 if <code>v_min&gt;0</code>)</td>
+</tr>
+<tr>
+<td>failure tax</td>
+<td>overshoot / stall / diverge / wall-pin %</td>
+<td><em>why</em> it failed, not just that</td>
+</tr>
+<tr>
+<td>compute</td>
+<td>QP failure rate; solve time; warm-start hit rate</td>
+<td>controller health</td>
+</tr>
+</tbody>
+</table>
+<p><code>path-length ratio</code> and <code>min distance</code> are the highest-value additions: together
+they distinguish all three observed failure modes that success rate collapses.</p>
+<p><strong>2. Will residual RL improve the current controller?</strong> <em>Hypothesis: yes for the
+near-goal landing and general robustness</em> — the residual is ~0 in the far field
+(DeePC already navigates well), small to learn, starts at the DeePC baseline (no
+regression risk), and is trained on the true reward, so it directly targets the
+terminal-maneuver gap. <em>Genuine uncertainties</em>: (a) QP-in-the-loop training cost
+may be prohibitive; (b) the reach bonus is sparse — may need reward shaping; (c) if
+the trivial <code>--Q_heading 0</code> fix already removes the stall, the <em>marginal</em> gain of
+residual RL over the config fix could be small. <strong>The real question is not "does RL
+help?" but "does residual RL beat the much cheaper heading-reference fix?"</strong> — which
+requires an ablation: <code>DeePC + heading-fix</code> vs <code>DeePC + residual-RL</code> vs both,
+scored on the metrics above.</p>
 
 
 
