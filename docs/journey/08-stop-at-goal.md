@@ -69,6 +69,20 @@ Closed-loop on the new data (**seed 42, 3 episodes**):
 With `v_min = 0` the goal is a genuine equilibrium, the controller brakes, and a
 miss now _lingers near_ the goal instead of spiraling across the box.
 
+<figure markdown>
+  <video controls loop muted playsinline width="480">
+    <source src="../videos/successful-landing.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <figcaption>
+    Successful reach (<code>libraries_v0.npz</code>, seed 42). The robot now
+    decelerates on approach and lands inside the 0.5 tolerance (final_dist 0.42,
+    129 steps) — the deceleration the old <code>v ∈ [10, 20]</code> data could not
+    represent. Reproduce: <code>uv run python scripts/run_deepc.py --libraries
+    data/libraries_v0.npz --seed 42 --episodes 1 --record docs/journey/videos</code>.
+  </figcaption>
+</figure>
+
 ## New problem — over-braking / pirouette at the goal
 
 The remaining failure (seed 42, ep 1: truncated at `final_dist = 2.75`, `w`
@@ -77,7 +91,7 @@ _too much_ near the goal and gets stuck in a near-stationary spin.
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="videos/over-braking-pirouette.mp4" type="video/mp4">
+    <source src="../videos/over-braking-pirouette.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>
