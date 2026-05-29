@@ -1358,14 +1358,14 @@
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    __init__.py
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    data_collection.py    # offline (u, y) trajectory generation
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    hankel.py             # block-Hankel matrix construction
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    deepc.py              # DeePC + LibrarySwitchingDeePC
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    deepc.py              # DeePC (orientation-keyed library switching built in)
 </span></code></pre></div>
 <p>A controller is anything implementing the <code>Controller</code> protocol:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Controller</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_initial</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_current</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y_ref</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span> <span class="o">...</span>
 </span></code></pre></div>
-<p>(The protocol isn't enforced as a literal <code>typing.Protocol</code>; both <code>DeePC</code> and <code>LibrarySwitchingDeePC</code> follow this shape.)</p>
+<p>(The protocol isn't enforced as a literal <code>typing.Protocol</code>; <code>DeePC</code> follows this shape.)</p>
 <h2 id="the-deepc-pipeline">The DeePC pipeline<a class="headerlink" href="#the-deepc-pipeline" title="Permanent link">&para;</a></h2>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>graph LR
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    A[Random PE inputs] --&gt; B[Offline rollout in env]
@@ -1381,7 +1381,7 @@
 <li><a href="data-collection/">Data collection</a> — <code>controllers/data_collection.py</code></li>
 <li>Block Hankel construction — <code>controllers/hankel.py</code></li>
 <li><a href="deepc/">DeePC controller</a> — <code>controllers/deepc.py</code></li>
-<li><a href="library-switching/">Library switching</a> — <code>controllers/deepc.py::LibrarySwitchingDeePC</code></li>
+<li><a href="library-switching/">Library switching</a> — orientation-keyed switching built into <code>controllers/deepc.py::DeePC</code></li>
 </ul>
 <h2 id="why-this-layered-design">Why this layered design<a class="headerlink" href="#why-this-layered-design" title="Permanent link">&para;</a></h2>
 <ul>
