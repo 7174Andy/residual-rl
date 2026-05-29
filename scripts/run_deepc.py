@@ -14,11 +14,13 @@ Usage:
     uv run python scripts/run_deepc.py
     uv run python scripts/run_deepc.py --library 0 --episodes 5 --seed 42
     uv run python scripts/run_deepc.py --T_ini 5 --N 9              # paper variants
+    uv run python scripts/run_deepc.py --random --headless --episodes 100  # perf eval
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import time
 from typing import cast
@@ -37,6 +39,38 @@ from two_wheel_robot.env.dynamics import wrap_to_pi
 from two_wheel_robot.env.env import UnicycleGoalEnv
 
 
+def _encode_video(frames: list[np.ndarray], path: str, fps: int) -> bool:
+    """Encode `(H, W, 3)` uint8 RGB frames to an MP4 at `path`.
+
+    Uses imageio with its bundled ffmpeg (imageio-ffmpeg), so it does not depend
+    on a system ffmpeg install. yuv420p output keeps the file playable in browsers
+    (MkDocs docs pages); the 600x600 renderer satisfies the even-dimension need.
+    `macro_block_size=None` preserves the exact 600x600 frame size.
+    """
+    if not frames:
+        print(f"  warning: no frames to write for {path}", file=sys.stderr)
+        return False
+    try:
+        import imageio.v2 as imageio
+    except ImportError:
+        print(
+            "  warning: imageio not installed; cannot record. "
+            "Install with `uv add imageio imageio-ffmpeg`.",
+            file=sys.stderr,
+        )
+        return False
+    writer = imageio.get_writer(
+        path, mode="I", fps=fps,
+        codec="libx264", pixelformat="yuv420p", macro_block_size=None,
+    )
+    try:
+        for fr in frames:
+            writer.append_data(np.ascontiguousarray(fr, dtype=np.uint8))
+    finally:
+        writer.close()
+    return True
+
+
 def _resolve_sample_bounds(data) -> np.ndarray:
     """Read `sample_bounds` from the .npz; fall back to paper bounds for old files."""
     if "sample_bounds" in data.files:
@@ -48,7 +82,7 @@ def _resolve_sample_bounds(data) -> np.ndarray:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--libraries", default="data/libraries.npz")
+    parser.add_argument("--libraries", default="data/libraries_v0.npz")
     parser.add_argument(
         "--single_library",
         type=int,
@@ -63,6 +97,33 @@ def main() -> int:
     parser.add_argument("--N", type=int, default=12)
     parser.add_argument("--episodes", type=int, default=3)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument(
+        "--random",
+        action="store_true",
+        help=(
+            "draw a base seed from OS entropy instead of using --seed, so start "
+            "poses and goals are genuinely random. The drawn seed is printed; "
+            "rerun with --seed <that value> (no --random) to reproduce the run."
+        ),
+    )
+    parser.add_argument(
+        "--headless",
+        action="store_true",
+        help=(
+            "disable the pygame window and run as fast as possible. Use for "
+            "measuring aggregate performance over many episodes."
+        ),
+    )
+    parser.add_argument(
+        "--record",
+        type=str,
+        default=None,
+        metavar="DIR",
+        help=(
+            "record each episode to DIR/episode_<ep>.mp4 via system ffmpeg. "
+            "Forces rgb_array rendering (overrides --headless / the human window)."
+        ),
+    )
     parser.add_argument(
         "--lambda_g",
         type=float,
@@ -97,6 +158,18 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    # Resolve the per-episode seeding. --random draws a base seed from OS entropy
+    # (printed so the run stays reproducible); otherwise use the deterministic
+    # --seed. Either way episode `ep` resets with base_seed + ep.
+    if args.random:
+        base_seed = int(np.random.default_rng().integers(0, 2**32))
+        print(
+            f"--random: drew base seed {base_seed} "
+            f"(rerun with --seed {base_seed} to reproduce)"
+        )
+    else:
+        base_seed = args.seed
+
     # Load offline data
     try:
         data = np.load(args.libraries)
@@ -114,14 +187,24 @@ def main() -> int:
         f"w in [{sample_bounds[1,0]:.3f}, {sample_bounds[1,1]:.3f}]"
     )
 
+    # Recording forces offscreen rgb_array rendering; otherwise human window
+    # unless --headless. (rgb_array takes precedence so we can capture frames.)
+    recording = args.record is not None
+    if recording:
+        render_mode = "rgb_array"
+        os.makedirs(args.record, exist_ok=True)
+    else:
+        render_mode = None if args.headless else "human"
+
     # Match env action bounds to the data collection bounds so the controller
     # stays inside its empirical envelope (no extrapolation to unseen actions).
     env = gym.make(
         "TwoWheelGoal-v0",
         action_bounds=sample_bounds,
-        render_mode="human",
+        render_mode=render_mode,
     )
     base = cast(UnicycleGoalEnv, env.unwrapped)
+    record_fps = int(env.metadata.get("render_fps", 40))
 
     # Override Q's heading weight (default 1.0). With paper's Q[2,2]=0, the QP
     # has no direct cost gradient on heading and tends to saturate w.
@@ -177,9 +260,11 @@ def main() -> int:
     u_init_midpoint = 0.5 * (base.action_bounds[:, 0] + base.action_bounds[:, 1])
     print(f"u_initial (midpoint): v={u_init_midpoint[0]:.3f}, w={u_init_midpoint[1]:.3f}")
 
+    # Per-episode records for the aggregate summary.
+    records: list[dict] = []
     try:
         for ep in range(args.episodes):
-            _, info = env.reset(seed=args.seed + ep)
+            _, info = env.reset(seed=base_seed + ep)
             controller.reset(base.y, u_initial=u_init_midpoint)
             steps = 0
             total_reward = 0.0
@@ -187,6 +272,9 @@ def main() -> int:
             qp_failed = False
             applied = []
             lib_usage = np.zeros(n_lib, dtype=np.int64)
+            frames: list[np.ndarray] = []
+            if recording:
+                frames.append(np.asarray(env.render(), dtype=np.uint8))  # initial pose
             while not (terminated or truncated):
                 if args.no_bearing_ref:
                     y_ref_step = base.y_ref
@@ -206,6 +294,8 @@ def main() -> int:
                     break
                 lib_usage[controller.last_library_idx] += 1
                 _, reward, terminated, truncated, info = env.step(u_t)
+                if recording:
+                    frames.append(np.asarray(env.render(), dtype=np.uint8))
                 applied.append(u_t.copy())
                 total_reward += float(reward)
                 steps += 1
@@ -215,6 +305,15 @@ def main() -> int:
                 outcome = "REACHED"
             else:
                 outcome = "truncated"
+            records.append(
+                {
+                    "reached": outcome == "REACHED",
+                    "qp_failed": qp_failed,
+                    "steps": steps,
+                    "return": total_reward,
+                    "final_dist": float(info["distance"]),
+                }
+            )
             print(
                 f"episode {ep}: {outcome:9s} after {steps:3d} steps  "
                 f"return={total_reward:+10.1f}  final_dist={info['distance']:.2f}"
@@ -232,8 +331,42 @@ def main() -> int:
                 )
                 if n_lib > 1:
                     print(f"  library usage: {lib_usage.tolist()}")
-        # Hold the final frame briefly so the last state is visible.
-        time.sleep(1.5)
+            if recording:
+                out_path = os.path.join(args.record, f"episode_{ep}.mp4")
+                if _encode_video(frames, out_path, record_fps):
+                    print(f"  wrote {out_path} ({len(frames)} frames @ {record_fps} fps)")
+
+        # Aggregate summary across all episodes.
+        if records:
+            n = len(records)
+            n_reached = sum(r["reached"] for r in records)
+            n_qp_fail = sum(r["qp_failed"] for r in records)
+            returns = np.array([r["return"] for r in records])
+            finals = np.array([r["final_dist"] for r in records])
+            reached_steps = [r["steps"] for r in records if r["reached"]]
+            seed_desc = (
+                f"random base_seed={base_seed}" if args.random else f"seed={base_seed}"
+            )
+            print(
+                f"\n=== summary over {n} episodes ({seed_desc}) ===\n"
+                f"  success rate : {n_reached}/{n} = {n_reached / n:.1%}"
+                + (f"   (QP failures: {n_qp_fail})" if n_qp_fail else "")
+                + "\n"
+                f"  return       : mean={returns.mean():+.1f}  std={returns.std():.1f}\n"
+                f"  final_dist   : mean={finals.mean():.2f}  std={finals.std():.2f}  "
+                f"max={finals.max():.2f}\n"
+                f"  steps(reached): "
+                + (
+                    f"mean={np.mean(reached_steps):.1f}  "
+                    f"min={min(reached_steps)}  max={max(reached_steps)}"
+                    if reached_steps
+                    else "n/a (none reached)"
+                )
+            )
+
+        # Hold the final frame briefly so the last state is visible (windowed only).
+        if not args.headless:
+            time.sleep(1.5)
     finally:
         env.close()
 

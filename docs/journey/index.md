@@ -13,7 +13,7 @@ Entries are roughly chronological, but each one stands alone — you can read th
 | [05](05-cold-start.md)           | Cold-start bug — when the synthetic past locks the controller |
 | [06](06-single-library-fails.md) | Why one library isn't enough — bilinear dynamics              |
 | [07](07-library-switching.md)    | Library switching — local linearization via 4 quadrants       |
-| [08](08-stop-at-goal.md)         | Stopping at the goal — deceleration / overshoot (open)        |
+| [08](08-stop-at-goal.md)         | Stopping at the goal — overshoot (fixed) → over-braking (RL next) |
 
 ## Conventions
 
