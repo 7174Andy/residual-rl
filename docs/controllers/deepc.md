@@ -84,6 +84,20 @@ recompiling. On a library switch the warm-start `g` is cleared, since its
 columns indexed the previous library. Per-step solve times are dominated by the
 QP solver rather than CVXPY's canonicalization.
 
+## Solver
+
+At the paper's `λ_y = 3·10⁶`, the QP is ill-conditioned (the slack penalty
+dominates the Hessian). cvxpy's incidental default for this problem class is
+OSQP, whose iteration cap is too low — it returns `user_limit` and the solve
+fails; CLARABEL's interior-point factorization can break down numerically
+(`SolverError`) on some states. The controller therefore defaults to
+**`solver="SCS"`** (a first-order, equilibrated solver that is robust across
+operating points). Pass `solver` and `solver_opts` to override — e.g.
+`solver="CLARABEL", solver_opts={"max_iter": 50000}` for higher accuracy where
+the problem is well-conditioned. A hard `cvxpy.SolverError` is caught and
+re-raised as the controller's `RuntimeError`, so a solver breakdown is reported
+like any other QP failure rather than crashing the caller.
+
 ## Public API
 
 ::: two_wheel_robot.controllers.deepc.DeePC
