@@ -75,7 +75,8 @@ class DeePC:
         lambda_y: float = 3e6,
         u_bounds: Optional[tuple[np.ndarray, np.ndarray]] = None,
         heading_index: int = 2,
-        solver: Optional[str] = None,
+        solver: Optional[str] = "SCS",
+        solver_opts: Optional[dict] = None,
     ):
         if T_ini < 1 or N < 1:
             raise ValueError(f"T_ini, N must be >= 1; got {T_ini}, {N}")
@@ -153,6 +154,13 @@ class DeePC:
         self.u_bounds = u_bounds
         self.heading_index = int(heading_index)
         self.solver = solver
+        # The Reg-DDPC QP is ill-conditioned at the paper's lambda_y (~3e6) over
+        # a large Hankel. cvxpy's incidental QP default (OSQP) hits its iteration
+        # cap, and CLARABEL's interior-point factorization can break down
+        # numerically (SolverError) on some states. SCS (first-order, with
+        # equilibration) is robust across operating points at its own defaults;
+        # pass solver/solver_opts to override (e.g. CLARABEL + {"max_iter": ...}).
+        self.solver_opts = dict(solver_opts) if solver_opts is not None else {}
 
         # Single shared past trajectory buffer — primed by reset().
         self._u_buf: Optional[np.ndarray] = None  # shape (T_ini, m_u)
@@ -314,7 +322,13 @@ class DeePC:
         self._y_ini_param.value = self._y_buf.flatten()
         self._y_ref_param.value = y_ref_flat
 
-        self._problem.solve(solver=self.solver, warm_start=True)
+        try:
+            self._problem.solve(solver=self.solver, warm_start=True, **self.solver_opts)
+        except cp.error.SolverError as exc:
+            # A hard solver breakdown (e.g. interior-point numerical failure) is
+            # reported as a controller failure, not propagated as a raw cvxpy
+            # exception, so callers handle it like any other QP failure.
+            raise RuntimeError(f"DeePC QP failed: solver error ({exc})") from exc
         status = self._problem.status
         if status not in ("optimal", "optimal_inaccurate"):
             raise RuntimeError(f"DeePC QP failed: status={status}")

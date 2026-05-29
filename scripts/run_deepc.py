@@ -90,7 +90,9 @@ def main() -> int:
         action="store_true",
         help=(
             "use the env's default y_ref = (g_x, g_y, 0) instead of "
-            "(g_x, g_y, bearing_to_goal). Combine with --Q_heading 0 for paper-faithful."
+            "(g_x, g_y, bearing_to_goal). The paper tracks a tangent-heading "
+            "reference, so the default (bearing ref + --Q_heading 2) is the "
+            "paper-faithful setting; this flag disables it."
         ),
     )
     args = parser.parse_args()

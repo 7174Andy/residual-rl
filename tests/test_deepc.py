@@ -253,3 +253,56 @@ def test_u_bounds_respected():
         assert u_t[0] >= u_min[0] - 1e-6
         assert u_t[0] <= u_max[0] + 1e-6
         y_cur = 0.9 * y_cur + u_t
+
+
+# ---- Solver configuration ---------------------------------------------------
+
+
+def _bare_single() -> DeePC:
+    """A single-library DeePC built WITHOUT specifying solver/solver_opts."""
+    u, y = S.single_library()
+    lib = build_hankel(u, y, T_ini=S.T_INI, N=S.N)
+    return DeePC([lib], anchor_headings=[0.0], Q=S.Q, R=S.R, T_ini=S.T_INI, N=S.N)
+
+
+def test_default_solver_is_scs():
+    # cvxpy's incidental default for this QP is OSQP, whose iteration cap is too
+    # low for the ill-conditioned (large lambda_y) problem; CLARABEL's
+    # factorization numerically breaks down (SolverError) on some states. SCS
+    # (first-order, equilibrated) is robust across operating points.
+    assert _bare_single().solver == "SCS"
+
+
+def test_default_solver_opts_empty():
+    # SCS is robust at its own default settings — no forced iteration cap.
+    assert _bare_single().solver_opts == {}
+
+
+def test_explicit_solver_opts_override_default():
+    c = _build_single(solver_opts={"max_iter": 123})
+    assert c.solver_opts == {"max_iter": 123}
+
+
+def test_solver_opts_forwarded_to_solve():
+    # A max_iter of 1 cannot converge -> user_limit -> RuntimeError. If this
+    # raises, the opts reached the solve() call. (_build_single pins CLARABEL.)
+    c = _build_single(solver_opts={"max_iter": 1})
+    c.reset(np.array([0.0, 0.0, 0.1]))
+    with pytest.raises(RuntimeError):
+        c.act(np.array([0.0, 0.0, 0.1]), np.array([1.0, 1.0, 0.0]))
+
+
+def test_solver_error_is_reported_as_runtime_error():
+    # A hard cvxpy SolverError (e.g. interior-point numerical breakdown) must
+    # surface as the controller's RuntimeError, not crash the caller.
+    import cvxpy as cp
+
+    c = _build_single()
+    c.reset(np.array([0.0, 0.0, 0.1]))
+
+    def boom(*a, **k):
+        raise cp.error.SolverError("simulated numerical breakdown")
+
+    c._problem.solve = boom
+    with pytest.raises(RuntimeError):
+        c.act(np.array([0.0, 0.0, 0.1]), np.array([1.0, 1.0, 0.0]))

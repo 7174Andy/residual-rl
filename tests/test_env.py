@@ -205,7 +205,9 @@ def test_y_and_y_ref_exposed():
     np.testing.assert_allclose(info["y_ref"], [4.0, 5.0, 0.0])
 
 
-def test_default_Q_is_3x3_with_zero_heading_entry():
+def test_default_Q_is_3x3_with_heading_weight_two():
+    # Default Q = diag(1, 1, 2), matching the paper's Q_z (arXiv:2603.07395,
+    # Appendix D). Heading is weighted, not don't-care.
     env = UnicycleGoalEnv()
     assert env.Q.shape == (3, 3)
-    assert env.Q[2, 2] == 0.0
+    assert env.Q[2, 2] == 2.0

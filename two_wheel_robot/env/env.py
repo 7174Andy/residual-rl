@@ -34,9 +34,9 @@ class UnicycleGoalEnv(gym.Env):
         self.max_steps = int(max_steps)
         self.dt = float(dt)
         self.action_bounds = np.asarray(action_bounds, dtype=np.float64)
-        # DeePC-style cost on the 3-D output y = (x, y, delta). Heading entry
-        # is zero by default (don't-care at the goal) but Q stays 3x3 so heading
-        # remains visible to the behavioral predictor.
+        # DeePC-style cost on the 3-D output y = (x, y, delta). Default heading
+        # weight is 2 (paper's Q_z = diag(1, 1, 2)); the full 3x3 Q also keeps
+        # heading visible to the behavioral predictor.
         self.Q = (
             np.diag([1.0, 1.0, 2.0])
             if Q is None
