@@ -22,7 +22,7 @@ from two_wheel_robot.env.env import UnicycleGoalEnv
 # ---- Paper (arXiv:2603.07395 Appendix D) data-collection settings -----------
 
 PAPER_SAMPLE_BOUNDS: np.ndarray = np.array(
-    [[10.0, 20.0], [-np.pi / 6, np.pi / 6]], dtype=np.float64
+    [[0.0, 20.0], [-np.pi / 2, np.pi / 2]], dtype=np.float64
 )
 PAPER_INIT_HEADINGS: tuple[float, ...] = (
     np.pi / 4,

@@ -36,12 +36,12 @@ def main() -> None:
     parser.add_argument("--out", type=str, default="data/libraries.npz")
     parser.add_argument("--T", type=int, default=PAPER_T)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--v_min", type=float, default=10.0, help="min tangential vel (paper: 10)")
+    parser.add_argument("--v_min", type=float, default=0.0, help="min tangential vel (paper: 10)")
     parser.add_argument("--v_max", type=float, default=20.0, help="max tangential vel (paper: 20)")
     parser.add_argument(
         "--w_abs_max",
         type=float,
-        default=np.pi / 6,
+        default=np.pi / 2,
         help="|w| upper bound; w sampled in [-w_abs_max, w_abs_max] (paper: pi/6)",
     )
     args = parser.parse_args()
