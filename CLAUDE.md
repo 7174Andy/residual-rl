@@ -39,7 +39,7 @@ The unicycle is *not* globally Koopman-linearizable. DeePC built here should exp
 r_t = -(y_t - y_ref)ᵀ Q (y_t - y_ref) - u_tᵀ R u_t + reach_bonus · [reached this step]
 ```
 
-where `y = (x, y, δ)` is the 3-D output and `y_ref = (g_x, g_y, 0)`. Defaults: `Q = diag(1, 1, 0)` (heading not penalized, but still in `y` so behavioral predictors see it), `R = 1.3e-3 · I₂` (paper value), `reach_bonus = 100`.
+where `y = (x, y, δ)` is the 3-D output and `y_ref = (g_x, g_y, 0)`. Defaults: `Q = diag(1, 1, 2)` (heading weighted, matching the paper's `Q_z` in arXiv:2603.07395 Appendix D; the full 3-D `y` also keeps heading visible to behavioral predictors), `R = 1.3e-3 · I₂` (paper value), `reach_bonus = 100`.
 
 Termination uses position-only error (`‖p − g‖ < goal_tolerance`); heading is irrelevant to "reached".
 
