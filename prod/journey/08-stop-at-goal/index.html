@@ -1593,6 +1593,19 @@ steps <em>over</em> the 0.5-radius circle instead of landing in it.</p>
 <li><strong>Misses the goal by ~1 cm</strong> — the constant ~0.25 units/step stride can't be
    shortened, so the robot overshoots the tolerance circle.</li>
 </ol>
+<figure>
+<video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
+    <source src="../videos/cannot-stop-overshoot.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+<figcaption>
+    Can't-stop overshoot (<code>libraries.npz</code>, `v ∈ [10, 20]`, seed 42).
+    `v` stays floored at 10 (never brakes), so the robot skims the goal and orbits
+    at the ~6.4-unit minimum turning radius without landing. Reproduce:
+    <code>uv run python scripts/run_deepc.py --libraries data/libraries.npz
+    --seed 42 --episodes 3 --record docs/journey/videos</code> (episode 1).
+  </figcaption>
+</figure>
 <h2 id="resolution-widen-the-data-envelope-to-v-0-20">Resolution — widen the data envelope to <code>v ∈ [0, 20]</code><a class="headerlink" href="#resolution-widen-the-data-envelope-to-v-0-20" title="Permanent link">&para;</a></h2>
 <p>The overshoot is a <strong>stabilizability</strong> fact, not a tuning issue. For the goal <code>p*</code>
 to be an equilibrium we need <code>p_{t+1} = p_t</code>, i.e. <code>Δt · v_t = 0 ⇒ v_t = 0</code>. With
