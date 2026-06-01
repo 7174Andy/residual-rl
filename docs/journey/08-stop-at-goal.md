@@ -170,6 +170,35 @@ of seeds. On most failing seeds the robot **never commits to forward motion** an
 truncates far away — the same `v → 0` family as
 [06](06-single-library-fails.md), now seed-dependent rather than universal.
 
+<figure markdown>
+  <video controls loop muted playsinline width="480">
+    <source src="../videos/far-field-v-collapse-stall.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <figcaption>
+    Far-field `v`-collapse — pure stall (`libraries_v0.npz`, seed 4104626047).
+    `v` never leaves ~0 (`v̄ = 0.00`), so the robot sits near the start while the
+    goal is 14.6 units away; it truncates at `final_dist 14.61` having made no net
+    progress. Nothing to do with stopping _at_ the goal — it never drives toward it.
+    Reproduce: <code>uv run python scripts/run_deepc.py --seed 4104626047
+    --episodes 1 --record docs/journey/videos</code>.
+  </figcaption>
+</figure>
+
+<figure markdown>
+  <video controls loop muted playsinline width="480">
+    <source src="../videos/far-field-v-collapse-worst.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <figcaption>
+    Far-field `v`-collapse — worst case (`libraries_v0.npz`, seed 4104626064).
+    The robot drifts with only token forward speed (`v̄ = 0.71`) and never converges,
+    ending the farthest of the whole sweep at `final_dist 15.77`. Reproduce:
+    <code>uv run python scripts/run_deepc.py --seed 4104626064 --episodes 1
+    --record docs/journey/videos</code>.
+  </figcaption>
+</figure>
+
 We ruled out the two obvious culprits:
 
 - **Not step size / horizon.** At `v = 10`, displacement is `0.25` units/step → ~100
