@@ -1,10 +1,14 @@
 # 08. Stopping at the goal — the deceleration / overshoot problem
 
-!!! note "Status: partially resolved (2026-05-29)"
+!!! note "Status: partially resolved (updated 2026-06-01)"
 The original **overshoot** problem below is resolved by widening the data
-envelope (see _Resolution_). Doing so surfaced a **new** failure — _over-braking_
-near the goal — whose proposed fix (RL + DeePC) is still open. Read top-to-bottom
-as a sequence: overshoot → fix → new problem → next direction.
+envelope (see _Resolution_). Doing so surfaced **two** residual failures: an
+_over-braking_ pirouette near the goal, and — only visible at larger sample — a
+**dominant _far-field `v`-collapse_** where the robot never drives in at all (see
+_Larger-sample reality check_). Reach rate over random seeds is **~39%**, not the
+2/3 the seed-42 sample suggested. Proposed fixes (heading-reference config; RL +
+DeePC) still open. Read top-to-bottom as a sequence: overshoot → fix → residual
+problems → next direction.
 
 ## Problem (one line)
 
@@ -139,6 +143,50 @@ heading tracking near the goal is actively counterproductive.
 
 A cheap, untested config fix exists: `--Q_heading 0` or `--no_bearing_ref` (or
 gate heading off inside a small radius). Try this _before_ reaching for RL.
+
+## Larger-sample reality check (2026-06-01)
+
+The numbers above ("2 / 3", "a miss now lingers near the goal at 2.75") come from
+**n = 3 on seed 42** — optimistic. A broader random sweep (`scripts/run_deepc.py
+--episodes 100 --random`, base seed `4104626029`, n = 78 before the slow run was
+stopped; `libraries_v0.npz`) reframes the picture:
+
+- **Reach rate ≈ 39 %** (30 / 78); seed 0's 3 / 4 is a lucky draw.
+- **QP failures: 0 / 78** — the controller is numerically healthy, so the solver is
+  _not_ the bottleneck (the "compute" metric row below can be deprioritized).
+- The 48 truncated episodes end a **median of 5.38 units from the goal** (max 15.77),
+  with median mean-`v` ≈ **1.66** (successes run `v̄` ≈ 4–7).
+
+That splits the residual failure into **two populations**, not the single near-goal
+mode the section above describes:
+
+| population                          | count (of 48 truncations) | signature                                              | matches                |
+| ----------------------------------- | ------------------------- | ------------------------------------------------------ | ---------------------- |
+| near-goal pirouette / over-brake    | 15 (final_dist < 3.0)     | reaches the neighborhood, then stalls / spins          | the "New problem" above |
+| **far-field `v`-collapse**          | **33 (final_dist ≥ 3.0)** | never drives in; `v̄` stays ≈ 1.6 across the whole run | **dominant; new**      |
+
+So the Resolution's "miss now lingers near the goal" claim holds only for a minority
+of seeds. On most failing seeds the robot **never commits to forward motion** and
+truncates far away — the same `v → 0` family as
+[06](06-single-library-fails.md), now seed-dependent rather than universal.
+
+We ruled out the two obvious culprits:
+
+- **Not step size / horizon.** At `v = 10`, displacement is `0.25` units/step → ~100
+  units of path budget over 200 steps, far more than the 20-unit workspace diagonal.
+  Failures end far away with low `v`, not "almost there after running out of steps"
+  (only 7 / 48 ended < 1.0).
+- **Not the regularizers.** [06](06-single-library-fails.md) swept `λ_g`, `λ_y`, `N`,
+  `T_ini` against this exact `v → 0` mode and none moved it. λ is not the lever.
+
+**Implication for the fixes below.** `--Q_heading 0` / `--no_bearing_ref` targets the
+near-goal pirouette (the `1/d` bearing ill-conditioning), so it should help that
+~15-episode population — but it likely will **not** fix the dominant far-field
+`v`-collapse, which is upstream (library / prediction quality for the current
+heading). Expect the config fix to lift reach rate _modestly_, not to solve it. A
+definitive attribution needs a per-step trace (the QP's predicted Δdistance for
+`v > 0`, selected library, and slack `σ_y` on a failing far-field seed) — logging
+not yet added to `run_deepc.py`.
 
 ## Direction — combine RL with DeePC
 
