@@ -44,7 +44,7 @@ Pure reference for the env, controllers, and CLI scripts. No "why" — that live
 
 - [Overview](../controllers/index.md) — package layout, controller protocol.
 - [DeePC](../controllers/deepc.md) — QP formulation, hyperparameters, caching.
-- [Library switching](../controllers/library-switching.md) — orientation-keyed wrapper, selection logic.
+- [Library switching](../controllers/library-switching.md) — orientation-keyed library selection built into DeePC.
 - [Data collection](../controllers/data-collection.md) — offline PE trajectories, Hankel matrices.
 - [API](../controllers/api.md) — auto-generated from docstrings.
 

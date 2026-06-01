@@ -51,28 +51,28 @@ On each `act(y_current, y_ref)`:
 The four libraries come from offline rollouts started at the paper's four init headings (`controllers/data_collection.PAPER_INIT_HEADINGS`); each rollout's data concentrates around one quadrant anchor. `scripts/run_deepc.py` builds all four by default (`--single_library N` passes a one-element list for the single-library contrast) and prints **per-episode library usage** so you can see when switching actually triggered:
 
 ```text
-episode 1: REACHED   after 107 steps  final_dist=0.43
-  library usage: [0, 0, 17, 90]    # Q3 → Q2 mid-flight
+episode 1: REACHED   after  94 steps  final_dist=0.46
+  library usage: [0, 0, 17, 77]    # Q3 → Q4 mid-flight
 ```
 
 ## Outcome
 
-Closed-loop test on broad-`w` data with library switching enabled (all four libraries loaded):
+Closed-loop test on broad-`w` data with library switching enabled (all four libraries loaded). Reproduce with `uv run python scripts/run_deepc.py --headless --episodes 4 --seed 0` (data: `data/libraries_v0.npz`, `T_ini=5`, `N=12`):
 
 | Episode | Outcome | Steps | Final dist |
 |---|---|---|---|
-| 0 | truncated | 200 | 16.96 |
-| 1 | **REACHED** | 107 | **0.43** |
-| 2 | **REACHED** | 36 | **0.50** |
-| 3 | QP-fail @ 89 | — | 1.49 (was approaching) |
+| 0 | truncated | 200 | 16.95 |
+| 1 | **REACHED** | 94 | **0.46** |
+| 2 | **REACHED** | 35 | **0.46** |
+| 3 | **REACHED** | 115 | **0.48** |
 
-This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where `v` was stuck at zero in all four episodes.
+Success rate **3/4 = 75%** (mean steps-to-reach 81). This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where `v` was stuck at zero in all four episodes.
 
 ## Caveats
 
 - Switching only helps if the robot **actually crosses quadrant boundaries** during an episode. With narrow `w` data the turn rate is too low and switching becomes a no-op.
-- Library 0 fails on some seeds (episode 0 above). Diagnosing these one-off failures would benefit from logging the QP's `σ_y` and the controller's predicted vs actual trajectory.
-- Occasional QP solver `user_limit` failures suggest the SCS default iteration cap is sometimes too low; CLARABEL might be more reliable for this problem class.
+- Some seeds still fail to converge (episode 0 above: 200 steps, ends 16.95 from goal despite cycling all four libraries — `w` saturates positive while `v` stays near zero, so the robot spins rather than driving out). Diagnosing these would benefit from logging the QP's `σ_y` and the controller's predicted vs actual trajectory.
+- QP solver `user_limit` / numerical failures still surface on some seeds (none at `--seed 0` here, but they appear elsewhere). The SCS default iteration cap is sometimes too low; CLARABEL might be more reliable for this problem class.
 
 ## Code
 

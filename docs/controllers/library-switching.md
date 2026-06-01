@@ -71,11 +71,11 @@ for _ in range(max_steps):
 `scripts/run_deepc.py` prints library usage per episode:
 
 ```text
-episode 1: REACHED   after 107 steps  return=-11998.2  final_dist=0.43
-  library usage: [0, 0, 17, 90]
+episode 1: REACHED   after  94 steps  return=-11208.0  final_dist=0.46
+  library usage: [0, 0, 17, 77]
 ```
 
-This episode started in quadrant Q3 (library 3, 17 steps), then switched to Q2 (library 2, 90 steps). Useful for sanity-checking that switching actually triggers — narrow `w` collections give episodes where the robot stays in one quadrant (`[0, 0, 200, 0]`-style usage) and switching becomes a no-op.
+This episode started in quadrant Q3 (library 2, 17 steps), then switched to Q4 (library 3, 77 steps). Useful for sanity-checking that switching actually triggers — narrow `w` collections give episodes where the robot stays in one quadrant (`[0, 0, 200, 0]`-style usage) and switching becomes a no-op.
 
 ## Public API
 
