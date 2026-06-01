@@ -1587,10 +1587,10 @@ problem — not recompiling. On every <code>act()</code>:</p>
 <p><code>scripts/run_deepc.py</code> does exactly this by default. Use <code>--single_library N</code> to pass a one-element library list and see the single-library contrast.</p>
 <h2 id="diagnostic-library-usage-histogram">Diagnostic: library usage histogram<a class="headerlink" href="#diagnostic-library-usage-histogram" title="Permanent link">&para;</a></h2>
 <p><code>scripts/run_deepc.py</code> prints library usage per episode:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>episode 1: REACHED   after 107 steps  return=-11998.2  final_dist=0.43
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  library usage: [0, 0, 17, 90]
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>episode 1: REACHED   after  94 steps  return=-11208.0  final_dist=0.46
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  library usage: [0, 0, 17, 77]
 </span></code></pre></div>
-<p>This episode started in quadrant Q3 (library 3, 17 steps), then switched to Q2 (library 2, 90 steps). Useful for sanity-checking that switching actually triggers — narrow <code>w</code> collections give episodes where the robot stays in one quadrant (<code>[0, 0, 200, 0]</code>-style usage) and switching becomes a no-op.</p>
+<p>This episode started in quadrant Q3 (library 2, 17 steps), then switched to Q4 (library 3, 77 steps). Useful for sanity-checking that switching actually triggers — narrow <code>w</code> collections give episodes where the robot stays in one quadrant (<code>[0, 0, 200, 0]</code>-style usage) and switching becomes a no-op.</p>
 <h2 id="public-api">Public API<a class="headerlink" href="#public-api" title="Permanent link">&para;</a></h2>
 <p>Library switching is part of <code>DeePC</code> — see the <a href="../deepc/#public-api">DeePC reference</a> for the full constructor (<code>libraries</code>, <code>anchor_headings</code>, <code>heading_index</code>) and the <code>last_library_idx</code> / <code>last_warm_started</code> diagnostics.</p>
 

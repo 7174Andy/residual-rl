@@ -1602,11 +1602,11 @@
 <li>Slide the shared buffer with the applied <code>(u_t, y_current)</code>.</li>
 </ol>
 <p>The four libraries come from offline rollouts started at the paper's four init headings (<code>controllers/data_collection.PAPER_INIT_HEADINGS</code>); each rollout's data concentrates around one quadrant anchor. <code>scripts/run_deepc.py</code> builds all four by default (<code>--single_library N</code> passes a one-element list for the single-library contrast) and prints <strong>per-episode library usage</strong> so you can see when switching actually triggered:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>episode 1: REACHED   after 107 steps  final_dist=0.43
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  library usage: [0, 0, 17, 90]    # Q3 → Q2 mid-flight
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>episode 1: REACHED   after  94 steps  final_dist=0.46
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  library usage: [0, 0, 17, 77]    # Q3 → Q4 mid-flight
 </span></code></pre></div>
 <h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
-<p>Closed-loop test on broad-<code>w</code> data with library switching enabled (all four libraries loaded):</p>
+<p>Closed-loop test on broad-<code>w</code> data with library switching enabled (all four libraries loaded). Reproduce with <code>uv run python scripts/run_deepc.py --headless --episodes 4 --seed 0</code> (data: <code>data/libraries_v0.npz</code>, <code>T_ini=5</code>, <code>N=12</code>):</p>
 <table>
 <thead>
 <tr>
@@ -1621,34 +1621,34 @@
 <td>0</td>
 <td>truncated</td>
 <td>200</td>
-<td>16.96</td>
+<td>16.95</td>
 </tr>
 <tr>
 <td>1</td>
 <td><strong>REACHED</strong></td>
-<td>107</td>
-<td><strong>0.43</strong></td>
+<td>94</td>
+<td><strong>0.46</strong></td>
 </tr>
 <tr>
 <td>2</td>
 <td><strong>REACHED</strong></td>
-<td>36</td>
-<td><strong>0.50</strong></td>
+<td>35</td>
+<td><strong>0.46</strong></td>
 </tr>
 <tr>
 <td>3</td>
-<td>QP-fail @ 89</td>
-<td>—</td>
-<td>1.49 (was approaching)</td>
+<td><strong>REACHED</strong></td>
+<td>115</td>
+<td><strong>0.48</strong></td>
 </tr>
 </tbody>
 </table>
-<p>This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where <code>v</code> was stuck at zero in all four episodes.</p>
+<p>Success rate <strong>3/4 = 75%</strong> (mean steps-to-reach 81). This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where <code>v</code> was stuck at zero in all four episodes.</p>
 <h2 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Switching only helps if the robot <strong>actually crosses quadrant boundaries</strong> during an episode. With narrow <code>w</code> data the turn rate is too low and switching becomes a no-op.</li>
-<li>Library 0 fails on some seeds (episode 0 above). Diagnosing these one-off failures would benefit from logging the QP's <code>σ_y</code> and the controller's predicted vs actual trajectory.</li>
-<li>Occasional QP solver <code>user_limit</code> failures suggest the SCS default iteration cap is sometimes too low; CLARABEL might be more reliable for this problem class.</li>
+<li>Some seeds still fail to converge (episode 0 above: 200 steps, ends 16.95 from goal despite cycling all four libraries — <code>w</code> saturates positive while <code>v</code> stays near zero, so the robot spins rather than driving out). Diagnosing these would benefit from logging the QP's <code>σ_y</code> and the controller's predicted vs actual trajectory.</li>
+<li>QP solver <code>user_limit</code> / numerical failures still surface on some seeds (none at <code>--seed 0</code> here, but they appear elsewhere). The SCS default iteration cap is sometimes too low; CLARABEL might be more reliable for this problem class.</li>
 </ul>
 <h2 id="code">Code<a class="headerlink" href="#code" title="Permanent link">&para;</a></h2>
 <p><code>two_wheel_robot/controllers/deepc.py::DeePC</code> — library switching is built into the controller (<code>libraries</code>, <code>anchor_headings</code>, <code>heading_index</code>; <code>last_library_idx</code> diagnostic). See <a href="../../controllers/library-switching/">library switching reference</a>.</p>
