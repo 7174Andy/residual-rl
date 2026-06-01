@@ -1390,10 +1390,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#root-cause-of-the-v-collapse-predictor-infidelity-not-missing-data" class="md-nav__link">
+  <a href="#root-cause-of-the-v-collapse-a-hallucinated-prediction-from-a-degenerate-past-not-missing-data-and-not-a-bug" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Root cause of the v-collapse — predictor infidelity, not missing data
+        Root cause of the v-collapse — a hallucinated prediction from a degenerate past, not missing data (and not a bug)
       
     </span>
   </a>
@@ -1531,10 +1531,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#root-cause-of-the-v-collapse-predictor-infidelity-not-missing-data" class="md-nav__link">
+  <a href="#root-cause-of-the-v-collapse-a-hallucinated-prediction-from-a-degenerate-past-not-missing-data-and-not-a-bug" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Root cause of the v-collapse — predictor infidelity, not missing data
+        Root cause of the v-collapse — a hallucinated prediction from a degenerate past, not missing data (and not a bug)
       
     </span>
   </a>
@@ -1830,7 +1830,7 @@ truncates far away — the same <code>v → 0</code> family as
 <li><strong>Not the regularizers.</strong> <a href="../06-single-library-fails/">06</a> swept <code>λ_g</code>, <code>λ_y</code>, <code>N</code>,
   <code>T_ini</code> against this exact <code>v → 0</code> mode and none moved it. λ is not the lever.</li>
 </ul>
-<h2 id="root-cause-of-the-v-collapse-predictor-infidelity-not-missing-data">Root cause of the <code>v</code>-collapse — predictor infidelity, not missing data<a class="headerlink" href="#root-cause-of-the-v-collapse-predictor-infidelity-not-missing-data" title="Permanent link">&para;</a></h2>
+<h2 id="root-cause-of-the-v-collapse-a-hallucinated-prediction-from-a-degenerate-past-not-missing-data-and-not-a-bug">Root cause of the <code>v</code>-collapse — a hallucinated prediction from a degenerate past, not missing data (and not a bug)<a class="headerlink" href="#root-cause-of-the-v-collapse-a-hallucinated-prediction-from-a-degenerate-past-not-missing-data-and-not-a-bug" title="Permanent link">&para;</a></h2>
 <p>A per-step trace settles the attribution — and it is <strong>not</strong> what "library quality"
 first suggests. <code>scripts/run_deepc.py --seed 4104626047 --episodes 1 --headless
 --trace</code> logs, each step, the QP's own predicted distance-reduction and a
@@ -1856,12 +1856,37 @@ identically:</p>
    identical state and re-hallucinates the identical "I'll reach it" plan → the robot
    sits frozen at <code>d = 14.61</code> for all 200 steps.</li>
 </ol>
-<p>This is the <strong>bilinear unfaithfulness of <a href="../06-single-library-fails/">06</a> caught in
-the act</strong>: for a nonlinear system, <code>Yf·g</code> and <code>Uf·g</code> from the same <code>g</code> need not be a
-<em>real</em> trajectory. The <code>g</code> that best matches "reach the goal" in the predicted
-<strong>output</strong> is paired with an <strong>input</strong> whose first action is <code>v = 0</code> (motion deferred
-to later horizon steps that never arrive). The QP trusts the prediction and applies
-the garbage first action.</p>
+<p><strong>Why the prediction lies — and why it is <em>not</em> a bug.</strong> For a nonlinear system,
+<code>Yf·g</code> and <code>Uf·g</code> from the same <code>g</code> need not be a <em>real</em> trajectory: the <code>g</code> that
+matches "reach the goal" in the predicted <strong>output</strong> can be paired with an <strong>input</strong>
+whose first action is <code>v = 0</code>. But nonlinearity alone is not the whole story — an
+in-distribution test pins it down. Feeding each library a <strong>real</strong> recent past plus
+the <strong>real</strong> future inputs from held-out data, the predictor reproduces the true
+future positions to <strong>~0.01–0.05 units one step ahead</strong> (3 of 4 libraries). So the
+Hankel construction and <code>u</code>/<code>y</code> alignment are <strong>correct</strong>, and the predictor is
+<em>accurate when the past is informative</em> — despite the same nonlinearity. The
+closed-loop hallucination (~8.6 units off at step 1) is ~200× larger than any error
+the predictor makes on real data, so it is <strong>not an implementation error</strong>.</p>
+<p>The hallucination is triggered by a <strong>degenerate past</strong>, not nonlinearity per se:</p>
+<ul>
+<li>At <code>reset()</code> the past buffer is primed with <code>T_ini</code> copies of one frozen pose — not
+  a real trajectory.</li>
+<li>Once the robot stalls, its <em>real</em> recent history is also near-constant (fixed
+  position, spinning heading).</li>
+</ul>
+<p>A (near-)constant past is matched by <strong>many</strong> <code>g</code>'s — the constraints <code>Up·g = u_ini</code>,
+<code>Yp·g = y_ini</code> no longer pin down the future — so the QP is free to pick a blend whose
+predicted future lands on the goal while its first control is <code>v = 0</code>. It is
+<strong>self-trapping</strong>: frozen init → stall → constant history → sustains the stall. The
+precise cause is the <em>conjunction</em>, the bilinear unfaithfulness of
+<a href="../06-single-library-fails/">06</a> <strong>gated on past-conditioning</strong>:</p>
+<blockquote>
+<p><strong>nonlinear dynamics</strong> (matching the past no longer guarantees a real future)
+<strong>+ an uninformative/constant past</strong> (so many blends satisfy the match)
+→ the QP picks a blend that predicts reaching the goal but whose first control is
+<code>v = 0</code>.</p>
+</blockquote>
+<p>Nonlinearity alone would not do it — on a real, varied past the predictor is accurate.</p>
 <p><strong>Consequences for the fixes:</strong></p>
 <ul>
 <li><strong>Reweighting <code>Q</code>/<code>R</code>/<code>λ</code> will not reliably fix it.</strong> Lowering <code>R</code> only removes the
@@ -1870,36 +1895,65 @@ the garbage first action.</p>
   reweighting repairs. (Consistent with <a href="../06-single-library-fails/">06</a>'s λ sweep.)</li>
 <li><strong><code>--Q_heading 0</code> / <code>--no_bearing_ref</code></strong> still targets only the <em>near-goal
   pirouette</em> population (~15 episodes), not this dominant collapse.</li>
-<li><strong>The root DeePC-side fix is a <em>faithful</em> predictor</strong> — the Koopman lift (<code>sin δ</code>,
-  <code>cos δ</code> into <code>y</code>; journey 07's considered-#4), so the linear span contains only
-  physically realizable trajectories and cannot pair "reach goal" with "do nothing
-  now." A terminal constraint or move-blocking (forbid deferring motion) is a cheaper
-  partial guard.</li>
+<li><strong>Attack the trigger (cheap — now the leading lever).</strong> Because the predictor is
+  accurate on an <em>informative</em> past, keeping the past informative should help: anchor
+  the prediction to the current measurement (the buffer currently lags one step), seed
+  the past with a short real motion instead of a frozen pose, or force a few forward
+  steps at episode start before handing to DeePC. Untested.</li>
+<li><strong>Attack the root (model class).</strong> A <em>faithful</em> predictor — the Koopman lift
+  (<code>sin δ</code>, <code>cos δ</code> into <code>y</code>; journey 07's considered-#4) — makes the linear span hold
+  only physically realizable trajectories, so it cannot pair "reach goal" with "do
+  nothing now." A terminal constraint / move-blocking is a cheaper partial guard.</li>
 <li><strong>RL on the true env reward is immune</strong> — it learns from <em>real</em> transitions and is
   never fooled by the hallucinated predictor (next section).</li>
 </ul>
+<p><strong>Aside — library 1 is poorly conditioned.</strong> The failing seed selected <code>lib = 1</code>
+(heading band ≈ <code>3π/4</code>), and that library predicts notably worse even in-distribution
+(horizon position RMSE ≈ 3.5 vs ≈ 0.1–0.5 for the others) — a separate data-quality
+issue worth its own look.</p>
 <h2 id="direction-combine-rl-with-deepc">Direction — combine RL with DeePC<a class="headerlink" href="#direction-combine-rl-with-deepc" title="Permanent link">&para;</a></h2>
-<p>For a robust <em>general</em> policy (and if the config fix plateaus), warm-start RL from
-DeePC. RL optimizes the <strong>true</strong> env reward (including <code>reach_bonus</code>), closing the
-exact gap that causes the stall. Two candidate architectures:</p>
-<ul>
-<li><strong>Residual RL</strong> — <code>u = u_DeePC + u_RL(obs)</code>, residual zero-initialized so initial
-  behavior ≈ DeePC. The far-field trace makes this the <em>robust</em> choice: on a collapse
-  seed <code>u_DeePC ≈ (0, spin)</code> is a <strong>neutral</strong> baseline (not adversarial), so RL simply
-  supplies the real forward velocity the hallucinated predictor refuses to. Note the
-  premise shifts, though — the residual is <em>not</em> "small everywhere" (small on the
-  ~39 % DeePC solves, but it carries the navigation on the ~42 % it collapses). Keeps
-  the QP <em>in the training loop</em> (a solve per step → expensive).</li>
-<li><strong>BC warm-start → fine-tune</strong> — clone DeePC into a fast neural policy, then
-  PPO/SAC on env reward. Avoids QP-in-loop during RL, but is <em>worse</em> for this failure:
-  cloning reproduces the <code>v = 0</code> stall on the ~42 % of states where DeePC collapses,
-  so BC imports the dominant flaw and fine-tuning must unlearn it — down-weight the
-  stalled demos heavily. The repo's body-frame observation is already designed for
-  this.</li>
-</ul>
-<p>Either way, note that far-field go-to-goal is the <em>easy</em> part for RL (the body-frame
-observation is a standard go-to-goal state); the harder part is the near-goal
-deceleration with the sparse <code>reach_bonus</code>.</p>
+<p>The whole arc above points to one structural conclusion, and it sets up the next step.</p>
+<p><strong>The limitation.</strong> DeePC is <strong>model-free</strong>: its prediction <em>is</em> the data
+representation <code>[Up;Yp;Uf;Yf]·g = [uini;yini;u;y]</code> (DeeP-LCC, <a href="https://arxiv.org/abs/2203.10639">arXiv:2203.10639</a>
+Eq. 21 / Prop. 2), with <strong>no physics prior to flag a wrong one</strong>. Willems'
+fundamental lemma makes that representation <em>exact</em> for linear systems with
+informative data — but the two-wheel robot is nonlinear, so the representation is
+valid only locally, and on a degenerate past it fails silently. With no model to
+catch it, a wrong representation flows straight to the actuator → the <code>v</code>-collapse.
+That is the limit of "truly based on data": <strong>garbage representation in → garbage
+control out, unchecked.</strong></p>
+<p><strong>Why RL is the right tool for <em>this</em> limitation.</strong> RL optimizes the <strong>true</strong> env
+reward (including <code>reach_bonus</code>) and learns from <strong>real transitions</strong> — so it
+<strong>cannot be fooled by a hallucinated representation</strong>. It is grounded in what the
+robot actually does, exactly where DeePC's data-blend is ungrounded. That is the
+logical hinge: RL is not a generic upgrade, it covers the precise failure we traced.</p>
+<p><strong>The framing is <em>backstop</em>, not <em>polish</em>.</strong> The earlier premise — "DeePC navigates
+well, RL just refines the landing" — is wrong: the trace shows far-field navigation
+is the <em>dominant</em> DeePC failure. So the hybrid is:</p>
+<blockquote>
+<p><strong>DeePC supplies the strong prior where its representation is valid (~39 % of
+seeds); RL backstops the regime where the representation is invalid (the ~42 % it
+collapses).</strong> Each covers the other's gap.</p>
+</blockquote>
+<p><strong>Default architecture — residual RL.</strong> <code>u = u_DeePC + u_RL(obs)</code>, residual
+zero-initialized so initial behavior ≈ DeePC. The trace makes this the robust choice:
+on a collapse seed <code>u_DeePC ≈ (0, spin)</code> is a <strong>neutral</strong> baseline (not adversarial),
+so RL simply supplies the forward velocity the hallucinated predictor refuses to. The
+premise shifts honestly, though — the residual is <em>not</em> "small everywhere": tiny on
+the ~39 % DeePC solves, but it <em>carries</em> the navigation on the ~42 % it collapses.</p>
+<p><strong>Alternative — BC warm-start → fine-tune.</strong> Clone DeePC into a fast neural policy,
+then PPO/SAC on env reward. Avoids QP-in-loop, but is <em>worse</em> for this failure:
+cloning reproduces the <code>v = 0</code> stall on the states where DeePC collapses, so BC
+imports the dominant flaw and fine-tuning must unlearn it — only viable with the
+stalled demos heavily down-weighted.</p>
+<p><strong>The obstacle the plan must confront.</strong> Residual RL keeps the <strong>QP in the training
+loop</strong> — a ~0.5 s solve every step, ×200 steps/episode, ×millions of RL steps — which
+is likely prohibitive as-is. The story is not complete without an answer: speed up /
+cache the QP, train the residual only in a near-goal (or near-collapse) band, or
+accept BC warm-start (no QP-in-loop) with careful demo weighting. Name it now rather
+than discover it mid-implementation. (Aside: far-field go-to-goal is the <em>easy</em> part
+for RL — the body-frame observation is a standard go-to-goal state; the harder part is
+near-goal deceleration under the sparse <code>reach_bonus</code>.)</p>
 <p>(Scaffolding note: no <code>rl/</code> dir and <code>stable_baselines3</code> not yet installed — this is
 greenfield. Item 3 of the repo plan.)</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Permanent link">&para;</a></h2>
