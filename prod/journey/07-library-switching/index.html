@@ -1643,12 +1643,19 @@
 </tr>
 </tbody>
 </table>
-<p>Success rate <strong>3/4 = 75%</strong> (mean steps-to-reach 81). This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where <code>v</code> was stuck at zero in all four episodes.</p>
+<p>Success rate <strong>3/4</strong> on this seed (mean steps-to-reach 81). This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where <code>v</code> was stuck at zero in all four episodes.</p>
+<p>Seed 0 is a lucky draw, though. Over a larger random sample (<code>--episodes 100 --random</code>, base seed <code>4104626029</code>, n=78 before the run was stopped) the aggregate is more sobering:</p>
+<ul>
+<li><strong>Reach rate ≈ 39%</strong> (30/78); the rest truncate at 200 steps.</li>
+<li><strong>QP failures: 0/78</strong> — the solver did not fail once across the whole sample (nor on seed 0).</li>
+<li>Steps-to-reach (successes): mean ≈ 103, range 7–174. Final distance: mean ≈ 4.0, max ≈ 15.8.</li>
+</ul>
+<p>So switching makes goal-reaching <em>possible</em> (~39% vs single-library's 0%), but it is far from reliable — the dominant failure is the truncation/spin mode below, not the QP.</p>
 <h2 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Switching only helps if the robot <strong>actually crosses quadrant boundaries</strong> during an episode. With narrow <code>w</code> data the turn rate is too low and switching becomes a no-op.</li>
-<li>Some seeds still fail to converge (episode 0 above: 200 steps, ends 16.95 from goal despite cycling all four libraries — <code>w</code> saturates positive while <code>v</code> stays near zero, so the robot spins rather than driving out). Diagnosing these would benefit from logging the QP's <code>σ_y</code> and the controller's predicted vs actual trajectory.</li>
-<li>QP solver <code>user_limit</code> / numerical failures still surface on some seeds (none at <code>--seed 0</code> here, but they appear elsewhere). The SCS default iteration cap is sometimes too low; CLARABEL might be more reliable for this problem class.</li>
+<li><strong>Truncation/spin is the dominant failure</strong> (~61% of random episodes). Episode 0 above is typical: 200 steps, ends 16.95 from goal despite cycling all four libraries — <code>w</code> saturates positive while <code>v</code> stays near zero, so the robot spins in place rather than driving out. Diagnosing these would benefit from logging the QP's <code>σ_y</code> and the controller's predicted vs actual trajectory.</li>
+<li><strong>QP solver failures did not appear</strong> in this measurement (0 across 82 episodes: 78 random + 4 at seed 0), so they are not the bottleneck here — the earlier "occasional <code>user_limit</code> failure" concern is not borne out on this build/data. The QP is still ill-conditioned at the paper's <code>λ_y ≈ 3e6</code> (see <code>deepc.py</code>), so a numerical breakdown remains <em>possible</em> on other data/solvers (SCS is chosen for robustness; CLARABEL can break down), but it is not what limits reaching.</li>
 </ul>
 <h2 id="code">Code<a class="headerlink" href="#code" title="Permanent link">&para;</a></h2>
 <p><code>two_wheel_robot/controllers/deepc.py::DeePC</code> — library switching is built into the controller (<code>libraries</code>, <code>anchor_headings</code>, <code>heading_index</code>; <code>last_library_idx</code> diagnostic). See <a href="../../controllers/library-switching/">library switching reference</a>.</p>
