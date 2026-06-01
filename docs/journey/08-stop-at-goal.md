@@ -6,9 +6,11 @@ envelope (see _Resolution_). Doing so surfaced **two** residual failures: an
 _over-braking_ pirouette near the goal, and — only visible at larger sample — a
 **dominant _far-field `v`-collapse_** where the robot never drives in at all (see
 _Larger-sample reality check_). Reach rate over random seeds is **~39%**, not the
-2/3 the seed-42 sample suggested. Proposed fixes (heading-reference config; RL +
-DeePC) still open. Read top-to-bottom as a sequence: overshoot → fix → residual
-problems → next direction.
+2/3 the seed-42 sample suggested. A per-step trace pins the collapse on **predictor
+infidelity** (the QP hallucinates that a `v = 0` plan reaches the goal), _not_
+missing data — see _Root cause of the `v`-collapse_. Proposed fixes (faithful
+predictor / Koopman lift; RL + DeePC) still open. Read top-to-bottom as a sequence:
+overshoot → fix → residual problems → root cause → next direction.
 
 ## Problem (one line)
 
@@ -208,14 +210,58 @@ We ruled out the two obvious culprits:
 - **Not the regularizers.** [06](06-single-library-fails.md) swept `λ_g`, `λ_y`, `N`,
   `T_ini` against this exact `v → 0` mode and none moved it. λ is not the lever.
 
-**Implication for the fixes below.** `--Q_heading 0` / `--no_bearing_ref` targets the
-near-goal pirouette (the `1/d` bearing ill-conditioning), so it should help that
-~15-episode population — but it likely will **not** fix the dominant far-field
-`v`-collapse, which is upstream (library / prediction quality for the current
-heading). Expect the config fix to lift reach rate _modestly_, not to solve it. A
-definitive attribution needs a per-step trace (the QP's predicted Δdistance for
-`v > 0`, selected library, and slack `σ_y` on a failing far-field seed) — logging
-not yet added to `run_deepc.py`.
+## Root cause of the `v`-collapse — predictor infidelity, not missing data
+
+A per-step trace settles the attribution — and it is **not** what "library quality"
+first suggests. `scripts/run_deepc.py --seed 4104626047 --episodes 1 --headless
+--trace` logs, each step, the QP's own predicted distance-reduction and a
+**forced-forward counterfactual** (`DeePC.diagnose_forward`: re-solve with the first
+step's `v` pinned `≥ 12`). On the pure-stall seed every one of the 200 steps reads
+identically:
+
+```text
+step  0  d=14.61  lib=1  v=0.00  w=-1.57  σy=0.0 | plan Δd=+13.91 | forced(v≥) v=12.0 Δd=+13.92 σy=0.0 [optimal]
+…
+median applied v = 0.00 | median plan Δd = +13.87 | median forced Δd = +13.88 (200/200 forced probes optimal)
+```
+
+Read it carefully — it rules out the data hypothesis:
+
+1. **The data _can_ drive in.** The forced-`v≥12` probe solves cleanly every step
+   (`optimal`, `σy = 0`) and predicts approaching the goal (`Δd ≈ +13.9`). The
+   selected library is _not_ missing the trajectories — pre-collection coverage is
+   **not** the cause.
+2. **The predictor hallucinates.** The QP's _own chosen_ plan — the one that applies
+   `v = 0` this step — **also** predicts reaching the goal (`plan Δd ≈ +13.9`). It
+   believes it can get ~14 units closer while doing nothing now.
+3. **So the QP takes the lazy plan.** With `v = 0` and `v = 12` predicted to be
+   _equally good_, the effort term `R·v²` breaks the tie toward `v = 0`. Receding
+   horizon applies `v = 0`, the real robot doesn't move, the next solve faces the
+   identical state and re-hallucinates the identical "I'll reach it" plan → the robot
+   sits frozen at `d = 14.61` for all 200 steps.
+
+This is the **bilinear unfaithfulness of [06](06-single-library-fails.md) caught in
+the act**: for a nonlinear system, `Yf·g` and `Uf·g` from the same `g` need not be a
+_real_ trajectory. The `g` that best matches "reach the goal" in the predicted
+**output** is paired with an **input** whose first action is `v = 0` (motion deferred
+to later horizon steps that never arrive). The QP trusts the prediction and applies
+the garbage first action.
+
+**Consequences for the fixes:**
+
+- **Reweighting `Q`/`R`/`λ` will not reliably fix it.** Lowering `R` only removes the
+  tie-breaker; the QP is then _indifferent_ between `v = 0` and `v = 12` (both falsely
+  predicted to reach) and can still stall. The rot is in the prediction, which no cost
+  reweighting repairs. (Consistent with [06](06-single-library-fails.md)'s λ sweep.)
+- **`--Q_heading 0` / `--no_bearing_ref`** still targets only the _near-goal
+  pirouette_ population (~15 episodes), not this dominant collapse.
+- **The root DeePC-side fix is a _faithful_ predictor** — the Koopman lift (`sin δ`,
+  `cos δ` into `y`; journey 07's considered-#4), so the linear span contains only
+  physically realizable trajectories and cannot pair "reach goal" with "do nothing
+  now." A terminal constraint or move-blocking (forbid deferring motion) is a cheaper
+  partial guard.
+- **RL on the true env reward is immune** — it learns from _real_ transitions and is
+  never fooled by the hallucinated predictor (next section).
 
 ## Direction — combine RL with DeePC
 
@@ -224,12 +270,22 @@ DeePC. RL optimizes the **true** env reward (including `reach_bonus`), closing t
 exact gap that causes the stall. Two candidate architectures:
 
 - **Residual RL** — `u = u_DeePC + u_RL(obs)`, residual zero-initialized so initial
-  behavior ≈ DeePC; RL learns a near-goal correction. Conceptually clean, but keeps
+  behavior ≈ DeePC. The far-field trace makes this the _robust_ choice: on a collapse
+  seed `u_DeePC ≈ (0, spin)` is a **neutral** baseline (not adversarial), so RL simply
+  supplies the real forward velocity the hallucinated predictor refuses to. Note the
+  premise shifts, though — the residual is _not_ "small everywhere" (small on the
+  ~39 % DeePC solves, but it carries the navigation on the ~42 % it collapses). Keeps
   the QP _in the training loop_ (a solve per step → expensive).
 - **BC warm-start → fine-tune** — clone DeePC into a fast neural policy, then
-  PPO/SAC on env reward. Avoids QP-in-loop during RL, but risks _importing the
-  expert's flaw_ (cloning DeePC near the goal clones the stall) — must down-weight
-  near-goal demos. The repo's body-frame observation is already designed for this.
+  PPO/SAC on env reward. Avoids QP-in-loop during RL, but is _worse_ for this failure:
+  cloning reproduces the `v = 0` stall on the ~42 % of states where DeePC collapses,
+  so BC imports the dominant flaw and fine-tuning must unlearn it — down-weight the
+  stalled demos heavily. The repo's body-frame observation is already designed for
+  this.
+
+Either way, note that far-field go-to-goal is the _easy_ part for RL (the body-frame
+observation is a standard go-to-goal state); the harder part is the near-goal
+deceleration with the sparse `reach_bonus`.
 
 (Scaffolding note: no `rl/` dir and `stable_baselines3` not yet installed — this is
 greenfield. Item 3 of the repo plan.)

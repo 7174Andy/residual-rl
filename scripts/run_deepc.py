@@ -80,6 +80,70 @@ def _resolve_sample_bounds(data) -> np.ndarray:
     return PAPER_SAMPLE_BOUNDS
 
 
+def _trace_step(step, cur_dist, goal, u_t, controller, diag, trace_rows) -> None:
+    """Print one per-step trace line and accumulate it for the episode verdict.
+
+    Columns: the applied `(v, w)`; the QP's own predicted distance reduction over
+    the horizon (`plan Δd`, positive = predicted to get closer); and the
+    forced-forward counterfactual's predicted reduction (`forced Δd`) and slack
+    when the first-step `v` is pinned `>= v_floor`.
+    """
+    goal = np.asarray(goal, dtype=np.float64)
+    # The QP's own plan: predicted distance at the horizon end vs now.
+    plan_dd = float("nan")
+    if controller.last_pred_y is not None:
+        plan_end = float(np.linalg.norm(controller.last_pred_y[-1, :2] - goal))
+        plan_dd = cur_dist - plan_end
+    # Forced-forward counterfactual.
+    forced_dd = float("nan")
+    forced_sig = float("nan")
+    forced_v = float("nan")
+    status = "n/a"
+    if diag is not None:
+        status = diag["status"]
+        if "pred_y" in diag:
+            forced_end = float(np.linalg.norm(diag["pred_y"][-1, :2] - goal))
+            forced_dd = cur_dist - forced_end
+            forced_sig = diag["sigma_y_norm"]
+            forced_v = float(diag["u_first"][0])
+    trace_rows.append(
+        {"plan_dd": plan_dd, "forced_dd": forced_dd, "forced_status": status}
+    )
+    print(
+        f"  step {step:3d} d={cur_dist:6.2f} lib={controller.last_library_idx} "
+        f"v={u_t[0]:6.2f} w={u_t[1]:+5.2f} σy={controller.last_sigma_y_norm:8.1f} | "
+        f"plan Δd={plan_dd:+6.2f} | forced(v≥) v={forced_v:5.1f} "
+        f"Δd={forced_dd:+6.2f} σy={forced_sig:8.1f} [{status}]"
+    )
+
+
+def _trace_verdict(trace_rows, applied) -> None:
+    """Summarize a traced episode into a data-vs-cost-shaping verdict."""
+    if not trace_rows:
+        return
+    import statistics as st
+
+    v_applied = [float(a[0]) for a in applied]
+    plan = [r["plan_dd"] for r in trace_rows if r["plan_dd"] == r["plan_dd"]]
+    forced = [r["forced_dd"] for r in trace_rows if r["forced_dd"] == r["forced_dd"]]
+    n_forced_ok = sum(1 for r in trace_rows if r["forced_status"].startswith("optimal"))
+    med_v = st.median(v_applied) if v_applied else float("nan")
+    med_plan = st.median(plan) if plan else float("nan")
+    med_forced = st.median(forced) if forced else float("nan")
+    print(
+        f"  --- trace verdict ---\n"
+        f"  median applied v       : {med_v:.2f}  (collapse if ~0)\n"
+        f"  median plan Δd (horizon): {med_plan:+.2f}  "
+        f"(QP's own predicted approach per step)\n"
+        f"  median forced Δd       : {med_forced:+.2f}  over {n_forced_ok}/"
+        f"{len(trace_rows)} solved forced probes\n"
+        f"  reading: forced Δd ~0 (or worse) while v≈0  => DATA COVERAGE "
+        f"(library can't represent driving in)\n"
+        f"           forced Δd strongly + while v≈0     => COST-SHAPING / "
+        f"COLD-START (data can drive in; QP declined)"
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--libraries", default="data/libraries_v0.npz")
@@ -145,6 +209,23 @@ def main() -> int:
             "paper's Q_z = diag(1, 1, 2)). Set to 0 for a 'heading don't-care' "
             "Q = diag(1, 1, 0)."
         ),
+    )
+    parser.add_argument(
+        "--trace",
+        action="store_true",
+        help=(
+            "per-step diagnostic trace: applied v/w, selected library, past-output "
+            "slack ‖σ_y‖, the QP's own predicted distance reduction, and a "
+            "forced-forward counterfactual (re-solve with first-step v >= "
+            "--trace_v_floor). Separates data-coverage vs cost-shaping vs cold-start "
+            "for the v-collapse failure. Best with --episodes 1."
+        ),
+    )
+    parser.add_argument(
+        "--trace_v_floor",
+        type=float,
+        default=12.0,
+        help="forced first-step v in the --trace counterfactual (default 12.0).",
     )
     parser.add_argument(
         "--no_bearing_ref",
@@ -272,6 +353,7 @@ def main() -> int:
             qp_failed = False
             applied = []
             lib_usage = np.zeros(n_lib, dtype=np.int64)
+            trace_rows: list[dict] = []
             frames: list[np.ndarray] = []
             if recording:
                 frames.append(np.asarray(env.render(), dtype=np.uint8))  # initial pose
@@ -286,6 +368,14 @@ def main() -> int:
                     y_ref_step = np.array(
                         [base.goal[0], base.goal[1], bearing], dtype=np.float64
                     )
+                # Forced-forward counterfactual must read the buffer BEFORE act()
+                # slides it, so probe first (it does not mutate controller state).
+                diag = (
+                    controller.diagnose_forward(base.y, y_ref_step, args.trace_v_floor)
+                    if args.trace
+                    else None
+                )
+                cur_dist = float(np.linalg.norm(base.state[:2] - base.goal))
                 try:
                     u_t = controller.act(base.y, y_ref_step)
                 except RuntimeError as exc:
@@ -293,6 +383,10 @@ def main() -> int:
                     qp_failed = True
                     break
                 lib_usage[controller.last_library_idx] += 1
+                if args.trace:
+                    _trace_step(
+                        steps, cur_dist, base.goal, u_t, controller, diag, trace_rows
+                    )
                 _, reward, terminated, truncated, info = env.step(u_t)
                 if recording:
                     frames.append(np.asarray(env.render(), dtype=np.uint8))
@@ -331,6 +425,8 @@ def main() -> int:
                 )
                 if n_lib > 1:
                     print(f"  library usage: {lib_usage.tolist()}")
+            if args.trace:
+                _trace_verdict(trace_rows, applied)
             if recording:
                 out_path = os.path.join(args.record, f"episode_{ep}.mp4")
                 if _encode_video(frames, out_path, record_fps):

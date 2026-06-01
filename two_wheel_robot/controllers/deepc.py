@@ -170,6 +170,10 @@ class DeePC:
         self.last_library_idx: int = -1
         self.last_warm_started: bool = False
         self._prev_idx: int = -1
+        # Per-step trace diagnostics, refreshed each act().
+        self.last_sigma_y_norm: float = float("nan")  # ‖σ_y‖, past-output slack
+        self.last_pred_y: Optional[np.ndarray] = None  # (N, p_y) predicted future
+        self.last_objective: float = float("nan")  # QP optimal value
 
         self._build_problem()
 
@@ -342,6 +346,15 @@ class DeePC:
         if self.u_bounds is not None:
             u_t = np.clip(u_t, self.u_bounds[0], self.u_bounds[1])
 
+        # Trace diagnostics: what the QP *believes* will happen under its own plan.
+        self.last_sigma_y_norm = (
+            float(np.linalg.norm(self._sigma_y.value))
+            if self._sigma_y.value is not None
+            else float("nan")
+        )
+        self.last_pred_y = (Yf @ g_val).reshape(self.N, self.p_y)
+        self.last_objective = float(self._problem.value)
+
         # Slide the shared buffer: drop oldest, append (u_t, y_current).
         self._u_buf = np.roll(self._u_buf, -1, axis=0)
         self._u_buf[-1] = u_t
@@ -351,3 +364,85 @@ class DeePC:
         self._prev_idx = idx
         self.last_library_idx = idx
         return u_t
+
+    def diagnose_forward(
+        self,
+        y_current: np.ndarray,
+        y_ref: np.ndarray,
+        v_floor: float,
+        v_component: int = 0,
+    ) -> dict:
+        """Counterfactual probe: can the selected library represent driving in?
+
+        Re-solves the QP at the *current* past buffer (does NOT mutate it) with the
+        first future step's `v` constrained `>= v_floor`. Returns the resulting
+        predicted future and slack. Interpretation when `act()` is collapsing
+        (`v ≈ 0`):
+
+        - forced solve still predicts **no approach** to the goal, or its past-slack
+          `σ_y` blows up / it goes infeasible → the library's column span cannot
+          represent forward progress from this heading/geometry → **data coverage**.
+        - forced solve predicts real approach at a modestly higher objective → the
+          data *can* drive in and the unconstrained QP simply declined →
+          **cost-shaping / cold-start**.
+
+        This builds a fresh (non-parametric) problem each call — diagnostic only,
+        not on the control hot path.
+        """
+        if self._u_buf is None or self._y_buf is None:
+            raise RuntimeError("Call reset() before diagnose_forward().")
+
+        y_current = np.asarray(y_current, dtype=np.float64).reshape(self.p_y)
+        idx = 0 if self._n_lib == 1 else self._select_index(
+            float(y_current[self.heading_index])
+        )
+        Up, Uf, Yp, Yf = self._libraries[idx]
+
+        y_ref = np.asarray(y_ref, dtype=np.float64)
+        y_ref_flat = (
+            np.tile(y_ref, self.N) if y_ref.ndim == 1 else y_ref.flatten()
+        )
+
+        g = cp.Variable(self.n_cols)
+        sigma_y = cp.Variable(self.T_ini * self.p_y)
+        Q_sqrt_bar = np.kron(np.eye(self.N), self._psd_sqrt(self.Q))
+        R_sqrt_bar = np.kron(np.eye(self.N), self._psd_sqrt(self.R))
+        u_future = Uf @ g
+        y_future = Yf @ g
+
+        objective = cp.Minimize(
+            cp.sum_squares(Q_sqrt_bar @ (y_future - y_ref_flat))
+            + cp.sum_squares(R_sqrt_bar @ u_future)
+            + self.lambda_g * cp.norm(g, 1)
+            + self.lambda_y * cp.sum_squares(sigma_y)
+        )
+        constraints = [
+            Up @ g == self._u_buf.flatten(),
+            Yp @ g + sigma_y == self._y_buf.flatten(),
+            u_future[v_component] >= v_floor,  # force forward motion this step
+        ]
+        if self.u_bounds is not None:
+            u_min = np.asarray(self.u_bounds[0], dtype=np.float64).reshape(self.m_u)
+            u_max = np.asarray(self.u_bounds[1], dtype=np.float64).reshape(self.m_u)
+            constraints.append(u_future >= np.tile(u_min, self.N))
+            constraints.append(u_future <= np.tile(u_max, self.N))
+
+        prob = cp.Problem(objective, constraints)
+        try:
+            prob.solve(solver=self.solver, **self.solver_opts)
+        except cp.error.SolverError as exc:
+            return {"idx": idx, "status": f"solver_error: {exc}"}
+        if prob.status not in ("optimal", "optimal_inaccurate"):
+            return {"idx": idx, "status": prob.status}
+
+        g_val = g.value
+        sigma_val = sigma_y.value
+        assert g_val is not None and sigma_val is not None
+        return {
+            "idx": idx,
+            "status": prob.status,
+            "pred_y": (Yf @ g_val).reshape(self.N, self.p_y),
+            "u_first": (Uf @ g_val)[: self.m_u].copy(),
+            "sigma_y_norm": float(np.linalg.norm(sigma_val)),
+            "objective": float(prob.value),
+        }
