@@ -2,98 +2,98 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/getting-started/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/controllers/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/controllers/api/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/controllers/data-collection/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/controllers/deepc/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/controllers/library-switching/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/environment/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/environment/api/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/environment/deepc-interface/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/environment/dynamics/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/environment/reward/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/journey/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/journey/01-task-framing/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/journey/02-env-design/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/journey/03-action-bounds/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/journey/04-deepc-formulation/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/journey/05-cold-start/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/journey/06-single-library-fails/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/journey/07-library-switching/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/journey/08-stop-at-goal/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/reference/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/reference/cli/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/two-wheeled-experiment/prod/superpowers/specs/2026-05-28-single-parametric-deepc-design/</loc>
-         <lastmod>2026-05-29</lastmod>
+         <lastmod>2026-06-01</lastmod>
     </url>
 </urlset>

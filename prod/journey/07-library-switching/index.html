@@ -1565,7 +1565,7 @@
 
 <h1 id="07-library-switching-local-linearization-via-4-quadrants">07. Library switching — local linearization via 4 quadrants<a class="headerlink" href="#07-library-switching-local-linearization-via-4-quadrants" title="Permanent link">&para;</a></h1>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p>Build <strong>four <code>DeePC</code> instances</strong>, one per heading-quadrant data library. At each step, the wrapper picks the controller whose anchor heading is closest to the robot's current heading and runs <em>its</em> QP.</p>
+<p><strong>Pre-collect four data libraries, one per heading quadrant, and hand all four to a single <code>DeePC</code> controller.</strong> Each step, the controller selects the library whose anchor heading is closest to the robot's current heading, swaps its Hankel matrices into one cached QP, and solves. The robot keeps one controller; only the <em>data library</em> feeding the predictor changes.</p>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
 <p>The previous entry <a href="../06-single-library-fails/">Why one library isn't enough</a> explained the structural problem: the unicycle's bilinear <code>cos(δ)·v</code> term cannot be represented by a single linear behavioral predictor across all orientations. The fix is piecewise linearization — fit a separate local model in each "operating region" and route the controller through whichever region you're in.</p>
 <p>The paper does exactly this. From <a href="https://arxiv.org/abs/2603.07395">arXiv:2603.07395</a> Appendix D:</p>
@@ -1588,24 +1588,25 @@
 <li><strong>Lift the state via Koopman (<code>sin δ</code>, <code>cos δ</code> in <code>y</code>)</strong> — alternative path that would let one library suffice. Bigger refactor (env's <code>y</code> becomes dim 4, <code>Q</code> becomes 4×4). Sidelined for now in favor of switching.</li>
 </ol>
 <h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
-<p>A <code>LibrarySwitchingDeePC</code> wrapper class:</p>
+<p>Switching lives <strong>inside <code>DeePC</code></strong> — there is no separate wrapper class. One controller holds:</p>
 <ul>
-<li>Holds N <code>DeePC</code> instances + their anchor headings.</li>
-<li>Maintains <strong>one shared past-<code>(u, y)</code> buffer</strong> — the robot's actual history is the same regardless of which controller predicts the future.</li>
-<li>On each <code>act(y_current, y_ref)</code>:<ol>
-<li><code>idx = argmin_i |wrap(y_current[2] − anchor_i)|</code>.</li>
-<li>Copy shared buffer into <code>controllers[idx]</code>'s buffer.</li>
-<li>Call <code>controllers[idx].act(...)</code>.</li>
-<li>Copy the updated buffer back to the shared one.</li>
-</ol>
-</li>
+<li>A list of N pre-collected libraries (each a <code>(Up, Uf, Yp, Yf)</code> Hankel tuple) plus their anchor headings.</li>
+<li>The active library's Hankels in <code>cp.Parameter</code>s, so swapping libraries means writing new parameter values into <strong>one compiled QP</strong> — no recompile per library.</li>
+<li><strong>One shared past-<code>(u, y)</code> buffer</strong> — the robot's actual history is the same regardless of which library predicts the future.</li>
 </ul>
-<p><code>scripts/run_deepc.py</code> builds all four libraries by default and prints <strong>per-episode library usage</strong> so you can see when switching actually triggered:</p>
+<p>On each <code>act(y_current, y_ref)</code>:</p>
+<ol>
+<li><code>idx = argmin_i |wrap(y_current[heading_index] − anchor_i)|</code> (trivially 0 with a single library).</li>
+<li>If <code>idx</code> changed since last step, clear the warm-start <code>g</code> — its columns indexed the old library and are meaningless under the new one.</li>
+<li>Write <code>libraries[idx]</code>'s <code>(Up, Uf, Yp, Yf)</code> into the Hankel parameters and solve.</li>
+<li>Slide the shared buffer with the applied <code>(u_t, y_current)</code>.</li>
+</ol>
+<p>The four libraries come from offline rollouts started at the paper's four init headings (<code>controllers/data_collection.PAPER_INIT_HEADINGS</code>); each rollout's data concentrates around one quadrant anchor. <code>scripts/run_deepc.py</code> builds all four by default (<code>--single_library N</code> passes a one-element list for the single-library contrast) and prints <strong>per-episode library usage</strong> so you can see when switching actually triggered:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>episode 1: REACHED   after 107 steps  final_dist=0.43
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  library usage: [0, 0, 17, 90]    # Q3 → Q2 mid-flight
 </span></code></pre></div>
 <h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
-<p>Closed-loop test on broad-<code>w</code> data with the switcher:</p>
+<p>Closed-loop test on broad-<code>w</code> data with library switching enabled (all four libraries loaded):</p>
 <table>
 <thead>
 <tr>
@@ -1650,7 +1651,7 @@
 <li>Occasional QP solver <code>user_limit</code> failures suggest the SCS default iteration cap is sometimes too low; CLARABEL might be more reliable for this problem class.</li>
 </ul>
 <h2 id="code">Code<a class="headerlink" href="#code" title="Permanent link">&para;</a></h2>
-<p><code>two_wheel_robot/controllers/deepc.py::LibrarySwitchingDeePC</code> — ~50 lines. See <a href="../../controllers/library-switching/">library switching reference</a>.</p>
+<p><code>two_wheel_robot/controllers/deepc.py::DeePC</code> — library switching is built into the controller (<code>libraries</code>, <code>anchor_headings</code>, <code>heading_index</code>; <code>last_library_idx</code> diagnostic). See <a href="../../controllers/library-switching/">library switching reference</a>.</p>
 
 
 
