@@ -1390,6 +1390,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#root-cause-of-the-v-collapse-predictor-infidelity-not-missing-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Root cause of the v-collapse — predictor infidelity, not missing data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#direction-combine-rl-with-deepc" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1520,6 +1531,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#root-cause-of-the-v-collapse-predictor-infidelity-not-missing-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Root cause of the v-collapse — predictor infidelity, not missing data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#direction-combine-rl-with-deepc" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1570,9 +1592,11 @@ envelope (see <em>Resolution</em>). Doing so surfaced <strong>two</strong> resid
 <em>over-braking</em> pirouette near the goal, and — only visible at larger sample — a
 <strong>dominant <em>far-field <code>v</code>-collapse</em></strong> where the robot never drives in at all (see
 <em>Larger-sample reality check</em>). Reach rate over random seeds is <strong>~39%</strong>, not the
-2/3 the seed-42 sample suggested. Proposed fixes (heading-reference config; RL +
-DeePC) still open. Read top-to-bottom as a sequence: overshoot → fix → residual
-problems → next direction.</p>
+2/3 the seed-42 sample suggested. A per-step trace pins the collapse on <strong>predictor
+infidelity</strong> (the QP hallucinates that a <code>v = 0</code> plan reaches the goal), <em>not</em>
+missing data — see <em>Root cause of the <code>v</code>-collapse</em>. Proposed fixes (faithful
+predictor / Koopman lift; RL + DeePC) still open. Read top-to-bottom as a sequence:
+overshoot → fix → residual problems → root cause → next direction.</p>
 <h2 id="problem-one-line">Problem (one line)<a class="headerlink" href="#problem-one-line" title="Permanent link">&para;</a></h2>
 <p>With forward-only speed bounds (<code>v_min &gt; 0</code>), the controller drives the robot to
 the goal's neighborhood but <strong>cannot decelerate to land inside the tolerance</strong> —
@@ -1806,27 +1830,76 @@ truncates far away — the same <code>v → 0</code> family as
 <li><strong>Not the regularizers.</strong> <a href="../06-single-library-fails/">06</a> swept <code>λ_g</code>, <code>λ_y</code>, <code>N</code>,
   <code>T_ini</code> against this exact <code>v → 0</code> mode and none moved it. λ is not the lever.</li>
 </ul>
-<p><strong>Implication for the fixes below.</strong> <code>--Q_heading 0</code> / <code>--no_bearing_ref</code> targets the
-near-goal pirouette (the <code>1/d</code> bearing ill-conditioning), so it should help that
-~15-episode population — but it likely will <strong>not</strong> fix the dominant far-field
-<code>v</code>-collapse, which is upstream (library / prediction quality for the current
-heading). Expect the config fix to lift reach rate <em>modestly</em>, not to solve it. A
-definitive attribution needs a per-step trace (the QP's predicted Δdistance for
-<code>v &gt; 0</code>, selected library, and slack <code>σ_y</code> on a failing far-field seed) — logging
-not yet added to <code>run_deepc.py</code>.</p>
+<h2 id="root-cause-of-the-v-collapse-predictor-infidelity-not-missing-data">Root cause of the <code>v</code>-collapse — predictor infidelity, not missing data<a class="headerlink" href="#root-cause-of-the-v-collapse-predictor-infidelity-not-missing-data" title="Permanent link">&para;</a></h2>
+<p>A per-step trace settles the attribution — and it is <strong>not</strong> what "library quality"
+first suggests. <code>scripts/run_deepc.py --seed 4104626047 --episodes 1 --headless
+--trace</code> logs, each step, the QP's own predicted distance-reduction and a
+<strong>forced-forward counterfactual</strong> (<code>DeePC.diagnose_forward</code>: re-solve with the first
+step's <code>v</code> pinned <code>≥ 12</code>). On the pure-stall seed every one of the 200 steps reads
+identically:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>step  0  d=14.61  lib=1  v=0.00  w=-1.57  σy=0.0 | plan Δd=+13.91 | forced(v≥) v=12.0 Δd=+13.92 σy=0.0 [optimal]
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>…
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>median applied v = 0.00 | median plan Δd = +13.87 | median forced Δd = +13.88 (200/200 forced probes optimal)
+</span></code></pre></div>
+<p>Read it carefully — it rules out the data hypothesis:</p>
+<ol>
+<li><strong>The data <em>can</em> drive in.</strong> The forced-<code>v≥12</code> probe solves cleanly every step
+   (<code>optimal</code>, <code>σy = 0</code>) and predicts approaching the goal (<code>Δd ≈ +13.9</code>). The
+   selected library is <em>not</em> missing the trajectories — pre-collection coverage is
+   <strong>not</strong> the cause.</li>
+<li><strong>The predictor hallucinates.</strong> The QP's <em>own chosen</em> plan — the one that applies
+   <code>v = 0</code> this step — <strong>also</strong> predicts reaching the goal (<code>plan Δd ≈ +13.9</code>). It
+   believes it can get ~14 units closer while doing nothing now.</li>
+<li><strong>So the QP takes the lazy plan.</strong> With <code>v = 0</code> and <code>v = 12</code> predicted to be
+   <em>equally good</em>, the effort term <code>R·v²</code> breaks the tie toward <code>v = 0</code>. Receding
+   horizon applies <code>v = 0</code>, the real robot doesn't move, the next solve faces the
+   identical state and re-hallucinates the identical "I'll reach it" plan → the robot
+   sits frozen at <code>d = 14.61</code> for all 200 steps.</li>
+</ol>
+<p>This is the <strong>bilinear unfaithfulness of <a href="../06-single-library-fails/">06</a> caught in
+the act</strong>: for a nonlinear system, <code>Yf·g</code> and <code>Uf·g</code> from the same <code>g</code> need not be a
+<em>real</em> trajectory. The <code>g</code> that best matches "reach the goal" in the predicted
+<strong>output</strong> is paired with an <strong>input</strong> whose first action is <code>v = 0</code> (motion deferred
+to later horizon steps that never arrive). The QP trusts the prediction and applies
+the garbage first action.</p>
+<p><strong>Consequences for the fixes:</strong></p>
+<ul>
+<li><strong>Reweighting <code>Q</code>/<code>R</code>/<code>λ</code> will not reliably fix it.</strong> Lowering <code>R</code> only removes the
+  tie-breaker; the QP is then <em>indifferent</em> between <code>v = 0</code> and <code>v = 12</code> (both falsely
+  predicted to reach) and can still stall. The rot is in the prediction, which no cost
+  reweighting repairs. (Consistent with <a href="../06-single-library-fails/">06</a>'s λ sweep.)</li>
+<li><strong><code>--Q_heading 0</code> / <code>--no_bearing_ref</code></strong> still targets only the <em>near-goal
+  pirouette</em> population (~15 episodes), not this dominant collapse.</li>
+<li><strong>The root DeePC-side fix is a <em>faithful</em> predictor</strong> — the Koopman lift (<code>sin δ</code>,
+  <code>cos δ</code> into <code>y</code>; journey 07's considered-#4), so the linear span contains only
+  physically realizable trajectories and cannot pair "reach goal" with "do nothing
+  now." A terminal constraint or move-blocking (forbid deferring motion) is a cheaper
+  partial guard.</li>
+<li><strong>RL on the true env reward is immune</strong> — it learns from <em>real</em> transitions and is
+  never fooled by the hallucinated predictor (next section).</li>
+</ul>
 <h2 id="direction-combine-rl-with-deepc">Direction — combine RL with DeePC<a class="headerlink" href="#direction-combine-rl-with-deepc" title="Permanent link">&para;</a></h2>
 <p>For a robust <em>general</em> policy (and if the config fix plateaus), warm-start RL from
 DeePC. RL optimizes the <strong>true</strong> env reward (including <code>reach_bonus</code>), closing the
 exact gap that causes the stall. Two candidate architectures:</p>
 <ul>
 <li><strong>Residual RL</strong> — <code>u = u_DeePC + u_RL(obs)</code>, residual zero-initialized so initial
-  behavior ≈ DeePC; RL learns a near-goal correction. Conceptually clean, but keeps
+  behavior ≈ DeePC. The far-field trace makes this the <em>robust</em> choice: on a collapse
+  seed <code>u_DeePC ≈ (0, spin)</code> is a <strong>neutral</strong> baseline (not adversarial), so RL simply
+  supplies the real forward velocity the hallucinated predictor refuses to. Note the
+  premise shifts, though — the residual is <em>not</em> "small everywhere" (small on the
+  ~39 % DeePC solves, but it carries the navigation on the ~42 % it collapses). Keeps
   the QP <em>in the training loop</em> (a solve per step → expensive).</li>
 <li><strong>BC warm-start → fine-tune</strong> — clone DeePC into a fast neural policy, then
-  PPO/SAC on env reward. Avoids QP-in-loop during RL, but risks <em>importing the
-  expert's flaw</em> (cloning DeePC near the goal clones the stall) — must down-weight
-  near-goal demos. The repo's body-frame observation is already designed for this.</li>
+  PPO/SAC on env reward. Avoids QP-in-loop during RL, but is <em>worse</em> for this failure:
+  cloning reproduces the <code>v = 0</code> stall on the ~42 % of states where DeePC collapses,
+  so BC imports the dominant flaw and fine-tuning must unlearn it — down-weight the
+  stalled demos heavily. The repo's body-frame observation is already designed for
+  this.</li>
 </ul>
+<p>Either way, note that far-field go-to-goal is the <em>easy</em> part for RL (the body-frame
+observation is a standard go-to-goal state); the harder part is the near-goal
+deceleration with the sparse <code>reach_bonus</code>.</p>
 <p>(Scaffolding note: no <code>rl/</code> dir and <code>stable_baselines3</code> not yet installed — this is
 greenfield. Item 3 of the repo plan.)</p>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Permanent link">&para;</a></h2>
