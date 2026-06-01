@@ -2,7 +2,7 @@
 
 ## Decision
 
-Build **four `DeePC` instances**, one per heading-quadrant data library. At each step, the wrapper picks the controller whose anchor heading is closest to the robot's current heading and runs *its* QP.
+**Pre-collect four data libraries, one per heading quadrant, and hand all four to a single `DeePC` controller.** Each step, the controller selects the library whose anchor heading is closest to the robot's current heading, swaps its Hankel matrices into one cached QP, and solves. The robot keeps one controller; only the *data library* feeding the predictor changes.
 
 ## Context
 
@@ -35,17 +35,20 @@ By collecting one library *starting from each of four orientations* (the paper's
 
 ## Implementation
 
-A `LibrarySwitchingDeePC` wrapper class:
+Switching lives **inside `DeePC`** — there is no separate wrapper class. One controller holds:
 
-- Holds N `DeePC` instances + their anchor headings.
-- Maintains **one shared past-`(u, y)` buffer** — the robot's actual history is the same regardless of which controller predicts the future.
-- On each `act(y_current, y_ref)`:
-    1. `idx = argmin_i |wrap(y_current[2] − anchor_i)|`.
-    2. Copy shared buffer into `controllers[idx]`'s buffer.
-    3. Call `controllers[idx].act(...)`.
-    4. Copy the updated buffer back to the shared one.
+- A list of N pre-collected libraries (each a `(Up, Uf, Yp, Yf)` Hankel tuple) plus their anchor headings.
+- The active library's Hankels in `cp.Parameter`s, so swapping libraries means writing new parameter values into **one compiled QP** — no recompile per library.
+- **One shared past-`(u, y)` buffer** — the robot's actual history is the same regardless of which library predicts the future.
 
-`scripts/run_deepc.py` builds all four libraries by default and prints **per-episode library usage** so you can see when switching actually triggered:
+On each `act(y_current, y_ref)`:
+
+1. `idx = argmin_i |wrap(y_current[heading_index] − anchor_i)|` (trivially 0 with a single library).
+2. If `idx` changed since last step, clear the warm-start `g` — its columns indexed the old library and are meaningless under the new one.
+3. Write `libraries[idx]`'s `(Up, Uf, Yp, Yf)` into the Hankel parameters and solve.
+4. Slide the shared buffer with the applied `(u_t, y_current)`.
+
+The four libraries come from offline rollouts started at the paper's four init headings (`controllers/data_collection.PAPER_INIT_HEADINGS`); each rollout's data concentrates around one quadrant anchor. `scripts/run_deepc.py` builds all four by default (`--single_library N` passes a one-element list for the single-library contrast) and prints **per-episode library usage** so you can see when switching actually triggered:
 
 ```text
 episode 1: REACHED   after 107 steps  final_dist=0.43
@@ -54,7 +57,7 @@ episode 1: REACHED   after 107 steps  final_dist=0.43
 
 ## Outcome
 
-Closed-loop test on broad-`w` data with the switcher:
+Closed-loop test on broad-`w` data with library switching enabled (all four libraries loaded):
 
 | Episode | Outcome | Steps | Final dist |
 |---|---|---|---|
@@ -73,4 +76,4 @@ This is the first time the DeePC controller actually navigated the robot to the 
 
 ## Code
 
-`two_wheel_robot/controllers/deepc.py::LibrarySwitchingDeePC` — ~50 lines. See [library switching reference](../controllers/library-switching.md).
+`two_wheel_robot/controllers/deepc.py::DeePC` — library switching is built into the controller (`libraries`, `anchor_headings`, `heading_index`; `last_library_idx` diagnostic). See [library switching reference](../controllers/library-switching.md).
