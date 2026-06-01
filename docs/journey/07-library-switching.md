@@ -66,13 +66,21 @@ Closed-loop test on broad-`w` data with library switching enabled (all four libr
 | 2 | **REACHED** | 35 | **0.46** |
 | 3 | **REACHED** | 115 | **0.48** |
 
-Success rate **3/4 = 75%** (mean steps-to-reach 81). This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where `v` was stuck at zero in all four episodes.
+Success rate **3/4** on this seed (mean steps-to-reach 81). This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where `v` was stuck at zero in all four episodes.
+
+Seed 0 is a lucky draw, though. Over a larger random sample (`--episodes 100 --random`, base seed `4104626029`, n=78 before the run was stopped) the aggregate is more sobering:
+
+- **Reach rate ≈ 39%** (30/78); the rest truncate at 200 steps.
+- **QP failures: 0/78** — the solver did not fail once across the whole sample (nor on seed 0).
+- Steps-to-reach (successes): mean ≈ 103, range 7–174. Final distance: mean ≈ 4.0, max ≈ 15.8.
+
+So switching makes goal-reaching *possible* (~39% vs single-library's 0%), but it is far from reliable — the dominant failure is the truncation/spin mode below, not the QP.
 
 ## Caveats
 
 - Switching only helps if the robot **actually crosses quadrant boundaries** during an episode. With narrow `w` data the turn rate is too low and switching becomes a no-op.
-- Some seeds still fail to converge (episode 0 above: 200 steps, ends 16.95 from goal despite cycling all four libraries — `w` saturates positive while `v` stays near zero, so the robot spins rather than driving out). Diagnosing these would benefit from logging the QP's `σ_y` and the controller's predicted vs actual trajectory.
-- QP solver `user_limit` / numerical failures still surface on some seeds (none at `--seed 0` here, but they appear elsewhere). The SCS default iteration cap is sometimes too low; CLARABEL might be more reliable for this problem class.
+- **Truncation/spin is the dominant failure** (~61% of random episodes). Episode 0 above is typical: 200 steps, ends 16.95 from goal despite cycling all four libraries — `w` saturates positive while `v` stays near zero, so the robot spins in place rather than driving out. Diagnosing these would benefit from logging the QP's `σ_y` and the controller's predicted vs actual trajectory.
+- **QP solver failures did not appear** in this measurement (0 across 82 episodes: 78 random + 4 at seed 0), so they are not the bottleneck here — the earlier "occasional `user_limit` failure" concern is not borne out on this build/data. The QP is still ill-conditioned at the paper's `λ_y ≈ 3e6` (see `deepc.py`), so a numerical breakdown remains *possible* on other data/solvers (SCS is chosen for robustness; CLARABEL can break down), but it is not what limits reaching.
 
 ## Code
 
