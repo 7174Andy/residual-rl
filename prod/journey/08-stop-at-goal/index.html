@@ -1379,6 +1379,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#larger-sample-reality-check-2026-06-01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Larger-sample reality check (2026-06-01)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#direction-combine-rl-with-deepc" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1498,6 +1509,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#larger-sample-reality-check-2026-06-01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Larger-sample reality check (2026-06-01)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#direction-combine-rl-with-deepc" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1541,12 +1563,16 @@
 
 <h1 id="08-stopping-at-the-goal-the-deceleration-overshoot-problem">08. Stopping at the goal — the deceleration / overshoot problem<a class="headerlink" href="#08-stopping-at-the-goal-the-deceleration-overshoot-problem" title="Permanent link">&para;</a></h1>
 <div class="admonition note">
-<p class="admonition-title">Status: partially resolved (2026-05-29)</p>
+<p class="admonition-title">Status: partially resolved (updated 2026-06-01)</p>
 </div>
 <p>The original <strong>overshoot</strong> problem below is resolved by widening the data
-envelope (see <em>Resolution</em>). Doing so surfaced a <strong>new</strong> failure — <em>over-braking</em>
-near the goal — whose proposed fix (RL + DeePC) is still open. Read top-to-bottom
-as a sequence: overshoot → fix → new problem → next direction.</p>
+envelope (see <em>Resolution</em>). Doing so surfaced <strong>two</strong> residual failures: an
+<em>over-braking</em> pirouette near the goal, and — only visible at larger sample — a
+<strong>dominant <em>far-field <code>v</code>-collapse</em></strong> where the robot never drives in at all (see
+<em>Larger-sample reality check</em>). Reach rate over random seeds is <strong>~39%</strong>, not the
+2/3 the seed-42 sample suggested. Proposed fixes (heading-reference config; RL +
+DeePC) still open. Read top-to-bottom as a sequence: overshoot → fix → residual
+problems → next direction.</p>
 <h2 id="problem-one-line">Problem (one line)<a class="headerlink" href="#problem-one-line" title="Permanent link">&para;</a></h2>
 <p>With forward-only speed bounds (<code>v_min &gt; 0</code>), the controller drives the robot to
 the goal's neighborhood but <strong>cannot decelerate to land inside the tolerance</strong> —
@@ -1702,6 +1728,65 @@ the controller is penalized for heading error the task doesn't reward — so the
 heading tracking near the goal is actively counterproductive.</p>
 <p>A cheap, untested config fix exists: <code>--Q_heading 0</code> or <code>--no_bearing_ref</code> (or
 gate heading off inside a small radius). Try this <em>before</em> reaching for RL.</p>
+<h2 id="larger-sample-reality-check-2026-06-01">Larger-sample reality check (2026-06-01)<a class="headerlink" href="#larger-sample-reality-check-2026-06-01" title="Permanent link">&para;</a></h2>
+<p>The numbers above ("2 / 3", "a miss now lingers near the goal at 2.75") come from
+<strong>n = 3 on seed 42</strong> — optimistic. A broader random sweep (<code>scripts/run_deepc.py
+--episodes 100 --random</code>, base seed <code>4104626029</code>, n = 78 before the slow run was
+stopped; <code>libraries_v0.npz</code>) reframes the picture:</p>
+<ul>
+<li><strong>Reach rate ≈ 39 %</strong> (30 / 78); seed 0's 3 / 4 is a lucky draw.</li>
+<li><strong>QP failures: 0 / 78</strong> — the controller is numerically healthy, so the solver is
+  <em>not</em> the bottleneck (the "compute" metric row below can be deprioritized).</li>
+<li>The 48 truncated episodes end a <strong>median of 5.38 units from the goal</strong> (max 15.77),
+  with median mean-<code>v</code> ≈ <strong>1.66</strong> (successes run <code>v̄</code> ≈ 4–7).</li>
+</ul>
+<p>That splits the residual failure into <strong>two populations</strong>, not the single near-goal
+mode the section above describes:</p>
+<table>
+<thead>
+<tr>
+<th>population</th>
+<th>count (of 48 truncations)</th>
+<th>signature</th>
+<th>matches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>near-goal pirouette / over-brake</td>
+<td>15 (final_dist &lt; 3.0)</td>
+<td>reaches the neighborhood, then stalls / spins</td>
+<td>the "New problem" above</td>
+</tr>
+<tr>
+<td><strong>far-field <code>v</code>-collapse</strong></td>
+<td><strong>33 (final_dist ≥ 3.0)</strong></td>
+<td>never drives in; <code>v̄</code> stays ≈ 1.6 across the whole run</td>
+<td><strong>dominant; new</strong></td>
+</tr>
+</tbody>
+</table>
+<p>So the Resolution's "miss now lingers near the goal" claim holds only for a minority
+of seeds. On most failing seeds the robot <strong>never commits to forward motion</strong> and
+truncates far away — the same <code>v → 0</code> family as
+<a href="../06-single-library-fails/">06</a>, now seed-dependent rather than universal.</p>
+<p>We ruled out the two obvious culprits:</p>
+<ul>
+<li><strong>Not step size / horizon.</strong> At <code>v = 10</code>, displacement is <code>0.25</code> units/step → ~100
+  units of path budget over 200 steps, far more than the 20-unit workspace diagonal.
+  Failures end far away with low <code>v</code>, not "almost there after running out of steps"
+  (only 7 / 48 ended &lt; 1.0).</li>
+<li><strong>Not the regularizers.</strong> <a href="../06-single-library-fails/">06</a> swept <code>λ_g</code>, <code>λ_y</code>, <code>N</code>,
+  <code>T_ini</code> against this exact <code>v → 0</code> mode and none moved it. λ is not the lever.</li>
+</ul>
+<p><strong>Implication for the fixes below.</strong> <code>--Q_heading 0</code> / <code>--no_bearing_ref</code> targets the
+near-goal pirouette (the <code>1/d</code> bearing ill-conditioning), so it should help that
+~15-episode population — but it likely will <strong>not</strong> fix the dominant far-field
+<code>v</code>-collapse, which is upstream (library / prediction quality for the current
+heading). Expect the config fix to lift reach rate <em>modestly</em>, not to solve it. A
+definitive attribution needs a per-step trace (the QP's predicted Δdistance for
+<code>v &gt; 0</code>, selected library, and slack <code>σ_y</code> on a failing far-field seed) — logging
+not yet added to <code>run_deepc.py</code>.</p>
 <h2 id="direction-combine-rl-with-deepc">Direction — combine RL with DeePC<a class="headerlink" href="#direction-combine-rl-with-deepc" title="Permanent link">&para;</a></h2>
 <p>For a robust <em>general</em> policy (and if the config fix plateaus), warm-start RL from
 DeePC. RL optimizes the <strong>true</strong> env reward (including <code>reach_bonus</code>), closing the
