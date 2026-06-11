@@ -14,3 +14,6 @@ data/
 
 # MkDocs build output
 site/
+
+# Cluade related
+docs/superpowers
