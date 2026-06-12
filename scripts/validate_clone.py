@@ -30,11 +30,20 @@ def main() -> int:
     predictor = load_clone(args.clone, device=args.device)
     deepc, info = build_canonical_deepc(libraries_path=args.libraries)
 
-    # (1) regime-conditioned open-loop regression on the held-out dataset.
+    # (1) regime-conditioned open-loop regression. Score on the held-out
+    # validation split (stored in the checkpoint) so the numbers aren't biased
+    # by training-on-test; fall back to the full set if the split can't be
+    # matched to this dataset.
     ds = np.load(args.data, allow_pickle=True)
     feats, targs, regime = ds["features"], ds["targets"], ds["regime"]
+    val_idx = predictor.val_idx
+    if val_idx is not None and predictor.n_train_samples == feats.shape[0]:
+        feats, targs, regime = feats[val_idx], targs[val_idx], regime[val_idx]
+        scope = f"held-out, n={len(val_idx)}"
+    else:
+        scope = f"FULL dataset, n={feats.shape[0]} — no matching split; numbers optimistic"
     pred = predictor.predict(feats)
-    print("=== (1) regression by regime ===")
+    print(f"=== (1) regression by regime [{scope}] ===")
     for r, m in regression_by_regime(pred, targs, regime).items():
         print(f"  {r:11s} n={m['n']:6d}  MAE v={m['mae_v']:.4f} w={m['mae_w']:.4f}  "
               f"RMSE v={m['rmse_v']:.4f} w={m['rmse_w']:.4f}")

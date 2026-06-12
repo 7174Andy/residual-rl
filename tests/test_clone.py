@@ -50,3 +50,7 @@ def test_save_load_roundtrip(tmp_path):
     one = pred.predict(feats[0])
     assert one.shape == (2,)
     assert np.allclose(one, out[0], atol=1e-5)
+    # The held-out split round-trips so the fidelity gate can score unseen rows.
+    assert pred.val_idx is not None
+    assert pred.n_train_samples == 500
+    assert len(pred.val_idx) == int(0.2 * 500)

@@ -137,6 +137,12 @@ def train_clone(
         "output_dim": int(output_dim),
         "n_lib": int(n_lib),
         "hidden": list(hidden),
+        # The held-out validation split (indices into the training dataset) so
+        # the fidelity gate can score open-loop regression on unseen rows rather
+        # than training-on-test. `n_samples` lets a consumer confirm the dataset
+        # it loaded is the one these indices refer to.
+        "val_idx": val_idx.astype(np.int64),
+        "n_samples": int(n),
     }
     return model, stats, history
 
@@ -156,6 +162,9 @@ class ClonePredictor:
         self.feat_std = stats["feat_std"]
         self.targ_mean = stats["targ_mean"]
         self.targ_std = stats["targ_std"]
+        # Held-out split metadata (may be absent in older checkpoints).
+        self.val_idx = stats.get("val_idx")
+        self.n_train_samples = stats.get("n_samples")
 
     def predict(self, features: np.ndarray) -> np.ndarray:
         features = np.asarray(features, dtype=np.float64)
