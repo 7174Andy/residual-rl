@@ -262,6 +262,38 @@ class DeePC:
         self._prev_idx = -1
         self._g.value = None
 
+    def prime_buffer(self, u_buf: np.ndarray, y_buf: np.ndarray) -> None:
+        """Seed the past buffer with an explicit `(u_buf, y_buf)` of length T_ini.
+
+        Unlike `reset()` (which tiles a single constant past), this accepts an
+        arbitrary `T_ini`-step history — used by offline clone-data generation to
+        prime realistic, non-degenerate pasts. Behavior-preserving: an equivalent
+        buffer yields the same `act()` output as `reset()`. Clears any warm-start.
+        """
+        u_buf = np.asarray(u_buf, dtype=np.float64)
+        y_buf = np.asarray(y_buf, dtype=np.float64)
+        if u_buf.shape != (self.T_ini, self.m_u):
+            raise ValueError(
+                f"u_buf shape {u_buf.shape}; expected ({self.T_ini}, {self.m_u})"
+            )
+        if y_buf.shape != (self.T_ini, self.p_y):
+            raise ValueError(
+                f"y_buf shape {y_buf.shape}; expected ({self.T_ini}, {self.p_y})"
+            )
+        self._u_buf = u_buf.copy()
+        self._y_buf = y_buf.copy()
+        self._prev_idx = -1
+        self._g.value = None
+
+    @property
+    def past_buffer(self) -> tuple[np.ndarray, np.ndarray]:
+        """Current past buffer as `(u_buf.copy(), y_buf.copy())`, each `(T_ini, ·)`.
+
+        Read this *before* calling `act()` (which slides the buffer)."""
+        if self._u_buf is None or self._y_buf is None:
+            raise RuntimeError("Call reset() or prime_buffer() first.")
+        return self._u_buf.copy(), self._y_buf.copy()
+
     def _select_index(self, heading: float) -> int:
         """Index of the library whose anchor is closest to `heading` on the circle."""
         # Wrap-aware shortest signed angular difference; pick smallest |diff|.
