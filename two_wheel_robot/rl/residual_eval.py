@@ -47,22 +47,24 @@ def benchmark(model, deepc, predictor, res_env, info, seeds) -> dict:
     regressions = rescued = 0
     devs = []
     n = 0
-    for s in seeds:
-        s = int(s)
-        rd, _ = run_deepc_closed_loop(deepc, info, env_d, s)
-        rc, traj_c = run_clone_closed_loop(predictor, info, env_c, s)
-        rr, traj_r = run_residual_closed_loop(model, res_env, s)
-        d_reach += int(rd)
-        c_reach += int(rc)
-        r_reach += int(rr)
-        if rc and not rr:
-            regressions += 1
-        if rr and not rc:
-            rescued += 1
-        devs.append(trajectory_deviation(traj_r, traj_c))
-        n += 1
-    env_d.close()
-    env_c.close()
+    try:
+        for s in seeds:
+            s = int(s)
+            rd, _ = run_deepc_closed_loop(deepc, info, env_d, s)
+            rc, traj_c = run_clone_closed_loop(predictor, info, env_c, s)
+            rr, traj_r = run_residual_closed_loop(model, res_env, s)
+            d_reach += int(rd)
+            c_reach += int(rc)
+            r_reach += int(rr)
+            if rc and not rr:
+                regressions += 1
+            if rr and not rc:
+                rescued += 1
+            devs.append(trajectory_deviation(traj_c, traj_r))
+            n += 1
+    finally:
+        env_d.close()
+        env_c.close()
     return {
         "n": n,
         "deepc_reach": d_reach,
