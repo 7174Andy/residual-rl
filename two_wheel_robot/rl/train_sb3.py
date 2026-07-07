@@ -21,7 +21,12 @@ from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
 _ALGOS = {"td3": TD3, "sac": SAC}
 
 
-def make_residual_env(clone_path, libraries_path, residual_frac=1.0, device="cpu"):
+def make_residual_env(
+    clone_path: str,
+    libraries_path: str,
+    residual_frac: float = 1.0,
+    device: str = "cpu",
+) -> DummyVecEnv:
     """Single-env DummyVecEnv wrapping a Monitored ResidualDeePCEnv (TD3 is off-policy)."""
     def _factory():
         env = ResidualDeePCEnv(
@@ -91,9 +96,11 @@ def train_residual(
         )
     model = Algo(**kwargs)
     _zero_init_actor(model)
-    model.learn(total_timesteps=total_timesteps, progress_bar=False)
-    model.save(out_path)
-    venv.close()
+    try:
+        model.learn(total_timesteps=total_timesteps, progress_bar=False)
+        model.save(out_path)
+    finally:
+        venv.close()
     return model
 
 
@@ -102,4 +109,6 @@ def load_residual(path: str, algo: str = "td3", device: str = "cpu"):
     algo = algo.lower()
     if algo not in _ALGOS:
         raise ValueError(f"algo must be one of {sorted(_ALGOS)}, got {algo!r}")
+    # `algo` must match the class the checkpoint was trained with; SB3's .load()
+    # does not record it in the zip, so a mismatch fails or loads the wrong policy.
     return _ALGOS[algo].load(path, device=device)
