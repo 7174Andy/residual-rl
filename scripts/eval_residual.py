@@ -31,8 +31,10 @@ def main() -> int:
         residual_frac=args.residual_frac, device=args.device,
     )
     seeds = [args.base_seed + i for i in range(args.n_seeds)]
-    rep = benchmark(model, deepc, predictor, res_env, info, seeds)
-    res_env.close()
+    try:
+        rep = benchmark(model, deepc, predictor, res_env, info, seeds)
+    finally:
+        res_env.close()
 
     print(f"=== three-way benchmark over {rep['n']} seeds (base {args.base_seed}) ===")
     print(f"  DeePC    reach {rep['deepc_reach']:3d}/{rep['n']} = {rep['deepc_reach_rate']:.3f}"

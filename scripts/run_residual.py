@@ -21,8 +21,15 @@ def _encode_video(frames, path, fps) -> bool:
     if not frames:
         print(f"  warning: no frames for {path}", file=sys.stderr)
         return False
-    import imageio.v2 as imageio
-
+    try:
+        import imageio.v2 as imageio
+    except ImportError:
+        print(
+            "  warning: imageio not installed; cannot record. "
+            "Install with `uv add imageio imageio-ffmpeg`.",
+            file=sys.stderr,
+        )
+        return False
     writer = imageio.get_writer(
         path, mode="I", fps=fps, codec="libx264",
         pixelformat="yuv420p", macro_block_size=None,
