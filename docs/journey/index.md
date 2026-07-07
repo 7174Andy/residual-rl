@@ -14,6 +14,7 @@ Entries are roughly chronological, but each one stands alone — you can read th
 | [06](06-single-library-fails.md) | Why one library isn't enough — bilinear dynamics              |
 | [07](07-library-switching.md)    | Library switching — local linearization via 4 quadrants       |
 | [08](08-stop-at-goal.md)         | Stopping at the goal — overshoot (fixed) → over-braking (RL next) |
+| [09](09-imitation-learning.md)   | Imitation learning — cloning DeePC into a fast neural policy   |
 
 ## Conventions
 
