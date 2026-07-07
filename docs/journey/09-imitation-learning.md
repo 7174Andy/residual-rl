@@ -160,7 +160,7 @@ Paired agreement (the decisive test):
 | seed-by-seed outcome agreement     | **64 / 78 = 82.1 %**                         |
 | confusion (both / DeePC-only / clone-only / neither) | 23 / 7 / 7 / 41           |
 | McNemar $p$                        | **1.0** (disagreements balanced → no bias)  |
-| median trajectory position deviation | **~0.93 units** (per-seed median)         |
+| median trajectory position deviation | **0.94 units** median · **2.01** p95 (per-seed) |
 
 ## Reading the numbers
 
@@ -169,8 +169,8 @@ Paired agreement (the decisive test):
   seeds split exactly 7/7, so they are boundary noise (near-miss seeds that tip either
   way), not a systematic skew. This is the property that a raw success-rate match cannot
   certify.
-- **Same paths, not just same outcomes.** Median trajectory deviation ~0.93 units (on a
-  20-unit workspace diagonal) says the clone follows nearly the same route, not just
+- **Same paths, not just same outcomes.** Median trajectory deviation ~0.94 units
+  (worst-case p95 ~2.01, on a 20-unit workspace diagonal) says the clone follows nearly the same route, not just
   ends in the same place. On the video seeds the clone takes a few more steps
   (45 vs 41; 71 vs 58) but lands equivalently.
 - **The failures transfer too.** On seed 4104626061 both stall in the far field — the
