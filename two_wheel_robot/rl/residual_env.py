@@ -109,6 +109,22 @@ class ResidualDeePCEnv(gym.Env):
         # _make_obs computes and caches self._u_base as a side effect
         return self._make_obs(body_obs), info
 
+    def step(self, action):
+        a_res = np.clip(np.asarray(action, dtype=np.float64).reshape(2), -1.0, 1.0)
+        u_base = self._u_base            # base action cached for the current state
+        y_pre = self.base.y              # pre-step measurement for the buffer slide
+        u = np.clip(
+            u_base + self.residual_frac * self.half_range * a_res,
+            self.a_low, self.a_high,
+        )
+        body_obs, reward, term, trunc, info = self.env.step(u)
+        self._u_buf = np.roll(self._u_buf, -1, axis=0)
+        self._u_buf[-1] = u
+        self._y_buf = np.roll(self._y_buf, -1, axis=0)
+        self._y_buf[-1] = y_pre
+        obs = self._make_obs(body_obs)   # recompute + cache u_base for the next step
+        return obs, reward, term, trunc, info
+
     def render(self):
         return self.env.render()
 

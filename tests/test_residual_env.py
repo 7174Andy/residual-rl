@@ -43,3 +43,52 @@ def test_obs_without_base_is_5d():
         assert env.observation_space.contains(obs)
     finally:
         env.close()
+
+
+@pytest.mark.integration
+def test_zero_residual_matches_clone_rollout():
+    import gymnasium as gym
+    import two_wheel_robot.env  # noqa: F401
+    from two_wheel_robot.rl.clone import load_clone
+    from two_wheel_robot.rl.clone_eval import run_clone_closed_loop
+    from two_wheel_robot.rl.deepc_setup import build_canonical_deepc
+    from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
+
+    _deepc, info = build_canonical_deepc(libraries_path=LIB)
+    predictor = load_clone(CLONE, device="cpu")
+    env_c = gym.make("TwoWheelGoal-v0", action_bounds=info["action_bounds"])
+    reached_clone, traj_clone = run_clone_closed_loop(predictor, info, env_c, seed=7)
+    env_c.close()
+
+    res = ResidualDeePCEnv(clone_path=CLONE, libraries_path=LIB)
+    try:
+        obs, _ = res.reset(seed=7)
+        traj = [res.base.state.copy()]
+        term = trunc = False
+        last_info: dict = {}
+        while not (term or trunc):
+            obs, _, term, trunc, last_info = res.step(np.zeros(2, dtype=np.float32))
+            traj.append(res.base.state.copy())
+    finally:
+        res.close()
+
+    traj = np.asarray(traj)
+    assert traj.shape == traj_clone.shape
+    assert np.allclose(traj, traj_clone, atol=1e-9)
+    assert bool(last_info.get("reached", False)) == reached_clone
+
+
+@pytest.mark.integration
+def test_residual_scaling_and_clip():
+    from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
+
+    res = ResidualDeePCEnv(clone_path=CLONE, libraries_path=LIB, residual_frac=1.0)
+    try:
+        res.reset(seed=1)
+        u_base = res._u_base.copy()
+        res.step(np.ones(2, dtype=np.float32))  # full +residual: u_base + half_range
+        applied = res._u_buf[-1]  # buffer's last row holds the applied action
+        expected = np.clip(u_base + res.half_range, res.a_low, res.a_high)
+        assert np.allclose(applied, expected, atol=1e-9)
+    finally:
+        res.close()
