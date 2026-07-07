@@ -86,6 +86,7 @@ class ResidualDeePCEnv(gym.Env):
 
     def _base_action(self) -> np.ndarray:
         """clip(clone.predict(featurize(buffer, y, y_ref))) for the current state."""
+        assert self._u_buf is not None and self._y_buf is not None  # primed by reset()
         y_cur = self.base.y
         y_ref = bearing_y_ref(self.base.state, self.base.goal)
         feat = featurize(self._u_buf, self._y_buf, y_cur, y_ref, self.anchors)
@@ -110,6 +111,9 @@ class ResidualDeePCEnv(gym.Env):
         return self._make_obs(body_obs), info
 
     def step(self, action):
+        assert (
+            self._u_buf is not None and self._y_buf is not None and self._u_base is not None
+        ), "call reset() before step()"
         a_res = np.clip(np.asarray(action, dtype=np.float64).reshape(2), -1.0, 1.0)
         u_base = self._u_base            # base action cached for the current state
         y_pre = self.base.y              # pre-step measurement for the buffer slide
