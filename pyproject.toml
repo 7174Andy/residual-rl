@@ -24,3 +24,8 @@ dev = [
     "pymdown-extensions>=10.21.3",
     "pytest>=9.0.3",
 ]
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: tests that load real data files from data/",
+]
