@@ -20,11 +20,26 @@ def test_spaces_and_reset():
         assert np.allclose(env.observation_space.high, 1.0)
 
         obs, info = env.reset(seed=0)
+        assert isinstance(info, dict)
         assert obs.shape == (7,)
         assert obs.dtype == np.float32
         assert env.observation_space.contains(obs)
         assert env._u_buf.shape == (env.T_ini, 2)
         assert env._y_buf.shape == (env.T_ini, 3)
         assert env._u_base.shape == (2,)
+    finally:
+        env.close()
+
+
+@pytest.mark.integration
+def test_obs_without_base_is_5d():
+    from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
+
+    env = ResidualDeePCEnv(clone_path=CLONE, libraries_path=LIB, include_base_in_obs=False)
+    try:
+        assert env.observation_space.shape == (5,)
+        obs, _ = env.reset(seed=0)
+        assert obs.shape == (5,)
+        assert env.observation_space.contains(obs)
     finally:
         env.close()

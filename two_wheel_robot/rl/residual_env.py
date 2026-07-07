@@ -48,7 +48,7 @@ class ResidualDeePCEnv(gym.Env):
         self.predictor = load_clone(clone_path, device=device)
         _deepc, info = build_canonical_deepc(libraries_path=libraries_path)
         del _deepc  # only the canonical config is needed to drive the clone
-        self.info = info
+        self._u_init_mid = np.asarray(info["u_init_midpoint"], dtype=np.float64)
         self.T_ini = int(info["T_ini"])
         self.anchors = info["anchors"]
         self.action_bounds = np.asarray(info["action_bounds"], dtype=np.float64)
@@ -68,7 +68,7 @@ class ResidualDeePCEnv(gym.Env):
         self.action_space = spaces.Box(-1.0, 1.0, shape=(2,), dtype=np.float32)
 
         # Raw obs bounds: inner body obs, optionally + u_base (in action bounds).
-        inner = self.env.observation_space
+        inner = cast(spaces.Box, self.env.observation_space)
         if self.include_base:
             self._raw_low = np.concatenate([inner.low, self.a_low]).astype(np.float64)
             self._raw_high = np.concatenate([inner.high, self.a_high]).astype(np.float64)
@@ -104,8 +104,9 @@ class ResidualDeePCEnv(gym.Env):
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         body_obs, info = self.env.reset(seed=seed, options=options)
-        self._u_buf = np.tile(self.info["u_init_midpoint"], (self.T_ini, 1))
+        self._u_buf = np.tile(self._u_init_mid, (self.T_ini, 1))
         self._y_buf = np.tile(self.base.y, (self.T_ini, 1))
+        # _make_obs computes and caches self._u_base as a side effect
         return self._make_obs(body_obs), info
 
     def render(self):
