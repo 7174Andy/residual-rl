@@ -1735,8 +1735,14 @@ updates). SAC is kept as a built-in fallback (<code>--algo sac</code>) for the h
 not the default.</p>
 <p><strong>Training.</strong> TD3 on the env's <strong>native reward</strong> (already DeePC's quadratic cost + reach
 bonus), 200k steps, single env, <code>net_arch=[256,256]</code>, action-noise σ = 0.1, CPU. Mean episode
-reward improved ~4× (−3.4·10⁴ → ~−8.5·10³) as the residual learned to drive through the
-stall. The QP is never called during training.</p>
+reward improved ~4× (−3.4·10⁴ → a noisy plateau around −8·10³; best −6.8·10³) as the residual
+learned to drive through the stall (curve below). The QP is never called during training.</p>
+<p><img alt="TD3 residual training-return curve" src="../figures/residual_return.png" /></p>
+<p><em>Mean episode return (SB3 <code>ep_rew_mean</code>) over training episodes — the shipped seed-0 run: a
+rapid climb (episodes ~20–200), then a noisy plateau (~−7k to −11k). The return plateaus and
+even dips late while the </em><em>reach rate is 87.2 %</em><em> — the reward also charges control effort
+<code>−uᵀRu</code>, so a lower return does not mean fewer reaches (TD3 also saves the final, not the best,
+policy). Regenerate from the committed curve with <code>uv run python scripts/plot_training_return.py</code>.</em></p>
 <h2 id="side-by-side-clone-vs-cloneresidual">Side-by-side — clone vs clone+residual<a class="headerlink" href="#side-by-side-clone-vs-cloneresidual" title="Permanent link">&para;</a></h2>
 <p>Two <strong>rescued</strong> seeds under the canonical config (same start/goal for both controllers). Left
 = the clone (stalls in the far field); right = clone + residual (reaches). These are the
@@ -1865,6 +1871,12 @@ to its successes and no QP in the loop.</p>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># side-by-side videos on a rescued seed (clone stalls, residual reaches)</span>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_clone.py<span class="w">    </span>--record<span class="w"> </span>docs/journey/videos<span class="w"> </span>--seeds<span class="w"> </span><span class="m">4104626029</span><span class="w">  </span><span class="c1"># -&gt; episode_&lt;seed&gt;.mp4</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_residual.py<span class="w"> </span>--record<span class="w"> </span>docs/journey/videos<span class="w"> </span>--seeds<span class="w"> </span><span class="m">4104626029</span><span class="w">  </span><span class="c1"># -&gt; episode_&lt;seed&gt;.mp4</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c1"># regenerate the training-return figure from the committed curve CSV</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_training_return.py
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c1"># ...or from a fresh run&#39;s raw returns:</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="c1">#   uv run python scripts/train_residual.py --monitor-out data/residual_monitor ...</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1">#   uv run python scripts/plot_training_return.py --monitor data/residual_monitor.monitor.csv</span>
 </span></code></pre></div>
 
 
