@@ -30,11 +30,15 @@ def test_smoke_train_and_save(tmp_path):
     from two_wheel_robot.rl.train_sb3 import load_residual, train_residual
 
     out = tmp_path / "residual.zip"
+    monitor = tmp_path / "mon"
     model = train_residual(
         clone_path=CLONE, libraries_path=LIB, out_path=str(out),
         total_timesteps=600, device="cpu", seed=0, verbose=0,
+        monitor_path=str(monitor),
     )
     assert out.exists()
+    # monitor_path persists per-episode returns for the training-return plot
+    assert (tmp_path / "mon.monitor.csv").exists()
 
     loaded = load_residual(str(out), device="cpu")
     obs = np.zeros(model.observation_space.shape, dtype=np.float32)

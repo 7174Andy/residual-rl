@@ -17,6 +17,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "matplotlib>=3.11.0",
     "mike>=2.2.0",
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.7.6",

@@ -20,13 +20,16 @@ def main() -> int:
     p.add_argument("--lr", type=float, default=1e-3)
     p.add_argument("--device", default="cpu")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--monitor-out", default=None,
+                   help="persist per-episode returns to <path>.monitor.csv "
+                        "(feed to scripts/plot_training_return.py --monitor)")
     args = p.parse_args()
 
     train_residual(
         clone_path=args.clone, libraries_path=args.libraries, out_path=args.out,
         algo=args.algo, total_timesteps=args.timesteps, residual_frac=args.residual_frac,
         action_noise_sigma=args.noise_sigma, learning_rate=args.lr,
-        device=args.device, seed=args.seed, verbose=1,
+        device=args.device, seed=args.seed, verbose=1, monitor_path=args.monitor_out,
     )
     print(f"saved -> {args.out}")
     return 0

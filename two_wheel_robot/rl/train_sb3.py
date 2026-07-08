@@ -26,14 +26,21 @@ def make_residual_env(
     libraries_path: str,
     residual_frac: float = 1.0,
     device: str = "cpu",
+    monitor_path: str | None = None,
 ) -> DummyVecEnv:
-    """Single-env DummyVecEnv wrapping a Monitored ResidualDeePCEnv (TD3 is off-policy)."""
+    """Single-env DummyVecEnv wrapping a Monitored ResidualDeePCEnv (TD3 is off-policy).
+
+    ``monitor_path`` (optional): when set, SB3 writes per-episode returns to
+    ``<monitor_path>.monitor.csv`` — the reproducible source for the training-return
+    plot (``scripts/plot_training_return.py --monitor``). ``None`` keeps returns
+    in-memory only.
+    """
     def _factory():
         env = ResidualDeePCEnv(
             clone_path=clone_path, libraries_path=libraries_path,
             residual_frac=residual_frac, device=device,
         )
-        return Monitor(env)
+        return Monitor(env, filename=monitor_path)
 
     return DummyVecEnv([_factory])
 
@@ -78,13 +85,19 @@ def train_residual(
     device: str = "cpu",
     seed: int = 0,
     verbose: int = 1,
+    monitor_path: str | None = None,
 ):
-    """Train and save the RL residual (algo='td3' default, 'sac' fallback). Returns the model."""
+    """Train and save the RL residual (algo='td3' default, 'sac' fallback). Returns the model.
+
+    ``monitor_path`` (optional): persist per-episode returns to
+    ``<monitor_path>.monitor.csv`` for the training-return plot.
+    """
     algo = algo.lower()
     if algo not in _ALGOS:
         raise ValueError(f"algo must be one of {sorted(_ALGOS)}, got {algo!r}")
     Algo = _ALGOS[algo]
-    venv = make_residual_env(clone_path, libraries_path, residual_frac, device=device)
+    venv = make_residual_env(clone_path, libraries_path, residual_frac, device=device,
+                             monitor_path=monitor_path)
     n_actions = int(venv.action_space.shape[0])
     kwargs = dict(
         policy="MlpPolicy", env=venv, learning_rate=learning_rate,

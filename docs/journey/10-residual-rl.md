@@ -68,8 +68,16 @@ not the default.
 
 **Training.** TD3 on the env's **native reward** (already DeePC's quadratic cost + reach
 bonus), 200k steps, single env, `net_arch=[256,256]`, action-noise σ = 0.1, CPU. Mean episode
-reward improved ~4× (−3.4·10⁴ → ~−8.5·10³) as the residual learned to drive through the
-stall. The QP is never called during training.
+reward improved ~4× (−3.4·10⁴ → a noisy plateau around −8·10³; best −6.8·10³) as the residual
+learned to drive through the stall (curve below). The QP is never called during training.
+
+![TD3 residual training-return curve](../figures/residual_return.png)
+
+*Mean episode return (SB3 `ep_rew_mean`) over training episodes — the shipped seed-0 run: a
+rapid climb (episodes ~20–200), then a noisy plateau (~−7k to −11k). The return plateaus and
+even dips late while the **reach rate is 87.2 %** — the reward also charges control effort
+`−uᵀRu`, so a lower return does not mean fewer reaches (TD3 also saves the final, not the best,
+policy). Regenerate from the committed curve with `uv run python scripts/plot_training_return.py`.*
 
 ## Side-by-side — clone vs clone+residual
 
@@ -163,4 +171,10 @@ uv run python scripts/eval_residual.py --model data/residual_td3.zip \
 # side-by-side videos on a rescued seed (clone stalls, residual reaches)
 uv run python scripts/run_clone.py    --record docs/journey/videos --seeds 4104626029  # -> episode_<seed>.mp4
 uv run python scripts/run_residual.py --record docs/journey/videos --seeds 4104626029  # -> episode_<seed>.mp4
+
+# regenerate the training-return figure from the committed curve CSV
+uv run python scripts/plot_training_return.py
+# ...or from a fresh run's raw returns:
+#   uv run python scripts/train_residual.py --monitor-out data/residual_monitor ...
+#   uv run python scripts/plot_training_return.py --monitor data/residual_monitor.monitor.csv
 ```
