@@ -10,13 +10,11 @@
       
       
       
-        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/03-action-bounds/">
+        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/10-residual-rl/">
       
       
-        <link rel="prev" href="../02-env-design/">
+        <link rel="prev" href="../09-imitation-learning/">
       
-      
-        <link rel="next" href="../04-deepc-formulation/">
       
       
         
@@ -27,7 +25,7 @@
     
     
       
-        <title>03. Action bounds - two-wheeled-experiment</title>
+        <title>10. Residual RL - two-wheeled-experiment</title>
       
     
     
@@ -80,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#03-action-bounds-paper-faithful-vs-broad" class="md-skip">
+        <a href="#10-residual-rl-rl-mpc-over-the-frozen-clone" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              03. Action bounds
+              10. Residual RL
             
           </span>
         </div>
@@ -1127,37 +1125,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    03. Action bounds
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../03-action-bounds/" class="md-nav__link">
         
   
   
@@ -1173,81 +1144,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#decision" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Decision
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#context" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Context
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#considered" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Considered
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#outcome" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Outcome
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#side-effect-the-wall-pinning-bug-as-a-feature" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Side effect — the wall-pinning bug as a feature
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1425,10 +1321,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../10-residual-rl/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Residual RL
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1444,6 +1367,142 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#motivation-one-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motivation (one line)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-was-built" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What was built
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#side-by-side-clone-vs-cloneresidual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Side-by-side — clone vs clone+residual
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#three-way-reach-rate-78-seeds-base-seed-4104626029-canonical-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three-way reach rate — 78 seeds, base seed 4104626029, canonical config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#paired-residual-vs-clone-the-decisive-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paired — residual vs clone (the decisive test)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-the-numbers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the numbers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-shows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this shows
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reproduce" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproduce
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1483,10 +1542,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#decision" class="md-nav__link">
+  <a href="#motivation-one-line" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Decision
+        Motivation (one line)
       
     </span>
   </a>
@@ -1505,10 +1564,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#considered" class="md-nav__link">
+  <a href="#what-was-built" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Considered
+        What was built
       
     </span>
   </a>
@@ -1516,10 +1575,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#outcome" class="md-nav__link">
+  <a href="#side-by-side-clone-vs-cloneresidual" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Outcome
+        Side-by-side — clone vs clone+residual
       
     </span>
   </a>
@@ -1527,10 +1586,71 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#side-effect-the-wall-pinning-bug-as-a-feature" class="md-nav__link">
+  <a href="#metrics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Side effect — the wall-pinning bug as a feature
+        Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#three-way-reach-rate-78-seeds-base-seed-4104626029-canonical-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three-way reach rate — 78 seeds, base seed 4104626029, canonical config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#paired-residual-vs-clone-the-decisive-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paired — residual vs clone (the decisive test)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-the-numbers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the numbers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-this-shows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this shows
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reproduce" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproduce
       
     </span>
   </a>
@@ -1557,52 +1677,195 @@
   
 
 
-<h1 id="03-action-bounds-paper-faithful-vs-broad">03. Action bounds — paper-faithful vs broad<a class="headerlink" href="#03-action-bounds-paper-faithful-vs-broad" title="Permanent link">&para;</a></h1>
-<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p>Default to <strong>broad bounds</strong> for both runtime <em>and</em> offline data collection: <code>v ∈ [0, 20]</code>, <code>w ∈ [-π/2, π/2]</code>. Paper bounds (<code>v ∈ [10, 20]</code>, <code>w ∈ [-π/6, π/6]</code>) remain a CLI override.</p>
+<h1 id="10-residual-rl-rl-mpc-over-the-frozen-clone">10. Residual RL — RL + MPC over the frozen clone<a class="headerlink" href="#10-residual-rl-rl-mpc-over-the-frozen-clone" title="Permanent link">&para;</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Status: complete (2026-07-08)</p>
+</div>
+<p>A <strong>TD3 residual</strong> trained on top of the frozen DeePC clone turns the far-field
+<code>v</code>-collapse from a failure into a solve. On the canonical 78-seed sweep the hybrid
+<code>u = clip(f_θ + μ)</code> reaches <strong>68/78 = 87.2 %</strong> vs the clone's (and DeePC's) <strong>30/78 =
+38.5 %</strong> — it <strong>rescues 38</strong> of the 48 seeds the clone stalls on with <strong>0 regressions</strong>
+(it never breaks a seed the clone already solved), McNemar <span class="arithmatex">\(p &lt; 10^{-4}\)</span>. The residual is
+<strong>zero-initialized</strong>, so at step 0 it <em>is</em> the clone; RL only adds the forward velocity the
+hallucinated predictor refused to. The QP never re-enters the loop: control is a <strong>103 µs</strong>
+two-MLP forward pass. This is the paper's <strong>RL + MPC</strong> architecture
+(<a href="https://arxiv.org/abs/2510.03354">arXiv:2510.03354</a>, Eq. 18) on the unicycle task.</p>
+<h2 id="motivation-one-line">Motivation (one line)<a class="headerlink" href="#motivation-one-line" title="Permanent link">&para;</a></h2>
+<p>The clone faithfully reproduces DeePC — including its ~39 % ceiling and the far-field stall
+(<a href="../09-imitation-learning/">09</a>). Add a learned residual that fixes the stall while keeping
+everything DeePC already gets right.</p>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p>The paper uses <code>v ∈ [10, 20]</code>, <code>w ∈ [-π/6, π/6]</code> to sample its PE inputs during data collection. These bounds make sense for the paper's task — <strong>trajectory tracking</strong>, where the robot is always moving forward along a smooth curve at moderate speed.</p>
-<p>For our goal-reaching task, the same bounds are pathological:</p>
-<ul>
-<li><strong><code>v ≥ 10</code></strong>: the robot <strong>cannot stop</strong>. Once it gets close to the goal it overshoots.</li>
-<li><strong><code>w ∈ [-π/6, π/6]</code></strong>: turn rate ≤ 30 °/s. A 180° turn takes 6 seconds = 240 steps. Episode length is 200. The robot can't reverse direction within an episode without using forward-curve maneuvering.</li>
-</ul>
-<p>The first run with paper bounds showed it clearly: the controller <strong>drove the robot into a wall and used wall-clipping as a free brake</strong>. From the controller's perspective this was a perfectly rational way to minimize position cost — but it's not the kind of behavior we want.</p>
-<h2 id="considered">Considered<a class="headerlink" href="#considered" title="Permanent link">&para;</a></h2>
+<p><a href="../08-stop-at-goal/">08</a> diagnosed the ceiling: DeePC navigates well on ~39 % of seeds and
+<strong>collapses</strong> on the rest — a hallucinated-prediction <code>v</code>-collapse where the QP commits
+<code>v ≈ 0</code> and the robot stalls in the far field. <a href="../09-imitation-learning/">09</a> amortized DeePC
+into a 23 µs neural clone <code>f_θ</code> that reproduces both its <strong>successes and its failures</strong> —
+by design, so that a learned residual has a fast, faithful baseline to correct. This entry
+is that residual.</p>
+<p>The plan named the obstacle it removes:</p>
+<blockquote>
+<p>"Residual RL keeps the <strong>QP in the training loop</strong> — a ~0.5 s solve every step … likely
+prohibitive as-is."</p>
+</blockquote>
+<p>Because the baseline is now <code>f_θ</code> (a forward pass), the QP never enters the RL loop.</p>
+<h2 id="what-was-built">What was built<a class="headerlink" href="#what-was-built" title="Permanent link">&para;</a></h2>
+<p><strong>The composition.</strong> A standalone <code>gym.Env</code> (<code>ResidualDeePCEnv</code>) holds the frozen clone, an
+inner <code>TwoWheelGoal-v0</code>, and the DeePC-style <code>T_ini</code> buffer. Each step it forms the paper's
+RL + MPC control (Eq. 18):</p>
+<div class="arithmatex">\[u = \operatorname{clip}\!\big(\underbrace{f_\theta(\text{features})}_{\text{frozen clone}} + \underbrace{\rho \cdot \tfrac{1}{2}(u_{\max}-u_{\min})\cdot \mu(\text{obs}\mid\theta^\mu)}_{\text{learned residual}},\ u_{\min},\ u_{\max}\big)\]</div>
+<p>and slides the buffer with <code>(applied u, pre-step y)</code> — the exact convention the clone was
+labeled under, so the two stay comparable. The residual authority <code>ρ = residual_frac</code> defaults
+to <strong>1.0</strong> (full range): the far-field fix needs a <em>large</em> <code>v</code> correction to escape the stall,
+and the final <code>clip</code> keeps <code>u</code> in bounds regardless.</p>
+<p><strong>Zero-init = no-regression at init.</strong> The TD3 actor's output head is zero-initialized, so at
+step 0 the residual is exactly 0 and the policy is <strong>bit-for-bit identical to the clone</strong>
+(a unit-test pins this: a zero-residual rollout reproduces the clone's closed loop exactly).
+RL can then only <em>add</em> to a known-good baseline — the floor is "no worse than clone."</p>
+<p><strong>Observation / action.</strong> The actor sees a 7-D obs — the env's body-frame state (5) plus the
+baseline's proposed <code>u_base</code> (2), min-max normalized to <span class="arithmatex">\([-1,1]\)</span> — and emits a residual in
+<span class="arithmatex">\([-1,1]^2\)</span>. Feeding it <code>u_base</code> lets it learn <em>how much to correct the baseline</em> rather than
+rediscovering the baseline.</p>
+<p><strong>Why TD3 — not PPO or classic DDPG.</strong> The earlier roadmap defaulted to <strong>PPO</strong>; the paper
+uses <strong>classic DDPG</strong>; we use <strong>TD3</strong>. PPO is on-policy, so it discards the <em>rare</em> stall-escape
+transitions this problem hinges on — an off-policy <strong>replay buffer</strong> reuses them — and its
+stochastic policy has no clean "start exactly at the clone and stay there until it helps"
+init. Classic DDPG is the right family (off-policy, deterministic actor — which is what makes
+zero-init crisp) but is notoriously unstable; <strong>TD3 is a strict, drop-in upgrade</strong> (twin
+critics + clipped double-Q against overestimation, target-policy smoothing, delayed actor
+updates). SAC is kept as a built-in fallback (<code>--algo sac</code>) for the hard-exploration regime,
+not the default.</p>
+<p><strong>Training.</strong> TD3 on the env's <strong>native reward</strong> (already DeePC's quadratic cost + reach
+bonus), 200k steps, single env, <code>net_arch=[256,256]</code>, action-noise σ = 0.1, CPU. Mean episode
+reward improved ~4× (−3.4·10⁴ → ~−8.5·10³) as the residual learned to drive through the
+stall. The QP is never called during training.</p>
+<h2 id="side-by-side-clone-vs-cloneresidual">Side-by-side — clone vs clone+residual<a class="headerlink" href="#side-by-side-clone-vs-cloneresidual" title="Permanent link">&para;</a></h2>
+<p>Two <strong>rescued</strong> seeds under the canonical config (same start/goal for both controllers). Left
+= the clone (stalls in the far field); right = clone + residual (reaches). These are the
+<code>v</code>-collapse seeds from <a href="../08-stop-at-goal/">08</a> — the exact regime the residual was built for.</p>
+<table>
+<thead>
+<tr><th>Clone — the DeePC surrogate (stalls)</th><th>Clone + TD3 residual (reaches)</th></tr>
+</thead>
+<tbody>
+<tr><td colspan="2" align="center"><b>seed 4104626029</b> — clone truncates at <b>12.91</b> (deep far-field stall); residual REACHES in <b>116 steps</b> → 0.39</td></tr>
+<tr>
+<td><video controls loop muted playsinline width="330"><source src="../videos/clone-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../videos/residual-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr><td colspan="2" align="center"><b>seed 4104626034</b> — clone truncates at <b>6.75</b>; residual REACHES in <b>98 steps</b> → 0.43</td></tr>
+<tr>
+<td><video controls loop muted playsinline width="330"><source src="../videos/clone-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../videos/residual-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="metrics">Metrics<a class="headerlink" href="#metrics" title="Permanent link">&para;</a></h2>
+<h3 id="three-way-reach-rate-78-seeds-base-seed-4104626029-canonical-config">Three-way reach rate — 78 seeds, base seed <code>4104626029</code>, canonical config<a class="headerlink" href="#three-way-reach-rate-78-seeds-base-seed-4104626029-canonical-config" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Option</th>
-<th>Status</th>
+<th>controller</th>
+<th>reach rate</th>
+<th>95 % CI (Wilson)</th>
+<th>per-step control</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Keep paper bounds for paper-faithfulness</td>
-<td>Rejected — task isn't tracking.</td>
+<td>DeePC (QP)</td>
+<td>30 / 78 = <strong>38.5 %</strong></td>
+<td>[0.284, 0.496]</td>
+<td>~0.6 s (QP)</td>
 </tr>
 <tr>
-<td>Switch to broad bounds (<code>v ∈ [0, 20]</code>, <code>w ∈ [-π/2, π/2]</code>)</td>
-<td>Chosen as the default.</td>
+<td>clone <code>f_θ</code> (surrogate)</td>
+<td>30 / 78 = <strong>38.5 %</strong></td>
+<td>[0.284, 0.496]</td>
+<td>23 µs (MLP)</td>
 </tr>
 <tr>
-<td>Allow reverse (<code>v ∈ [-20, 20]</code>)</td>
-<td>Considered. Kinematically valid but a step away from the paper's "forward-only" robot. Not needed for goal-reaching.</td>
-</tr>
-<tr>
-<td>Use paper bounds AND remove wall clipping (with a soft penalty for leaving the workspace)</td>
-<td>Rejected — adds complexity, doesn't fix the underlying "can't stop" issue.</td>
+<td><strong>clone + TD3 residual</strong></td>
+<td>68 / 78 = <strong>87.2 %</strong></td>
+<td>[0.780, 0.929]</td>
+<td><strong>103 µs</strong> (2 MLPs)</td>
 </tr>
 </tbody>
 </table>
-<h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
+<p>DeePC and the clone match at 30/78 — the clone reproduces the QP baseline exactly, confirming
+the harness is identical to <a href="../09-imitation-learning/">09</a>.</p>
+<h3 id="paired-residual-vs-clone-the-decisive-test">Paired — residual vs clone (the decisive test)<a class="headerlink" href="#paired-residual-vs-clone-the-decisive-test" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>paired metric</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>confusion (both / clone-only / residual-only / neither)</td>
+<td><strong>30 / 0 / 38 / 10</strong></td>
+</tr>
+<tr>
+<td><strong>rescued</strong> (clone fails → residual reaches)</td>
+<td><strong>38</strong></td>
+</tr>
+<tr>
+<td><strong>regressions</strong> (clone reaches → residual fails)</td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td>McNemar <span class="arithmatex">\(p\)</span></td>
+<td><strong><span class="arithmatex">\(&lt; 10^{-4}\)</span></strong> (highly significant, one-sided improvement)</td>
+</tr>
+<tr>
+<td>trajectory position deviation vs clone</td>
+<td>median <strong>2.45</strong> · median-of-p95 <strong>5.90</strong> (units)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="reading-the-numbers">Reading the numbers<a class="headerlink" href="#reading-the-numbers" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>scripts/collect_data.py</code> accepts <code>--v_min --v_max --w_abs_max</code> and saves the chosen bounds inside the <code>.npz</code> under key <code>sample_bounds</code>.</li>
-<li><code>scripts/run_deepc.py</code> reads <code>sample_bounds</code> from the data file and constructs the env with matching <code>action_bounds</code> automatically. This guarantees DeePC stays inside its empirical data envelope (no extrapolation to unseen action regions).</li>
-<li>The env's <code>action_bounds</code> constructor parameter is fully configurable, so paper bounds are one flag away if needed for paper-reproduction work.</li>
+<li><strong>It fixes the failure regime, not a random slice.</strong> The 38 rescued seeds are exactly the
+  far-field <code>v</code>-collapse cases from <a href="../08-stop-at-goal/">08</a>. Reach rate goes 38.5 % → 87.2 %
+  by solving the hard 62 %, not by trading one set of seeds for another.</li>
+<li><strong>Zero regressions — the no-regression property held through training.</strong> Every seed the
+  clone solved, the residual still solves (clone-only = 0). Zero-init guaranteed this at step
+  0; 200k steps of TD3 never gave it back. This is the payoff of adding a residual <em>on top of</em>
+  a good baseline rather than fine-tuning away from it.</li>
+<li><strong>Larger trajectory deviation is the point here.</strong> Unlike the clone (which was built to
+  <em>track</em> DeePC, ~0.9-unit deviation in <a href="../09-imitation-learning/">09</a>), the residual is built
+  to <em>diverge</em> where DeePC stalls — hence median 2.45 units. The deviation concentrates on the
+  rescued seeds, where the clone sits still and the residual drives to the goal.</li>
+<li><strong>The 10 that remain.</strong> 10/78 are solved by none of the three — the residual is a large
+  improvement, not a universal solver. These are the next frontier.</li>
+<li><strong>The speedup survives.</strong> Control is a 103 µs two-MLP forward pass (clone <code>f_θ</code> + actor μ)
+  vs the QP's ~0.6 s — ~5,800× — and the QP never entered the training loop.</li>
 </ul>
-<h2 id="side-effect-the-wall-pinning-bug-as-a-feature">Side effect — the wall-pinning bug as a feature<a class="headerlink" href="#side-effect-the-wall-pinning-bug-as-a-feature" title="Permanent link">&para;</a></h2>
-<p>The original "drive into wall to stop" behavior is a real failure mode of forward-only action spaces on environments with wall clipping. It's worth flagging because it's a <em>system-level</em> bug (not a controller bug): the data-driven controller did the optimal thing given the constraints. Removing wall-clipping and using a soft penalty would change the failure mode but not solve the underlying mismatch between forward-only kinematics and a stationary goal.</p>
+<h2 id="what-this-shows">What this shows<a class="headerlink" href="#what-this-shows" title="Permanent link">&para;</a></h2>
+<p>The paper's <strong>RL + MPC</strong> hybrid transfers to the unicycle: an amortized MPC surrogate supplies
+the prior where its data representation is valid, and a conservatively-initialized RL residual
+backstops the regime where it is not — recovering more than half the task's failures at no cost
+to its successes and no QP in the loop.</p>
+<p>Open questions carried forward:</p>
+<ul>
+<li>Does residual RL beat the much cheaper <code>--Q_heading 0</code> / <code>--no_bearing_ref</code> heading-reference
+  fix floated in <a href="../08-stop-at-goal/">08</a>? (Direct A/B still open.)</li>
+<li>The 10 unsolved seeds — geometry-hard, or reachable with more training / SAC's stronger
+  exploration (<code>--algo sac</code>)?</li>
+</ul>
+<h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># train the TD3 residual over the frozen clone (native env reward; QP never in the loop)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">200000</span><span class="w"> </span>--out<span class="w"> </span>data/residual_td3.zip
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># three-way benchmark: DeePC (QP) vs clone-only vs clone+residual on the 78-seed sweep</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/eval_residual.py<span class="w"> </span>--model<span class="w"> </span>data/residual_td3.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span>--n_seeds<span class="w"> </span><span class="m">78</span><span class="w"> </span>--base_seed<span class="w"> </span><span class="m">4104626029</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># side-by-side videos on a rescued seed (clone stalls, residual reaches)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_clone.py<span class="w">    </span>--record<span class="w"> </span>docs/journey/videos<span class="w"> </span>--seeds<span class="w"> </span><span class="m">4104626029</span><span class="w">  </span><span class="c1"># -&gt; episode_&lt;seed&gt;.mp4</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_residual.py<span class="w"> </span>--record<span class="w"> </span>docs/journey/videos<span class="w"> </span>--seeds<span class="w"> </span><span class="m">4104626029</span><span class="w">  </span><span class="c1"># -&gt; episode_&lt;seed&gt;.mp4</span>
+</span></code></pre></div>
 
 
 
@@ -1638,7 +1901,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../02-env-design/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 02. Env design">
+          <a href="../09-imitation-learning/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 09. Imitation learning">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1648,27 +1911,11 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                02. Env design
+                09. Imitation learning
               </div>
             </div>
           </a>
         
-        
-          
-          <a href="../04-deepc-formulation/" class="md-footer__link md-footer__link--next" aria-label="Next: 04. DeePC formulation">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                04. DeePC formulation
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
         
       </nav>
     
