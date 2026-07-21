@@ -1,6 +1,6 @@
 # 10. Residual RL — RL + MPC over the frozen clone
 
-!!! note "Status: complete (2026-07-08)"
+!!! note "Status: complete (2026-07-08; extended 2026-07-20)"
 A **TD3 residual** trained on top of the frozen DeePC clone turns the far-field
 `v`-collapse from a failure into a solve. On the canonical 78-seed sweep the hybrid
 `u = clip(f_θ + μ)` reaches **68/78 = 87.2 %** vs the clone's (and DeePC's) **30/78 =
@@ -10,6 +10,10 @@ A **TD3 residual** trained on top of the frozen DeePC clone turns the far-field
 hallucinated predictor refused to. The QP never re-enters the loop: control is a **103 µs**
 two-MLP forward pass. This is the paper's **RL + MPC** architecture
 ([arXiv:2510.03354](https://arxiv.org/abs/2510.03354), Eq. 18) on the unicycle task.
+**2026-07-20 update:** doubling the training budget to 400k steps (same
+hyperparameters, fresh zero-init run) lifts this to **74/78 = 94.9 %**, rescuing 6 of
+the 10 remaining failures with still **0 regressions** — see the "Follow-up — training
+to 400k steps" section below.
 
 ## Motivation (one line)
 
@@ -156,7 +160,99 @@ Open questions carried forward:
 - Does residual RL beat the much cheaper `--Q_heading 0` / `--no_bearing_ref` heading-reference
   fix floated in [08](08-stop-at-goal.md)? (Direct A/B still open.)
 - The 10 unsolved seeds — geometry-hard, or reachable with more training / SAC's stronger
-  exploration (`--algo sac`)?
+  exploration (`--algo sac`)? **Partially answered below: more training alone rescues 6 of the
+  10; the remaining 4 look structural, not just undertrained.**
+
+## Follow-up — training to 400k steps (2026-07-20)
+
+The first open question above ("reachable with more training?") is cheap to test directly:
+same architecture, same hyperparameters (`net_arch=[256,256]`, action-noise σ = 0.1, seed 0),
+just `--timesteps 400000` instead of `200000` — a fresh zero-init run, not a continuation of
+the shipped checkpoint. `ep_rew_mean` plateaus at a similar level to the 200k run (~−6.8·10³
+to −6.9·10³), so the aggregate training curve doesn't obviously look "still climbing" — the
+gain comes from continued fine convergence on the hard seeds, not an unfinished run.
+
+| controller           | reach rate            | rescued | regressions |
+| --------------------- | ---------------------- | ------- | ----------- |
+| clone + TD3 (200k)    | 68 / 78 = **87.2 %**   | 38      | 0           |
+| clone + TD3 (400k)    | 74 / 78 = **94.9 %**   | 44      | 0           |
+
+Of the 10 seeds that failed at 200k, **6 are fixed** by the longer run
+(`4104626037, 59, 64, 81, 90, 92`) and **4 still fail**
+(`4104626056, 69, 83, 86`) — confirmed with **0 newly-introduced regressions**: every seed the
+200k model solved, the 400k model still solves.
+
+**The 4 that remain, re-examined:**
+
+- **Seed `4104626056` — wide fly-by, unchanged.** Sweeps in on one big curved arc (turns a
+  single direction the whole episode) that passes the goal at ~1.9 units and swings back out
+  without ever tightening into a spiral. Essentially the same shape as at 200k.
+- **Seed `4104626069` — crawl-and-drift.** Approaches to 1.70 units by step 100, then drifts
+  back out to 2.49 by the end while still turning near max rate — no longer a clean stall
+  (`v` doesn't fully collapse to 0 the way it did at 200k) but still doesn't converge.
+- **Seed `4104626083` — hairline near-miss, most encouraging.** This was a **complete freeze**
+  at 200k (`v≈0`, `w≈0` for nearly the whole episode). At 400k it drives hard the entire way
+  and is still accelerating (`v = 5.19`) when the 200-step cap hits at `dist = 0.52` — 0.02
+  units outside the 0.5 tolerance. This looks like it would reach with only a handful more
+  steps; the freeze is gone.
+- **Seed `4104626086` — traded one failure mode for another.** At 200k this was a near-miss
+  stop-and-spin (closest approach 0.64). At 400k the closest approach is actually **worse**
+  (1.37) — it now overshoots in a fast pass, loops back for a correction, and runs out of
+  steps mid-correction. Still a failure either way (so it doesn't count against the
+  0-regressions claim, which is measured on reach/no-reach), but it's a reminder that TD3
+  training isn't monotonically improving every seed's trajectory quality even as the aggregate
+  reach rate goes up.
+
+<figure markdown>
+  <video controls loop muted playsinline width="480">
+    <source src="../videos/residual-400k-fail-4104626056.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <figcaption>
+    Seed 4104626056 (400k model) — wide fly-by that never tightens into the goal
+    (final_dist 1.94).
+  </figcaption>
+</figure>
+
+<figure markdown>
+  <video controls loop muted playsinline width="480">
+    <source src="../videos/residual-400k-fail-4104626069.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <figcaption>
+    Seed 4104626069 (400k model) — approaches then drifts back out (final_dist 2.49).
+  </figcaption>
+</figure>
+
+<figure markdown>
+  <video controls loop muted playsinline width="480">
+    <source src="../videos/residual-400k-fail-4104626083.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <figcaption>
+    Seed 4104626083 (400k model) — hairline near-miss (final_dist 0.52 vs 0.5 tolerance),
+    still driving hard (`v = 5.19`) when the step cap hits. No longer the complete freeze
+    seen at 200k.
+  </figcaption>
+</figure>
+
+<figure markdown>
+  <video controls loop muted playsinline width="480">
+    <source src="../videos/residual-400k-fail-4104626086.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <figcaption>
+    Seed 4104626086 (400k model) — fast overshoot and a correction loop that doesn't
+    complete in time (final_dist 1.37, worse closest-approach than at 200k).
+  </figcaption>
+</figure>
+
+**Reading it:** more training is a real, cheap lever (+7.7 points, 0 regressions) and it
+disproportionately helps the near-miss/late-overshoot population identified from the 200k
+failure videos — but two of the four remaining failures (`56` wide-orbit, `69` crawl-and-drift)
+look geometry/control-authority limited rather than undertrained, consistent with the
+velocity-decay-near-goal and reward-shaping ideas floated as next steps. Seed `83` is the
+exception — it looks like pure undertraining and may well flip with even more steps.
 
 ## Reproduce
 
@@ -177,4 +273,16 @@ uv run python scripts/plot_training_return.py
 # ...or from a fresh run's raw returns:
 #   uv run python scripts/train_residual.py --monitor-out data/residual_monitor ...
 #   uv run python scripts/plot_training_return.py --monitor data/residual_monitor.monitor.csv
+
+# --- 2026-07-20 follow-up: 400k-step run ---
+uv run python scripts/train_residual.py --timesteps 400000 --out data/residual_td3_400k.zip \
+    --monitor-out data/residual_400k_monitor
+
+uv run python scripts/eval_residual.py --model data/residual_td3_400k.zip \
+    --n_seeds 78 --base_seed 4104626029
+
+# failure videos for the 4 seeds still unsolved at 400k
+uv run python scripts/run_residual.py --model data/residual_td3_400k.zip \
+    --record docs/journey/videos \
+    --seeds 4104626056,4104626069,4104626083,4104626086  # -> episode_<seed>.mp4
 ```
