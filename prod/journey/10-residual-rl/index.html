@@ -1489,6 +1489,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#follow-up-training-to-400k-steps-2026-07-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-up — training to 400k steps (2026-07-20)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#reproduce" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1647,6 +1658,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#follow-up-training-to-400k-steps-2026-07-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Follow-up — training to 400k steps (2026-07-20)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#reproduce" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1679,7 +1701,7 @@
 
 <h1 id="10-residual-rl-rl-mpc-over-the-frozen-clone">10. Residual RL — RL + MPC over the frozen clone<a class="headerlink" href="#10-residual-rl-rl-mpc-over-the-frozen-clone" title="Permanent link">&para;</a></h1>
 <div class="admonition note">
-<p class="admonition-title">Status: complete (2026-07-08)</p>
+<p class="admonition-title">Status: complete (2026-07-08; extended 2026-07-20)</p>
 </div>
 <p>A <strong>TD3 residual</strong> trained on top of the frozen DeePC clone turns the far-field
 <code>v</code>-collapse from a failure into a solve. On the canonical 78-seed sweep the hybrid
@@ -1689,7 +1711,11 @@
 <strong>zero-initialized</strong>, so at step 0 it <em>is</em> the clone; RL only adds the forward velocity the
 hallucinated predictor refused to. The QP never re-enters the loop: control is a <strong>103 µs</strong>
 two-MLP forward pass. This is the paper's <strong>RL + MPC</strong> architecture
-(<a href="https://arxiv.org/abs/2510.03354">arXiv:2510.03354</a>, Eq. 18) on the unicycle task.</p>
+(<a href="https://arxiv.org/abs/2510.03354">arXiv:2510.03354</a>, Eq. 18) on the unicycle task.
+<strong>2026-07-20 update:</strong> doubling the training budget to 400k steps (same
+hyperparameters, fresh zero-init run) lifts this to <strong>74/78 = 94.9 %</strong>, rescuing 6 of
+the 10 remaining failures with still <strong>0 regressions</strong> — see the "Follow-up — training
+to 400k steps" section below.</p>
 <h2 id="motivation-one-line">Motivation (one line)<a class="headerlink" href="#motivation-one-line" title="Permanent link">&para;</a></h2>
 <p>The clone faithfully reproduces DeePC — including its ~39 % ceiling and the far-field stall
 (<a href="../09-imitation-learning/">09</a>). Add a learned residual that fixes the stall while keeping
@@ -1858,8 +1884,111 @@ to its successes and no QP in the loop.</p>
 <li>Does residual RL beat the much cheaper <code>--Q_heading 0</code> / <code>--no_bearing_ref</code> heading-reference
   fix floated in <a href="../08-stop-at-goal/">08</a>? (Direct A/B still open.)</li>
 <li>The 10 unsolved seeds — geometry-hard, or reachable with more training / SAC's stronger
-  exploration (<code>--algo sac</code>)?</li>
+  exploration (<code>--algo sac</code>)? <strong>Partially answered below: more training alone rescues 6 of the
+  10; the remaining 4 look structural, not just undertrained.</strong></li>
 </ul>
+<h2 id="follow-up-training-to-400k-steps-2026-07-20">Follow-up — training to 400k steps (2026-07-20)<a class="headerlink" href="#follow-up-training-to-400k-steps-2026-07-20" title="Permanent link">&para;</a></h2>
+<p>The first open question above ("reachable with more training?") is cheap to test directly:
+same architecture, same hyperparameters (<code>net_arch=[256,256]</code>, action-noise σ = 0.1, seed 0),
+just <code>--timesteps 400000</code> instead of <code>200000</code> — a fresh zero-init run, not a continuation of
+the shipped checkpoint. <code>ep_rew_mean</code> plateaus at a similar level to the 200k run (~−6.8·10³
+to −6.9·10³), so the aggregate training curve doesn't obviously look "still climbing" — the
+gain comes from continued fine convergence on the hard seeds, not an unfinished run.</p>
+<table>
+<thead>
+<tr>
+<th>controller</th>
+<th>reach rate</th>
+<th>rescued</th>
+<th>regressions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>clone + TD3 (200k)</td>
+<td>68 / 78 = <strong>87.2 %</strong></td>
+<td>38</td>
+<td>0</td>
+</tr>
+<tr>
+<td>clone + TD3 (400k)</td>
+<td>74 / 78 = <strong>94.9 %</strong></td>
+<td>44</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>Of the 10 seeds that failed at 200k, <strong>6 are fixed</strong> by the longer run
+(<code>4104626037, 59, 64, 81, 90, 92</code>) and <strong>4 still fail</strong>
+(<code>4104626056, 69, 83, 86</code>) — confirmed with <strong>0 newly-introduced regressions</strong>: every seed the
+200k model solved, the 400k model still solves.</p>
+<p><strong>The 4 that remain, re-examined:</strong></p>
+<ul>
+<li><strong>Seed <code>4104626056</code> — wide fly-by, unchanged.</strong> Sweeps in on one big curved arc (turns a
+  single direction the whole episode) that passes the goal at ~1.9 units and swings back out
+  without ever tightening into a spiral. Essentially the same shape as at 200k.</li>
+<li><strong>Seed <code>4104626069</code> — crawl-and-drift.</strong> Approaches to 1.70 units by step 100, then drifts
+  back out to 2.49 by the end while still turning near max rate — no longer a clean stall
+  (<code>v</code> doesn't fully collapse to 0 the way it did at 200k) but still doesn't converge.</li>
+<li><strong>Seed <code>4104626083</code> — hairline near-miss, most encouraging.</strong> This was a <strong>complete freeze</strong>
+  at 200k (<code>v≈0</code>, <code>w≈0</code> for nearly the whole episode). At 400k it drives hard the entire way
+  and is still accelerating (<code>v = 5.19</code>) when the 200-step cap hits at <code>dist = 0.52</code> — 0.02
+  units outside the 0.5 tolerance. This looks like it would reach with only a handful more
+  steps; the freeze is gone.</li>
+<li><strong>Seed <code>4104626086</code> — traded one failure mode for another.</strong> At 200k this was a near-miss
+  stop-and-spin (closest approach 0.64). At 400k the closest approach is actually <strong>worse</strong>
+  (1.37) — it now overshoots in a fast pass, loops back for a correction, and runs out of
+  steps mid-correction. Still a failure either way (so it doesn't count against the
+  0-regressions claim, which is measured on reach/no-reach), but it's a reminder that TD3
+  training isn't monotonically improving every seed's trajectory quality even as the aggregate
+  reach rate goes up.</li>
+</ul>
+<figure>
+<video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
+    <source src="../videos/residual-400k-fail-4104626056.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+<figcaption>
+    Seed 4104626056 (400k model) — wide fly-by that never tightens into the goal
+    (final_dist 1.94).
+  </figcaption>
+</figure>
+<figure>
+<video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
+    <source src="../videos/residual-400k-fail-4104626069.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+<figcaption>
+    Seed 4104626069 (400k model) — approaches then drifts back out (final_dist 2.49).
+  </figcaption>
+</figure>
+<figure>
+<video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
+    <source src="../videos/residual-400k-fail-4104626083.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+<figcaption>
+    Seed 4104626083 (400k model) — hairline near-miss (final_dist 0.52 vs 0.5 tolerance),
+    still driving hard (`v = 5.19`) when the step cap hits. No longer the complete freeze
+    seen at 200k.
+  </figcaption>
+</figure>
+<figure>
+<video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
+    <source src="../videos/residual-400k-fail-4104626086.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+<figcaption>
+    Seed 4104626086 (400k model) — fast overshoot and a correction loop that doesn't
+    complete in time (final_dist 1.37, worse closest-approach than at 200k).
+  </figcaption>
+</figure>
+<p><strong>Reading it:</strong> more training is a real, cheap lever (+7.7 points, 0 regressions) and it
+disproportionately helps the near-miss/late-overshoot population identified from the 200k
+failure videos — but two of the four remaining failures (<code>56</code> wide-orbit, <code>69</code> crawl-and-drift)
+look geometry/control-authority limited rather than undertrained, consistent with the
+velocity-decay-near-goal and reward-shaping ideas floated as next steps. Seed <code>83</code> is the
+exception — it looks like pure undertraining and may well flip with even more steps.</p>
 <h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># train the TD3 residual over the frozen clone (native env reward; QP never in the loop)</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">200000</span><span class="w"> </span>--out<span class="w"> </span>data/residual_td3.zip
@@ -1877,6 +2006,18 @@ to its successes and no QP in the loop.</p>
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c1"># ...or from a fresh run&#39;s raw returns:</span>
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="c1">#   uv run python scripts/train_residual.py --monitor-out data/residual_monitor ...</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1">#   uv run python scripts/plot_training_return.py --monitor data/residual_monitor.monitor.csv</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="c1"># --- 2026-07-20 follow-up: 400k-step run ---</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--out<span class="w"> </span>data/residual_td3_400k.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span>--monitor-out<span class="w"> </span>data/residual_400k_monitor
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/eval_residual.py<span class="w"> </span>--model<span class="w"> </span>data/residual_td3_400k.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span>--n_seeds<span class="w"> </span><span class="m">78</span><span class="w"> </span>--base_seed<span class="w"> </span><span class="m">4104626029</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="c1"># failure videos for the 4 seeds still unsolved at 400k</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_residual.py<span class="w"> </span>--model<span class="w"> </span>data/residual_td3_400k.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span>--record<span class="w"> </span>docs/journey/videos<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span>--seeds<span class="w"> </span><span class="m">4104626056</span>,4104626069,4104626083,4104626086<span class="w">  </span><span class="c1"># -&gt; episode_&lt;seed&gt;.mp4</span>
 </span></code></pre></div>
 
 
