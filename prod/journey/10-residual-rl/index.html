@@ -1771,26 +1771,36 @@ even dips late while the </em><em>reach rate is 87.2 %</em><em> — the reward a
 policy). Regenerate from the committed curve with <code>uv run python scripts/plot_training_return.py</code>.</em></p>
 <h2 id="side-by-side-clone-vs-cloneresidual">Side-by-side — clone vs clone+residual<a class="headerlink" href="#side-by-side-clone-vs-cloneresidual" title="Permanent link">&para;</a></h2>
 <p>Two <strong>rescued</strong> seeds under the canonical config (same start/goal for both controllers). Left
-= the clone (stalls in the far field); right = clone + residual (reaches). These are the
+= the clone (stalls in the far field); middle = clone + residual (reaches); right = the same
+two closed loops as a static trajectory + <code>v(t)</code> trace, so the video's qualitative "it
+drives through the stall" is paired with the quantitative channel that changed. These are the
 <code>v</code>-collapse seeds from <a href="../08-stop-at-goal/">08</a> — the exact regime the residual was built for.</p>
 <table>
 <thead>
-<tr><th>Clone — the DeePC surrogate (stalls)</th><th>Clone + TD3 residual (reaches)</th></tr>
+<tr><th>Clone — the DeePC surrogate (stalls)</th><th>Clone + TD3 residual (reaches)</th><th>Trajectory + v(t)</th></tr>
 </thead>
 <tbody>
-<tr><td colspan="2" align="center"><b>seed 4104626029</b> — clone truncates at <b>12.91</b> (deep far-field stall); residual REACHES in <b>116 steps</b> → 0.39</td></tr>
+<tr><td colspan="3" align="center"><b>seed 4104626029</b> — clone truncates at <b>12.91</b> (deep far-field stall); residual REACHES in <b>116 steps</b> → 0.39</td></tr>
 <tr>
-<td><video controls loop muted playsinline width="330"><source src="../videos/clone-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="330"><source src="../videos/residual-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="../videos/clone-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="../videos/residual-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><img src="../figures/seed_4104626029_metrics.png" width="280" alt="seed 4104626029 trajectory and v(t) trace"></td>
 </tr>
-<tr><td colspan="2" align="center"><b>seed 4104626034</b> — clone truncates at <b>6.75</b>; residual REACHES in <b>98 steps</b> → 0.43</td></tr>
+<tr><td colspan="3" align="center"><b>seed 4104626034</b> — clone truncates at <b>6.75</b>; residual REACHES in <b>98 steps</b> → 0.43</td></tr>
 <tr>
-<td><video controls loop muted playsinline width="330"><source src="../videos/clone-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="330"><source src="../videos/residual-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="../videos/clone-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="../videos/residual-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><img src="../figures/seed_4104626034_metrics.png" width="280" alt="seed 4104626034 trajectory and v(t) trace"></td>
 </tr>
 </tbody>
 </table>
 
+<p><em>Trajectory panel: clone (dashed gray, stalls) vs clone + TD3 residual (blue, reaches), goal
+marked with a star and the 0.5-unit tolerance circle. <code>v(t)</code> panel: the same two closed loops'
+forward-velocity channel — the clone's <code>v</code> decays toward 0 (the collapse), the residual's <code>v</code>
+climbs instead of decaying and drives the reach. Regenerate with
+<code>uv run python scripts/plot_seed_traces.py --seed 4104626029</code> (reads the committed
+<code>traj_&lt;seed&gt;_{clone,residual}.csv</code>, written once by <code>scripts/eval_seed_showcase.py</code>).</em></p>
 <h2 id="metrics">Metrics<a class="headerlink" href="#metrics" title="Permanent link">&para;</a></h2>
 <h3 id="three-way-reach-rate-78-seeds-base-seed-4104626029-canonical-config">Three-way reach rate — 78 seeds, base seed <code>4104626029</code>, canonical config<a class="headerlink" href="#three-way-reach-rate-78-seeds-base-seed-4104626029-canonical-config" title="Permanent link">&para;</a></h3>
 <table>
@@ -1821,10 +1831,22 @@ policy). Regenerate from the committed curve with <code>uv run python scripts/pl
 <td>[0.780, 0.929]</td>
 <td><strong>103 µs</strong> (2 MLPs)</td>
 </tr>
+<tr>
+<td><strong>clone + TD3 residual (400k)</strong></td>
+<td>74 / 78 = <strong>94.9 %</strong></td>
+<td>[0.875, 0.980]</td>
+<td><strong>103 µs</strong> (2 MLPs)</td>
+</tr>
 </tbody>
 </table>
 <p>DeePC and the clone match at 30/78 — the clone reproduces the QP baseline exactly, confirming
 the harness is identical to <a href="../09-imitation-learning/">09</a>.</p>
+<p><img alt="Reach rate bar chart — DeePC vs clone vs clone + TD3 residual (200k, 400k)" src="../figures/reach_rates.png" /></p>
+<p><em>Reach rate over the canonical 78-seed sweep, error bars = 95 % Wilson CI. DeePC and the
+clone are statistically indistinguishable (by construction); the residual is a clear jump
+outside either baseline's CI, and doubling the training budget lifts it further still.
+Regenerate with <code>uv run python scripts/plot_reach_rates.py</code> (reads the committed
+<code>docs/journey/figures/reach_rates.csv</code> — no benchmark re-run needed).</em></p>
 <h3 id="paired-residual-vs-clone-the-decisive-test">Paired — residual vs clone (the decisive test)<a class="headerlink" href="#paired-residual-vs-clone-the-decisive-test" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1894,6 +1916,15 @@ just <code>--timesteps 400000</code> instead of <code>200000</code> — a fresh 
 the shipped checkpoint. <code>ep_rew_mean</code> plateaus at a similar level to the 200k run (~−6.8·10³
 to −6.9·10³), so the aggregate training curve doesn't obviously look "still climbing" — the
 gain comes from continued fine convergence on the hard seeds, not an unfinished run.</p>
+<p><img alt="TD3 residual training-return curve, 200k vs 400k steps overlaid" src="../figures/residual_return_comparison.png" /></p>
+<p><em>Mean episode return (SB3 <code>ep_rew_mean</code>) for both runs on the same axes. The two curves are
+close to indistinguishable up to ~episode 1,300 (same seed, same hyperparameters — only the
+horizon differs), then visibly diverge before the 200k run ends at ~episode 1,550: the 400k
+run is not simply "the 200k run, continued," it's a fresh zero-init run whose noisy plateau
+happens to sit at a similar level, consistent with the reach-rate gain coming from convergence
+on individual hard seeds rather than a still-rising aggregate curve. Regenerate with
+<code>uv run python scripts/plot_training_return.py --compare 200k:docs/journey/figures/residual_return.csv
+400k:docs/journey/figures/residual_return_400k.csv</code> (both curve CSVs are committed data).</em></p>
 <table>
 <thead>
 <tr>
@@ -2007,17 +2038,42 @@ exception — it looks like pure undertraining and may well flip with even more 
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="c1">#   uv run python scripts/train_residual.py --monitor-out data/residual_monitor ...</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1">#   uv run python scripts/plot_training_return.py --monitor data/residual_monitor.monitor.csv</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="c1"># --- 2026-07-20 follow-up: 400k-step run ---</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--out<span class="w"> </span>data/residual_td3_400k.zip<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span>--monitor-out<span class="w"> </span>data/residual_400k_monitor
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="c1"># regenerate the reach-rate bar chart from the committed benchmark-results CSV</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="c1"># (no 78-seed re-run needed -- it&#39;s QP-bound and takes minutes per seed)</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_reach_rates.py
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/eval_residual.py<span class="w"> </span>--model<span class="w"> </span>data/residual_td3_400k.zip<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span>--n_seeds<span class="w"> </span><span class="m">78</span><span class="w"> </span>--base_seed<span class="w"> </span><span class="m">4104626029</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="c1"># failure videos for the 4 seeds still unsolved at 400k</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_residual.py<span class="w"> </span>--model<span class="w"> </span>data/residual_td3_400k.zip<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span>--record<span class="w"> </span>docs/journey/videos<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span>--seeds<span class="w"> </span><span class="m">4104626056</span>,4104626069,4104626083,4104626086<span class="w">  </span><span class="c1"># -&gt; episode_&lt;seed&gt;.mp4</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># --- 2026-07-20 follow-up: 400k-step run ---</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--out<span class="w"> </span>data/residual_td3_400k.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span>--monitor-out<span class="w"> </span>data/residual_400k_monitor
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/eval_residual.py<span class="w"> </span>--model<span class="w"> </span>data/residual_td3_400k.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span>--n_seeds<span class="w"> </span><span class="m">78</span><span class="w"> </span>--base_seed<span class="w"> </span><span class="m">4104626029</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="c1"># failure videos for the 4 seeds still unsolved at 400k</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_residual.py<span class="w"> </span>--model<span class="w"> </span>data/residual_td3_400k.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span>--record<span class="w"> </span>docs/journey/videos<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">    </span>--seeds<span class="w"> </span><span class="m">4104626056</span>,4104626069,4104626083,4104626086<span class="w">  </span><span class="c1"># -&gt; episode_&lt;seed&gt;.mp4</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="c1"># regenerate the 200k-vs-400k training-return overlay from the committed curve CSVs</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="c1"># (the 400k curve CSV was derived once via:</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="c1">#   uv run python scripts/plot_training_return.py --monitor data/residual_400k_monitor.monitor.csv \</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="c1">#       --out docs/journey/figures/residual_return_400k.png \</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="c1">#       --save-curve docs/journey/figures/residual_return_400k.csv )</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_training_return.py<span class="w"> </span>--compare<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">    </span>200k:docs/journey/figures/residual_return.csv<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">    </span>400k:docs/journey/figures/residual_return_400k.csv<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">    </span>--out<span class="w"> </span>docs/journey/figures/residual_return_comparison.png
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="c1"># --- per-seed showcase data (video-matched trajectory + v(t) traces) ---</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="c1"># generates traj_&lt;seed&gt;_{clone,residual}.csv; DeePC is skipped entirely</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="c1"># (clone/residual only), so this runs in seconds, not the QP-bound</span>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="c1"># minutes-per-seed of eval_residual.py&#39;s three-way benchmark</span>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/eval_seed_showcase.py
+</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>
+</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a><span class="c1"># trajectory + v(t) companion figure for a video-showcased seed (200k, to match</span>
+</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a><span class="c1"># the embedded video&#39;s checkpoint)</span>
+</span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_seed_traces.py<span class="w"> </span>--seed<span class="w"> </span><span class="m">4104626029</span>
+</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_seed_traces.py<span class="w"> </span>--seed<span class="w"> </span><span class="m">4104626034</span>
 </span></code></pre></div>
 
 
