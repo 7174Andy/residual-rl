@@ -86,26 +86,37 @@ policy). Regenerate from the committed curve with `uv run python scripts/plot_tr
 ## Side-by-side — clone vs clone+residual
 
 Two **rescued** seeds under the canonical config (same start/goal for both controllers). Left
-= the clone (stalls in the far field); right = clone + residual (reaches). These are the
+= the clone (stalls in the far field); middle = clone + residual (reaches); right = the same
+two closed loops as a static trajectory + `v(t)` trace, so the video's qualitative "it
+drives through the stall" is paired with the quantitative channel that changed. These are the
 `v`-collapse seeds from [08](08-stop-at-goal.md) — the exact regime the residual was built for.
 
 <table>
 <thead>
-<tr><th>Clone — the DeePC surrogate (stalls)</th><th>Clone + TD3 residual (reaches)</th></tr>
+<tr><th>Clone — the DeePC surrogate (stalls)</th><th>Clone + TD3 residual (reaches)</th><th>Trajectory + v(t)</th></tr>
 </thead>
 <tbody>
-<tr><td colspan="2" align="center"><b>seed 4104626029</b> — clone truncates at <b>12.91</b> (deep far-field stall); residual REACHES in <b>116 steps</b> → 0.39</td></tr>
+<tr><td colspan="3" align="center"><b>seed 4104626029</b> — clone truncates at <b>12.91</b> (deep far-field stall); residual REACHES in <b>116 steps</b> → 0.39</td></tr>
 <tr>
-<td><video controls loop muted playsinline width="330"><source src="../videos/clone-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="330"><source src="../videos/residual-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="../videos/clone-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="../videos/residual-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><img src="../figures/seed_4104626029_metrics.png" width="280" alt="seed 4104626029 trajectory and v(t) trace"></td>
 </tr>
-<tr><td colspan="2" align="center"><b>seed 4104626034</b> — clone truncates at <b>6.75</b>; residual REACHES in <b>98 steps</b> → 0.43</td></tr>
+<tr><td colspan="3" align="center"><b>seed 4104626034</b> — clone truncates at <b>6.75</b>; residual REACHES in <b>98 steps</b> → 0.43</td></tr>
 <tr>
-<td><video controls loop muted playsinline width="330"><source src="../videos/clone-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="330"><source src="../videos/residual-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="../videos/clone-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="../videos/residual-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><img src="../figures/seed_4104626034_metrics.png" width="280" alt="seed 4104626034 trajectory and v(t) trace"></td>
 </tr>
 </tbody>
 </table>
+
+*Trajectory panel: clone (dashed gray, stalls) vs clone + TD3 residual (blue, reaches), goal
+marked with a star and the 0.5-unit tolerance circle. `v(t)` panel: the same two closed loops'
+forward-velocity channel — the clone's `v` decays toward 0 (the collapse), the residual's `v`
+climbs instead of decaying and drives the reach. Regenerate with
+`uv run python scripts/plot_seed_traces.py --seed 4104626029` (reads the committed
+`traj_<seed>_{clone,residual}.csv`, written once by `scripts/eval_seed_showcase.py`).*
 
 ## Metrics
 
@@ -116,9 +127,18 @@ Two **rescued** seeds under the canonical config (same start/goal for both contr
 | DeePC (QP)                | 30 / 78 = **38.5 %** | [0.284, 0.496]   | ~0.6 s (QP)      |
 | clone `f_θ` (surrogate)   | 30 / 78 = **38.5 %** | [0.284, 0.496]   | 23 µs (MLP)      |
 | **clone + TD3 residual**  | 68 / 78 = **87.2 %** | [0.780, 0.929]   | **103 µs** (2 MLPs) |
+| **clone + TD3 residual (400k)** | 74 / 78 = **94.9 %** | [0.875, 0.980] | **103 µs** (2 MLPs) |
 
 DeePC and the clone match at 30/78 — the clone reproduces the QP baseline exactly, confirming
 the harness is identical to [09](09-imitation-learning.md).
+
+![Reach rate bar chart — DeePC vs clone vs clone + TD3 residual (200k, 400k)](../figures/reach_rates.png)
+
+*Reach rate over the canonical 78-seed sweep, error bars = 95 % Wilson CI. DeePC and the
+clone are statistically indistinguishable (by construction); the residual is a clear jump
+outside either baseline's CI, and doubling the training budget lifts it further still.
+Regenerate with `uv run python scripts/plot_reach_rates.py` (reads the committed
+`docs/journey/figures/reach_rates.csv` — no benchmark re-run needed).*
 
 ### Paired — residual vs clone (the decisive test)
 
@@ -171,6 +191,17 @@ just `--timesteps 400000` instead of `200000` — a fresh zero-init run, not a c
 the shipped checkpoint. `ep_rew_mean` plateaus at a similar level to the 200k run (~−6.8·10³
 to −6.9·10³), so the aggregate training curve doesn't obviously look "still climbing" — the
 gain comes from continued fine convergence on the hard seeds, not an unfinished run.
+
+![TD3 residual training-return curve, 200k vs 400k steps overlaid](../figures/residual_return_comparison.png)
+
+*Mean episode return (SB3 `ep_rew_mean`) for both runs on the same axes. The two curves are
+close to indistinguishable up to ~episode 1,300 (same seed, same hyperparameters — only the
+horizon differs), then visibly diverge before the 200k run ends at ~episode 1,550: the 400k
+run is not simply "the 200k run, continued," it's a fresh zero-init run whose noisy plateau
+happens to sit at a similar level, consistent with the reach-rate gain coming from convergence
+on individual hard seeds rather than a still-rising aggregate curve. Regenerate with
+`uv run python scripts/plot_training_return.py --compare 200k:docs/journey/figures/residual_return.csv
+400k:docs/journey/figures/residual_return_400k.csv` (both curve CSVs are committed data).*
 
 | controller           | reach rate            | rescued | regressions |
 | --------------------- | ---------------------- | ------- | ----------- |
@@ -274,6 +305,10 @@ uv run python scripts/plot_training_return.py
 #   uv run python scripts/train_residual.py --monitor-out data/residual_monitor ...
 #   uv run python scripts/plot_training_return.py --monitor data/residual_monitor.monitor.csv
 
+# regenerate the reach-rate bar chart from the committed benchmark-results CSV
+# (no 78-seed re-run needed -- it's QP-bound and takes minutes per seed)
+uv run python scripts/plot_reach_rates.py
+
 # --- 2026-07-20 follow-up: 400k-step run ---
 uv run python scripts/train_residual.py --timesteps 400000 --out data/residual_td3_400k.zip \
     --monitor-out data/residual_400k_monitor
@@ -285,4 +320,25 @@ uv run python scripts/eval_residual.py --model data/residual_td3_400k.zip \
 uv run python scripts/run_residual.py --model data/residual_td3_400k.zip \
     --record docs/journey/videos \
     --seeds 4104626056,4104626069,4104626083,4104626086  # -> episode_<seed>.mp4
+
+# regenerate the 200k-vs-400k training-return overlay from the committed curve CSVs
+# (the 400k curve CSV was derived once via:
+#   uv run python scripts/plot_training_return.py --monitor data/residual_400k_monitor.monitor.csv \
+#       --out docs/journey/figures/residual_return_400k.png \
+#       --save-curve docs/journey/figures/residual_return_400k.csv )
+uv run python scripts/plot_training_return.py --compare \
+    200k:docs/journey/figures/residual_return.csv \
+    400k:docs/journey/figures/residual_return_400k.csv \
+    --out docs/journey/figures/residual_return_comparison.png
+
+# --- per-seed showcase data (video-matched trajectory + v(t) traces) ---
+# generates traj_<seed>_{clone,residual}.csv; DeePC is skipped entirely
+# (clone/residual only), so this runs in seconds, not the QP-bound
+# minutes-per-seed of eval_residual.py's three-way benchmark
+uv run python scripts/eval_seed_showcase.py
+
+# trajectory + v(t) companion figure for a video-showcased seed (200k, to match
+# the embedded video's checkpoint)
+uv run python scripts/plot_seed_traces.py --seed 4104626029
+uv run python scripts/plot_seed_traces.py --seed 4104626034
 ```

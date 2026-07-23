@@ -20,17 +20,31 @@ from two_wheel_robot.rl.clone_eval import (
 from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
 
 
-def run_residual_closed_loop(model, res_env: ResidualDeePCEnv, seed: int):
-    """Run clone+residual in the loop. Returns (reached, trajectory (T+1, 3))."""
+def run_residual_closed_loop_with_actions(model, res_env: ResidualDeePCEnv, seed: int):
+    """Like `run_residual_closed_loop`, also returning the per-step applied action.
+
+    The applied action is read back off `res_env.base.last_action` (the inner
+    env's post-clip `u`), not the raw actor output -- that raw output is the
+    residual `a_res` in `[-1, 1]^2`, not the real-unit `(v, w)` this is for.
+    Returns `(reached, trajectory (T+1, 3), actions (T, 2))`.
+    """
     obs, _ = res_env.reset(seed=int(seed))
     traj = [res_env.base.state.copy()]
+    actions = []
     term = trunc = False
     last_info: dict = {}
     while not (term or trunc):
         action, _ = model.predict(obs, deterministic=True)
         obs, _, term, trunc, last_info = res_env.step(action)
         traj.append(res_env.base.state.copy())
-    return bool(last_info.get("reached", False)), np.asarray(traj)
+        actions.append(res_env.base.last_action.copy())
+    return bool(last_info.get("reached", False)), np.asarray(traj), np.asarray(actions)
+
+
+def run_residual_closed_loop(model, res_env: ResidualDeePCEnv, seed: int):
+    """Run clone+residual in the loop. Returns (reached, trajectory (T+1, 3))."""
+    reached, traj, _ = run_residual_closed_loop_with_actions(model, res_env, seed)
+    return reached, traj
 
 
 def benchmark(model, deepc, predictor, res_env, info, seeds) -> dict:

@@ -1,0 +1,5 @@
+label,k,n
+DeePC (QP),30,78
+Clone f_θ,30,78
+Clone + TD3 (200k),68,78
+Clone + TD3 (400k),74,78

@@ -78,14 +78,18 @@ def _reached(info: dict) -> bool:
     return bool(info.get("reached", False))
 
 
-def run_clone_closed_loop(predictor, info: dict, env, seed: int):
-    """Run clone-only in the loop. Returns `(reached, trajectory (T+1, 3))`."""
+def run_clone_closed_loop_with_actions(predictor, info: dict, env, seed: int):
+    """Like `run_clone_closed_loop`, also returning the per-step applied action.
+
+    Returns `(reached, trajectory (T+1, 3), actions (T, 2))`.
+    """
     base = cast(UnicycleGoalEnv, env.unwrapped)
     env.reset(seed=seed)
     T_ini = info["T_ini"]
     u_buf = np.tile(info["u_init_midpoint"], (T_ini, 1))
     y_buf = np.tile(base.y, (T_ini, 1))
     traj = [base.state.copy()]
+    actions = []
     term = trunc = False
     last_info: dict = {}
     while not (term or trunc):
@@ -100,7 +104,14 @@ def run_clone_closed_loop(predictor, info: dict, env, seed: int):
         u_buf = np.roll(u_buf, -1, axis=0); u_buf[-1] = u
         y_buf = np.roll(y_buf, -1, axis=0); y_buf[-1] = y_cur
         traj.append(base.state.copy())
-    return _reached(last_info), np.asarray(traj)
+        actions.append(u.copy())
+    return _reached(last_info), np.asarray(traj), np.asarray(actions)
+
+
+def run_clone_closed_loop(predictor, info: dict, env, seed: int):
+    """Run clone-only in the loop. Returns `(reached, trajectory (T+1, 3))`."""
+    reached, traj, _ = run_clone_closed_loop_with_actions(predictor, info, env, seed)
+    return reached, traj
 
 
 def run_deepc_closed_loop(deepc, info: dict, env, seed: int):
