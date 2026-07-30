@@ -98,15 +98,15 @@ drives through the stall" is paired with the quantitative channel that changed. 
 <tbody>
 <tr><td colspan="3" align="center"><b>seed 4104626029</b> — clone truncates at <b>12.91</b> (deep far-field stall); residual REACHES in <b>116 steps</b> → 0.39</td></tr>
 <tr>
-<td><video controls loop muted playsinline width="280"><source src="videos/clone-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="280"><source src="videos/residual-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><img src="figures/seed_4104626029_metrics.png" width="280" alt="seed 4104626029 trajectory and v(t) trace"></td>
+<td><video controls loop muted playsinline width="280"><source src="../videos/clone-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="../videos/residual-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><img src="../figures/seed_4104626029_metrics.png" width="280" alt="seed 4104626029 trajectory and v(t) trace"></td>
 </tr>
 <tr><td colspan="3" align="center"><b>seed 4104626034</b> — clone truncates at <b>6.75</b>; residual REACHES in <b>98 steps</b> → 0.43</td></tr>
 <tr>
-<td><video controls loop muted playsinline width="280"><source src="videos/clone-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="280"><source src="videos/residual-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><img src="figures/seed_4104626034_metrics.png" width="280" alt="seed 4104626034 trajectory and v(t) trace"></td>
+<td><video controls loop muted playsinline width="280"><source src="../videos/clone-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="../videos/residual-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><img src="../figures/seed_4104626034_metrics.png" width="280" alt="seed 4104626034 trajectory and v(t) trace"></td>
 </tr>
 </tbody>
 </table>
@@ -232,7 +232,7 @@ above (68/78 → 74/78). Of the 10 seeds that failed at 200k, **6 are fixed** by
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="videos/residual-400k-fail-4104626056.mp4" type="video/mp4">
+    <source src="../videos/residual-400k-fail-4104626056.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>
@@ -243,7 +243,7 @@ above (68/78 → 74/78). Of the 10 seeds that failed at 200k, **6 are fixed** by
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="videos/residual-400k-fail-4104626069.mp4" type="video/mp4">
+    <source src="../videos/residual-400k-fail-4104626069.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>
@@ -253,7 +253,7 @@ above (68/78 → 74/78). Of the 10 seeds that failed at 200k, **6 are fixed** by
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="videos/residual-400k-fail-4104626083.mp4" type="video/mp4">
+    <source src="../videos/residual-400k-fail-4104626083.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>
@@ -265,7 +265,7 @@ above (68/78 → 74/78). Of the 10 seeds that failed at 200k, **6 are fixed** by
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="videos/residual-400k-fail-4104626086.mp4" type="video/mp4">
+    <source src="../videos/residual-400k-fail-4104626086.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>

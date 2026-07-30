@@ -51,7 +51,7 @@ Two observed symptoms, one root cause:
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="videos/cannot-stop-overshoot.mp4" type="video/mp4">
+    <source src="../videos/cannot-stop-overshoot.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>
@@ -91,7 +91,7 @@ miss now _lingers near_ the goal instead of spiraling across the box.
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="videos/successful-landing.mp4" type="video/mp4">
+    <source src="../videos/successful-landing.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>
@@ -111,7 +111,7 @@ _too much_ near the goal and gets stuck in a near-stationary spin.
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="videos/over-braking-pirouette.mp4" type="video/mp4">
+    <source src="../videos/over-braking-pirouette.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>
@@ -174,7 +174,7 @@ truncates far away — the same `v → 0` family as
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="videos/far-field-v-collapse-stall.mp4" type="video/mp4">
+    <source src="../videos/far-field-v-collapse-stall.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>
@@ -189,7 +189,7 @@ truncates far away — the same `v → 0` family as
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="videos/far-field-v-collapse-worst.mp4" type="video/mp4">
+    <source src="../videos/far-field-v-collapse-worst.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>
