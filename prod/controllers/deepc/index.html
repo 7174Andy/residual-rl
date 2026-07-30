@@ -1208,10 +1208,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -1385,14 +1381,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/05-cold-start/" class="md-nav__link">
+      <a href="../../journey/05-library-switching/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    05. Cold-start bug
+    05. Library switching
   
 
     
@@ -1413,14 +1409,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/06-single-library-fails/" class="md-nav__link">
+      <a href="../../journey/06-stop-at-goal/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    06. Single library fails
+    06. Stopping at the goal
   
 
     
@@ -1441,14 +1437,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/07-library-switching/" class="md-nav__link">
+      <a href="../../journey/07-imitation-learning/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    07. Library switching
+    07. Imitation learning
   
 
     
@@ -1469,70 +1465,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/08-stop-at-goal/" class="md-nav__link">
+      <a href="../../journey/08-residual-rl/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    08. Stopping at the goal
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../journey/09-imitation-learning/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    09. Imitation learning
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../journey/10-residual-rl/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    10. Residual RL
+    08. Residual RL
   
 
     
@@ -1836,7 +1776,7 @@ u_{\min} \le U_f \cdot g &amp;\le u_{\max}
 <p>On <code>reset(y_initial, u_initial)</code>, both are filled with <code>T_ini</code> copies of the initial values. This "synthetic past" is consistent for any zero-velocity initial condition, and the soft <code>λ_y ‖σ_y‖²</code> penalty absorbs the inconsistency for other cases.</p>
 <div class="admonition warning">
 <p class="admonition-title">Cold-start gotcha</p>
-<p>If <code>u_initial</code> is <code>0</code> and the data has only non-negative <code>v</code> (e.g., paper-PE collection or broad bounds with <code>v ≥ 0</code>), the QP gets locked into outputting <code>u ≈ 0</code>. The fix is to prime <code>u_initial</code> at the <strong>midpoint of <code>action_bounds</code></strong> instead. <code>scripts/run_deepc.py</code> does this automatically. See <a href="../../journey/05-cold-start/">cold-start journey entry</a>.</p>
+<p>If <code>u_initial</code> is <code>0</code> and the data has only non-negative <code>v</code> (e.g., paper-PE collection or broad bounds with <code>v ≥ 0</code>), the QP gets locked into outputting <code>u ≈ 0</code>. The fix is to prime <code>u_initial</code> at the <strong>midpoint of <code>action_bounds</code></strong> instead. <code>scripts/run_deepc.py</code> does this automatically.</p>
 </div>
 <h2 id="libraries-and-orientation-switching">Libraries and orientation switching<a class="headerlink" href="#libraries-and-orientation-switching" title="Permanent link">&para;</a></h2>
 <p><code>DeePC</code> holds one or more orientation-keyed data libraries. The constructor

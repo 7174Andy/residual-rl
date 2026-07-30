@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/07-library-switching/">
+        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/07-imitation-learning/">
       
       
-        <link rel="prev" href="../06-single-library-fails/">
+        <link rel="prev" href="../06-stop-at-goal/">
       
       
-        <link rel="next" href="../08-stop-at-goal/">
+        <link rel="next" href="../08-residual-rl/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>07. Library switching - two-wheeled-experiment</title>
+        <title>07. Imitation learning - two-wheeled-experiment</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#07-library-switching-local-linearization-via-4-quadrants" class="md-skip">
+        <a href="#08-imitation-learning-cloning-deepc-into-a-neural-policy" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              07. Library switching
+              07. Imitation learning
             
           </span>
         </div>
@@ -1006,10 +1006,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -1186,14 +1182,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../05-cold-start/" class="md-nav__link">
+      <a href="../05-library-switching/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    05. Cold-start bug
+    05. Library switching
   
 
     
@@ -1214,14 +1210,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../06-single-library-fails/" class="md-nav__link">
+      <a href="../06-stop-at-goal/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    06. Single library fails
+    06. Stopping at the goal
   
 
     
@@ -1258,7 +1254,7 @@
   <span class="md-ellipsis">
     
   
-    07. Library switching
+    07. Imitation learning
   
 
     
@@ -1276,7 +1272,7 @@
   <span class="md-ellipsis">
     
   
-    07. Library switching
+    07. Imitation learning
   
 
     
@@ -1302,10 +1298,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#decision" class="md-nav__link">
+  <a href="#motivation-one-line" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Decision
+        Motivation (one line)
       
     </span>
   </a>
@@ -1324,10 +1320,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-local-linearization-works" class="md-nav__link">
+  <a href="#what-was-built" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why local linearization works
+        What was built
       
     </span>
   </a>
@@ -1335,10 +1331,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#considered" class="md-nav__link">
+  <a href="#side-by-side-deepc-vs-the-clone" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Considered
+        Side-by-side — DeePC vs the clone
       
     </span>
   </a>
@@ -1346,10 +1342,49 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
+  <a href="#metrics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Implementation
+        Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-open-loop-fidelity-does-the-clone-reproduce-deepcs-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (1) Open-loop fidelity — does the clone reproduce DeePC's action?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-closed-loop-behavioral-equivalence-78-random-seeds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (2)+(3) Closed-loop behavioral equivalence — 78 random seeds
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-the-numbers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the numbers
       
     </span>
   </a>
@@ -1357,10 +1392,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#outcome" class="md-nav__link">
+  <a href="#what-this-unlocks-residual-rl" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Outcome
+        What this unlocks — residual RL
       
     </span>
   </a>
@@ -1368,21 +1403,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#caveats" class="md-nav__link">
+  <a href="#reproduce" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Caveats
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#code" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Code
+        Reproduce
       
     </span>
   </a>
@@ -1405,70 +1429,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../08-stop-at-goal/" class="md-nav__link">
+      <a href="../08-residual-rl/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    08. Stopping at the goal
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../09-imitation-learning/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    09. Imitation learning
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../10-residual-rl/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    10. Residual RL
+    08. Residual RL
   
 
     
@@ -1516,10 +1484,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#decision" class="md-nav__link">
+  <a href="#motivation-one-line" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Decision
+        Motivation (one line)
       
     </span>
   </a>
@@ -1538,10 +1506,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-local-linearization-works" class="md-nav__link">
+  <a href="#what-was-built" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why local linearization works
+        What was built
       
     </span>
   </a>
@@ -1549,10 +1517,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#considered" class="md-nav__link">
+  <a href="#side-by-side-deepc-vs-the-clone" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Considered
+        Side-by-side — DeePC vs the clone
       
     </span>
   </a>
@@ -1560,10 +1528,49 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
+  <a href="#metrics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Implementation
+        Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-open-loop-fidelity-does-the-clone-reproduce-deepcs-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (1) Open-loop fidelity — does the clone reproduce DeePC's action?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-closed-loop-behavioral-equivalence-78-random-seeds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (2)+(3) Closed-loop behavioral equivalence — 78 random seeds
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-the-numbers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the numbers
       
     </span>
   </a>
@@ -1571,10 +1578,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#outcome" class="md-nav__link">
+  <a href="#what-this-unlocks-residual-rl" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Outcome
+        What this unlocks — residual RL
       
     </span>
   </a>
@@ -1582,21 +1589,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#caveats" class="md-nav__link">
+  <a href="#reproduce" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Caveats
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#code" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Code
+        Reproduce
       
     </span>
   </a>
@@ -1623,102 +1619,321 @@
   
 
 
-<h1 id="07-library-switching-local-linearization-via-4-quadrants">07. Library switching — local linearization via 4 quadrants<a class="headerlink" href="#07-library-switching-local-linearization-via-4-quadrants" title="Permanent link">&para;</a></h1>
-<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p><strong>Pre-collect four data libraries, one per heading quadrant, and hand all four to a single <code>DeePC</code> controller.</strong> Each step, the controller selects the library whose anchor heading is closest to the robot's current heading, swaps its Hankel matrices into one cached QP, and solves. The robot keeps one controller; only the <em>data library</em> feeding the predictor changes.</p>
+<h1 id="08-imitation-learning-cloning-deepc-into-a-neural-policy">08. Imitation learning — cloning DeePC into a neural policy<a class="headerlink" href="#08-imitation-learning-cloning-deepc-into-a-neural-policy" title="Permanent link">&para;</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Status: complete (2026-07-07)</p>
+</div>
+<p>A small MLP was trained by <strong>behavioral cloning</strong> to imitate the canonical DeePC
+controller. It reproduces DeePC's closed-loop behavior on a 78-seed random sweep —
+<strong>identical 38.5 % reach rate</strong>, <strong>McNemar <span class="arithmatex">\(p = 1.0\)</span></strong> (no systematic bias),
+<strong>82 % seed-by-seed outcome agreement</strong>, and bounded trajectory drift (~0.93 units
+median) — while replacing the <strong>~0.6 s QP solve</strong> with a <strong>23 µs forward pass</strong>
+(~26,000× faster). This clone is the frozen baseline <span class="arithmatex">\(f_\theta\)</span> for the
+residual-RL step proposed in <a href="../06-stop-at-goal/">06</a>. It faithfully reproduces
+DeePC's <em>failures</em> too (the far-field <code>v</code>-collapse) — that is by design: the clone's
+job is fidelity, RL's job is the fix.</p>
+<h2 id="motivation-one-line">Motivation (one line)<a class="headerlink" href="#motivation-one-line" title="Permanent link">&para;</a></h2>
+<p>Residual RL — <code>u = u_DeePC + u_RL(obs)</code> — needs the DeePC baseline evaluated at
+<strong>every RL training step</strong>, and keeping the <strong>QP in the loop</strong> (~0.6 s × 200 steps ×
+millions of steps) is prohibitive. Clone DeePC into a fast neural policy so the
+baseline is a microsecond forward pass instead of a solver call.</p>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p>The previous entry <a href="../06-single-library-fails/">Why one library isn't enough</a> explained the structural problem: the unicycle's bilinear <code>cos(δ)·v</code> term cannot be represented by a single linear behavioral predictor across all orientations. The fix is piecewise linearization — fit a separate local model in each "operating region" and route the controller through whichever region you're in.</p>
-<p>The paper does exactly this. From <a href="https://arxiv.org/abs/2603.07395">arXiv:2603.07395</a> Appendix D:</p>
+<p><a href="../06-stop-at-goal/">06</a> ended on a structural conclusion: DeePC navigates well on
+~39 % of seeds and <strong>collapses</strong> on the rest (the hallucinated-prediction
+<code>v</code>-collapse), so the next step is a <strong>hybrid</strong> — DeePC supplies the prior where its
+data representation is valid, RL backstops the regime where it is not. The default
+architecture is <strong>residual RL</strong> with a DeePC baseline. That plan named one concrete
+obstacle:</p>
 <blockquote>
-<p><em>"For each prediction horizon W, we construct 4 corresponding data libraries Hd with Tini = 5, each approximately representing the local behavior of the nonlinear system within orientation intervals [0, π/2), [π/2, π), [π, 3π/2), and [3π/2, 2π). During online tracking, the data library associated with the robot's current orientation is selected to improve tracking performance."</em></p>
+<p>"Residual RL keeps the <strong>QP in the training loop</strong> — a ~0.5 s solve every step … likely
+prohibitive as-is."</p>
 </blockquote>
-<p>So four libraries cover the heading circle, each anchored at the midpoint of its quadrant.</p>
-<h2 id="why-local-linearization-works">Why local linearization works<a class="headerlink" href="#why-local-linearization-works" title="Permanent link">&para;</a></h2>
-<p>Within a fixed heading region — say <code>δ ≈ π/4</code> — both <code>cos(δ)</code> and <code>sin(δ)</code> are nearly constant (<code>≈ 0.71</code> each). The dynamics behave locally like:</p>
-<div class="arithmatex">\[
-\Delta x \approx \Delta t \cdot 0.71 \cdot v, \qquad \Delta y \approx \Delta t \cdot 0.71 \cdot v
-\]</div>
-<p>This is <strong>linear in <code>v</code></strong> with fixed slope. A linear behavioral predictor trained on data collected while the robot was near heading <code>π/4</code> will correctly capture this slope and produce confident, non-degenerate predictions.</p>
-<p>By collecting one library <em>starting from each of four orientations</em> (the paper's <code>π/4, 3π/4, 5π/4, 7π/4</code>), each library's data is concentrated in a roughly π/2-wide heading region around its anchor. At runtime we always have <strong>the right library for the current heading</strong>.</p>
-<h2 id="considered">Considered<a class="headerlink" href="#considered" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>One library</strong> — failed structurally (previous entry).</li>
-<li><strong>Many libraries</strong> — diminishing returns past 4; the local linearity holds well over π/2-wide quadrants. 4 matches the paper.</li>
-<li><strong>Continuous gain scheduling</strong> — interpolate between libraries based on heading. More work; the paper's discrete switch is enough.</li>
-<li><strong>Lift the state via Koopman (<code>sin δ</code>, <code>cos δ</code> in <code>y</code>)</strong> — alternative path that would let one library suffice. Bigger refactor (env's <code>y</code> becomes dim 4, <code>Q</code> becomes 4×4). Sidelined for now in favor of switching.</li>
-</ol>
-<h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
-<p>Switching lives <strong>inside <code>DeePC</code></strong> — there is no separate wrapper class. One controller holds:</p>
+<p>This entry removes that obstacle. It builds the "BC warm-start" artifact 08 listed as
+an alternative, but repurposed: not as a policy to fine-tune away from, but as a
+<strong>frozen, amortized copy of DeePC</strong> to add a learned residual <em>on top of</em>. Either way
+the prerequisite is the same — a neural policy that behaves like DeePC — and that is
+what is validated here.</p>
+<h2 id="what-was-built">What was built<a class="headerlink" href="#what-was-built" title="Permanent link">&para;</a></h2>
+<p><strong>The contract.</strong> The clone sees exactly what DeePC's QP consumes each step and emits
+the single action DeePC would apply:</p>
 <ul>
-<li>A list of N pre-collected libraries (each a <code>(Up, Uf, Yp, Yf)</code> Hankel tuple) plus their anchor headings.</li>
-<li>The active library's Hankels in <code>cp.Parameter</code>s, so swapping libraries means writing new parameter values into <strong>one compiled QP</strong> — no recompile per library.</li>
-<li><strong>One shared past-<code>(u, y)</code> buffer</strong> — the robot's actual history is the same regardless of which library predicts the future.</li>
+<li><strong>Input</strong> — the DeePC-faithful state: the <code>T_ini = 5</code>-step past buffer
+  <code>(u_ini, y_ini)</code>, the current measurement <code>y = (x, y, δ)</code>, the goal <code>(g_x, g_y)</code>, and a
+  one-hot of the <strong>orientation-keyed library</strong> DeePC would select (4 heading anchors).</li>
+<li><strong>Output</strong> — the single applied action <code>u = (v, w)</code> (what the receding-horizon QP
+  actually commits, not the whole plan).</li>
 </ul>
-<p>On each <code>act(y_current, y_ref)</code>:</p>
-<ol>
-<li><code>idx = argmin_i |wrap(y_current[heading_index] − anchor_i)|</code> (trivially 0 with a single library).</li>
-<li>If <code>idx</code> changed since last step, clear the warm-start <code>g</code> — its columns indexed the old library and are meaningless under the new one.</li>
-<li>Write <code>libraries[idx]</code>'s <code>(Up, Uf, Yp, Yf)</code> into the Hankel parameters and solve.</li>
-<li>Slide the shared buffer with the applied <code>(u_t, y_current)</code>.</li>
-</ol>
-<p>The four libraries come from offline rollouts started at the paper's four init headings (<code>controllers/data_collection.PAPER_INIT_HEADINGS</code>); each rollout's data concentrates around one quadrant anchor. <code>scripts/run_deepc.py</code> builds all four by default (<code>--single_library N</code> passes a one-element list for the single-library contrast) and prints <strong>per-episode library usage</strong> so you can see when switching actually triggered:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>episode 1: REACHED   after  94 steps  final_dist=0.46
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  library usage: [0, 0, 17, 77]    # Q3 → Q4 mid-flight
-</span></code></pre></div>
-<h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
-<p>Closed-loop test on broad-<code>w</code> data with library switching enabled (all four libraries loaded). Reproduce with <code>uv run python scripts/run_deepc.py --headless --episodes 4 --seed 0</code> (data: <code>data/libraries_v0.npz</code>, <code>T_ini=5</code>, <code>N=12</code>):</p>
+<p><strong>Featurization (40-D).</strong> Heading is encoded as <code>(sin δ, cos δ)</code> so the <code>±π</code> wrap is
+continuous. Layout <code>6·T_ini + 6 + N_lib = 30 + 6 + 4 = 40</code>:</p>
 <table>
 <thead>
 <tr>
-<th>Episode</th>
-<th>Outcome</th>
-<th>Steps</th>
-<th>Final dist</th>
+<th>block</th>
+<th>dims</th>
+<th>contents</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>0</td>
-<td>truncated</td>
-<td>200</td>
-<td>16.95</td>
+<td>past buffer</td>
+<td><code>6·T_ini = 30</code></td>
+<td>5 steps of <code>(v, w, x, y, sin δ, cos δ)</code></td>
 </tr>
 <tr>
-<td>1</td>
-<td><strong>REACHED</strong></td>
-<td>94</td>
-<td><strong>0.46</strong></td>
+<td>current output</td>
+<td><code>4</code></td>
+<td><code>x, y, sin δ, cos δ</code></td>
 </tr>
 <tr>
-<td>2</td>
-<td><strong>REACHED</strong></td>
-<td>35</td>
-<td><strong>0.46</strong></td>
+<td>goal</td>
+<td><code>2</code></td>
+<td><code>g_x, g_y</code></td>
 </tr>
 <tr>
-<td>3</td>
-<td><strong>REACHED</strong></td>
-<td>115</td>
-<td><strong>0.48</strong></td>
+<td>library one-hot</td>
+<td><code>N_lib = 4</code></td>
+<td>which heading library DeePC would use</td>
 </tr>
 </tbody>
 </table>
-<p>Success rate <strong>3/4</strong> on this seed (mean steps-to-reach 81). This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where <code>v</code> was stuck at zero in all four episodes.</p>
-<p>Seed 0 is a lucky draw, though. Over a larger random sample (<code>--episodes 100 --random</code>, base seed <code>4104626029</code>, n=78 before the run was stopped) the aggregate is more sobering:</p>
+<p>The one-hot is the key design choice: DeePC's prediction is <strong>piecewise</strong> (a different
+local-linear library per heading quadrant), so telling the MLP which library is active
+spares it from having to rediscover that switching boundary from the raw heading.</p>
+<p><strong>Architecture.</strong> MLP <code>40 → 256 → 256 → 2</code>, ReLU, standardized inputs/targets (the
+one-hot tail passes through unscaled). CPU forward pass ≈ <strong>23 µs</strong>.</p>
+<p><strong>Data (hybrid, 35,023 labeled <code>state → DeePC action</code> pairs).</strong> No single sampling
+strategy covers both "everywhere the state space could be" and "where the closed loop
+actually goes", so the set is mixed:</p>
+<table>
+<thead>
+<tr>
+<th>source</th>
+<th>count</th>
+<th>share</th>
+<th>purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>synthetic</td>
+<td>15,024</td>
+<td>42.9 %</td>
+<td>broad coverage — random poses, goals, past buffers</td>
+</tr>
+<tr>
+<td>on-policy</td>
+<td>15,023</td>
+<td>42.9 %</td>
+<td>the distribution the clone will actually see</td>
+</tr>
+<tr>
+<td>degenerate</td>
+<td>4,976</td>
+<td>14.2 %</td>
+<td>frozen/constant-past stall states (the hard regime)</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>degenerate</strong> slice is deliberately over-represented: it is the <code>v</code>-collapse
+regime from <a href="../06-stop-at-goal/">06</a>, where the QP target is hardest to reproduce and
+where the downstream RL will do its work — so the clone must at least see it. Labels
+are the QP's own solution at each state, under the <strong>canonical config</strong> (bearing
+reference, <code>Q = diag(1, 1, 2)</code>, <code>R = 1.3·10⁻³ I</code>, <code>T_ini = 5</code>, <code>N = 12</code>,
+<code>λ_g = 2</code>, <code>λ_y = 3·10⁶</code>, <code>libraries_v0.npz</code>).</p>
+<p><strong>Validation gate (3 layers).</strong> Marginal reach-rate parity is <em>not</em> sufficient — two
+controllers can hit the same success rate on disjoint seeds. So fidelity is checked at
+three levels: (1) open-loop regression on a held-out split, by regime; (2) closed-loop
+trajectory deviation (does the clone's rollout track DeePC's path?); (3) <strong>paired
+per-seed outcomes</strong> with a McNemar test (does it agree seed-by-seed, and is any
+disagreement unbiased?).</p>
+<h2 id="side-by-side-deepc-vs-the-clone">Side-by-side — DeePC vs the clone<a class="headerlink" href="#side-by-side-deepc-vs-the-clone" title="Permanent link">&para;</a></h2>
+<p>Three random seeds under the canonical config. The env seed fixes the <strong>same</strong> start
+pose and goal for both controllers, so each row is the two controllers attempting an
+identical task. Left = DeePC (QP); right = the clone (MLP).</p>
+<table>
+<thead>
+<tr><th>DeePC — the QP controller (~0.6 s/step)</th><th>Clone — the neural policy (23 µs/step)</th></tr>
+</thead>
+<tbody>
+<tr><td colspan="2" align="center"><b>seed 4104626050 · both REACH</b> — DeePC 41 steps → 0.31; clone 45 steps → 0.32; path deviation 0.80 median / 1.53 p95</td></tr>
+<tr>
+<td><video controls loop muted playsinline width="330"><source src="../videos/deepc-4104626050.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../videos/clone-4104626050.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr><td colspan="2" align="center"><b>seed 4104626042 · both REACH</b> — DeePC 58 steps → 0.42; clone 71 steps → 0.46; path deviation 1.40 median / 2.15 p95</td></tr>
+<tr>
+<td><video controls loop muted playsinline width="330"><source src="../videos/deepc-4104626042.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../videos/clone-4104626042.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr><td colspan="2" align="center"><b>seed 4104626061 · both FAIL</b> — DeePC truncates at 1.06; clone truncates at 0.54 (a near-miss at the 0.5 edge); path deviation 0.57 median / 1.35 p95. The clone reproduces the far-field stall, not just the reaches.</td></tr>
+<tr>
+<td><video controls loop muted playsinline width="330"><source src="../videos/deepc-4104626061.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../videos/clone-4104626061.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+</tbody>
+</table>
+
+<p>All three video seeds fall in the <strong>82 % agreeing</strong> set (both reach, or both fail).
+They were chosen from the clone's own reaches plus one shared failure to illustrate the
+match, so they are a favorable-but-representative sample — the aggregate table below is
+the unbiased measure.</p>
+<h2 id="metrics">Metrics<a class="headerlink" href="#metrics" title="Permanent link">&para;</a></h2>
+<h3 id="1-open-loop-fidelity-does-the-clone-reproduce-deepcs-action">(1) Open-loop fidelity — does the clone reproduce DeePC's action?<a class="headerlink" href="#1-open-loop-fidelity-does-the-clone-reproduce-deepcs-action" title="Permanent link">&para;</a></h3>
+<p>Held-out split (<code>n = 3502</code>, never seen in training). Errors are in physical units
+(<code>v</code> in units/s, <code>w</code> in rad/s):</p>
+<table>
+<thead>
+<tr>
+<th>regime</th>
+<th>n</th>
+<th>MAE <code>v</code></th>
+<th>MAE <code>w</code></th>
+<th>RMSE <code>v</code></th>
+<th>RMSE <code>w</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>on-policy</td>
+<td>1,525</td>
+<td>0.58</td>
+<td>0.13</td>
+<td>0.94</td>
+<td>0.22</td>
+</tr>
+<tr>
+<td>synthetic</td>
+<td>1,495</td>
+<td>1.13</td>
+<td>0.22</td>
+<td>1.68</td>
+<td>0.37</td>
+</tr>
+<tr>
+<td>degenerate</td>
+<td>482</td>
+<td>2.78</td>
+<td>0.25</td>
+<td>4.06</td>
+<td>0.44</td>
+</tr>
+<tr>
+<td><strong>overall</strong></td>
+<td>3,502</td>
+<td><strong>1.12</strong></td>
+<td><strong>0.18</strong></td>
+<td><strong>1.97</strong></td>
+<td><strong>0.33</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Held-out correlation with the QP target: <code>corr(v) = 0.94</code>, <code>corr(w) = 0.97</code>
+(normalized MSE 0.092). The clone is <strong>most accurate exactly where it operates</strong>
+(on-policy: MAE <code>v</code> ≈ 0.58 units/s against a <code>[0, 20]</code> range) and least accurate on the
+<strong>degenerate</strong> stall states — expected, because there the QP itself is ill-posed (a
+near-constant past is matched by many solutions, so the target is nearly arbitrary; see
+<a href="../06-stop-at-goal/">06</a> <em>Root cause</em>). The clone cannot be more certain than DeePC is.</p>
+<h3 id="23-closed-loop-behavioral-equivalence-78-random-seeds">(2)+(3) Closed-loop behavioral equivalence — 78 random seeds<a class="headerlink" href="#23-closed-loop-behavioral-equivalence-78-random-seeds" title="Permanent link">&para;</a></h3>
+<p><code>scripts/validate_clone.py</code>, base seed <code>4104626029</code>, canonical config:</p>
+<table>
+<thead>
+<tr>
+<th>metric</th>
+<th>DeePC</th>
+<th>Clone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>reach rate</td>
+<td>30 / 78 = <strong>38.5 %</strong></td>
+<td>30 / 78 = <strong>38.5 %</strong></td>
+</tr>
+<tr>
+<td>reach-rate 95 % CI (Wilson)</td>
+<td>[0.284, 0.496]</td>
+<td>[0.284, 0.496]</td>
+</tr>
+<tr>
+<td>median solve/inference time per step</td>
+<td>~0.6 s (QP)</td>
+<td><strong>23 µs</strong> (MLP)</td>
+</tr>
+</tbody>
+</table>
+<p>Paired agreement (the decisive test):</p>
+<table>
+<thead>
+<tr>
+<th>paired metric</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>seed-by-seed outcome agreement</td>
+<td><strong>64 / 78 = 82.1 %</strong></td>
+</tr>
+<tr>
+<td>confusion (both / DeePC-only / clone-only / neither)</td>
+<td>23 / 7 / 7 / 41</td>
+</tr>
+<tr>
+<td>McNemar <span class="arithmatex">\(p\)</span></td>
+<td><strong>1.0</strong> (disagreements balanced → no bias)</td>
+</tr>
+<tr>
+<td>median trajectory position deviation</td>
+<td><strong>0.94 units</strong> median · <strong>2.01</strong> p95 (per-seed)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="reading-the-numbers">Reading the numbers<a class="headerlink" href="#reading-the-numbers" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Reach rate ≈ 39%</strong> (30/78); the rest truncate at 200 steps.</li>
-<li><strong>QP failures: 0/78</strong> — the solver did not fail once across the whole sample (nor on seed 0).</li>
-<li>Steps-to-reach (successes): mean ≈ 103, range 7–174. Final distance: mean ≈ 4.0, max ≈ 15.8.</li>
+<li><strong>Equivalent, not merely comparable.</strong> Identical marginal reach rate <em>and</em> McNemar
+  <span class="arithmatex">\(p = 1.0\)</span> mean the clone is neither better nor worse than DeePC — the 14 disagreeing
+  seeds split exactly 7/7, so they are boundary noise (near-miss seeds that tip either
+  way), not a systematic skew. This is the property that a raw success-rate match cannot
+  certify.</li>
+<li><strong>Same paths, not just same outcomes.</strong> Median trajectory deviation ~0.94 units
+  (worst-case p95 ~2.01, on a 20-unit workspace diagonal) says the clone follows nearly the same route, not just
+  ends in the same place. On the video seeds the clone takes a few more steps
+  (45 vs 41; 71 vs 58) but lands equivalently.</li>
+<li><strong>The failures transfer too.</strong> On seed 4104626061 both stall in the far field — the
+  clone inherits DeePC's dominant flaw. This is the honest, expected outcome of cloning
+  (flagged in <a href="../06-stop-at-goal/">06</a>'s "BC warm-start" note) and is <em>acceptable here</em>:
+  the clone is the baseline, and the residual RL is what supplies the forward velocity
+  the hallucinated predictor refuses to.</li>
+<li><strong>The speedup is the point.</strong> 0.6 s → 23 µs (~26,000×) is what turns "QP in the RL
+  training loop" from prohibitive into a non-issue.</li>
 </ul>
-<p>So switching makes goal-reaching <em>possible</em> (~39% vs single-library's 0%), but it is far from reliable — the dominant failure is the truncation/spin mode below, not the QP.</p>
-<h2 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Switching only helps if the robot <strong>actually crosses quadrant boundaries</strong> during an episode. With narrow <code>w</code> data the turn rate is too low and switching becomes a no-op.</li>
-<li><strong>Truncation/spin is the dominant failure</strong> (~61% of random episodes). Episode 0 above is typical: 200 steps, ends 16.95 from goal despite cycling all four libraries — <code>w</code> saturates positive while <code>v</code> stays near zero, so the robot spins in place rather than driving out. Diagnosing these would benefit from logging the QP's <code>σ_y</code> and the controller's predicted vs actual trajectory.</li>
-<li><strong>QP solver failures did not appear</strong> in this measurement (0 across 82 episodes: 78 random + 4 at seed 0), so they are not the bottleneck here — the earlier "occasional <code>user_limit</code> failure" concern is not borne out on this build/data. The QP is still ill-conditioned at the paper's <code>λ_y ≈ 3e6</code> (see <code>deepc.py</code>), so a numerical breakdown remains <em>possible</em> on other data/solvers (SCS is chosen for robustness; CLARABEL can break down), but it is not what limits reaching.</li>
-</ul>
-<h2 id="code">Code<a class="headerlink" href="#code" title="Permanent link">&para;</a></h2>
-<p><code>two_wheel_robot/controllers/deepc.py::DeePC</code> — library switching is built into the controller (<code>libraries</code>, <code>anchor_headings</code>, <code>heading_index</code>; <code>last_library_idx</code> diagnostic). See <a href="../../controllers/library-switching/">library switching reference</a>.</p>
+<h2 id="what-this-unlocks-residual-rl">What this unlocks — residual RL<a class="headerlink" href="#what-this-unlocks-residual-rl" title="Permanent link">&para;</a></h2>
+<p>The clone is the frozen <span class="arithmatex">\(f_\theta\)</span> for the hybrid proposed in
+<a href="../06-stop-at-goal/">06</a>:</p>
+<div class="arithmatex">\[u = \operatorname{clip}\big(f_\theta(\text{state}) + u_\text{RL}(\text{obs})\big)\]</div>
+<p>with the residual zero-initialized (initial behavior ≈ DeePC, no regression risk) and
+trained on the <strong>true env reward</strong>. Because <span class="arithmatex">\(f_\theta\)</span> is a 23 µs forward pass, the QP
+never enters the training loop. The residual is tiny on the ~39 % of seeds DeePC
+already solves and <em>carries</em> the ~42 % it collapses — exactly the far-field
+<code>v</code>-collapse the clone was just shown to reproduce.</p>
+<p>Open question carried forward: does residual RL beat the much cheaper
+<code>--Q_heading 0</code> / <code>--no_bearing_ref</code> heading-reference fix from
+<a href="../06-stop-at-goal/">06</a>? That ablation is the next entry.</p>
+<h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># generate the hybrid dataset (state -&gt; DeePC action pairs)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/gen_clone_data.py<span class="w"> </span>--out<span class="w"> </span>data/clone_dataset.npz
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># train the clone</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_clone.py<span class="w"> </span>--data<span class="w"> </span>data/clone_dataset.npz<span class="w"> </span>--out<span class="w"> </span>data/clone.pt
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># the 3-layer fidelity gate (open-loop regression + closed-loop paired outcomes)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/validate_clone.py<span class="w"> </span>--clone<span class="w"> </span>data/clone.pt<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span>--data<span class="w"> </span>data/clone_dataset.npz<span class="w"> </span>--n_seeds<span class="w"> </span><span class="m">78</span><span class="w"> </span>--base_seed<span class="w"> </span><span class="m">4104626029</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># side-by-side videos (DeePC left, clone right)</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_deepc.py<span class="w"> </span>--seed<span class="w"> </span><span class="m">4104626050</span><span class="w"> </span>--episodes<span class="w"> </span><span class="m">1</span><span class="w"> </span>--record<span class="w"> </span>docs/journey/videos<span class="w">  </span><span class="c1"># -&gt; episode_0.mp4, rename to deepc-4104626050.mp4</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_clone.py<span class="w"> </span>--record<span class="w"> </span>docs/journey/videos<span class="w"> </span>--seeds<span class="w"> </span><span class="m">4104626050</span><span class="w">              </span><span class="c1"># -&gt; clone-... via episode_&lt;seed&gt;.mp4</span>
+</span></code></pre></div>
 
 
 
@@ -1754,7 +1969,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../06-single-library-fails/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 06. Single library fails">
+          <a href="../06-stop-at-goal/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 06. Stopping at the goal">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1764,20 +1979,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                06. Single library fails
+                06. Stopping at the goal
               </div>
             </div>
           </a>
         
         
           
-          <a href="../08-stop-at-goal/" class="md-footer__link md-footer__link--next" aria-label="Next: 08. Stopping at the goal">
+          <a href="../08-residual-rl/" class="md-footer__link md-footer__link--next" aria-label="Next: 08. Residual RL">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                08. Stopping at the goal
+                08. Residual RL
               </div>
             </div>
             <div class="md-footer__button md-icon">

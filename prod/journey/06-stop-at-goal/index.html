@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/08-stop-at-goal/">
+        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/06-stop-at-goal/">
       
       
-        <link rel="prev" href="../07-library-switching/">
+        <link rel="prev" href="../05-library-switching/">
       
       
-        <link rel="next" href="../09-imitation-learning/">
+        <link rel="next" href="../07-imitation-learning/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>08. Stopping at the goal - two-wheeled-experiment</title>
+        <title>06. Stopping at the goal - two-wheeled-experiment</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#08-stopping-at-the-goal-the-deceleration-overshoot-problem" class="md-skip">
+        <a href="#07-stopping-at-the-goal-the-deceleration-overshoot-problem" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              08. Stopping at the goal
+              06. Stopping at the goal
             
           </span>
         </div>
@@ -1006,10 +1006,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -1186,70 +1182,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../05-cold-start/" class="md-nav__link">
+      <a href="../05-library-switching/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    05. Cold-start bug
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../06-single-library-fails/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    06. Single library fails
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../07-library-switching/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    07. Library switching
+    05. Library switching
   
 
     
@@ -1286,7 +1226,7 @@
   <span class="md-ellipsis">
     
   
-    08. Stopping at the goal
+    06. Stopping at the goal
   
 
     
@@ -1304,7 +1244,7 @@
   <span class="md-ellipsis">
     
   
-    08. Stopping at the goal
+    06. Stopping at the goal
   
 
     
@@ -1444,14 +1384,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../09-imitation-learning/" class="md-nav__link">
+      <a href="../07-imitation-learning/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    09. Imitation learning
+    07. Imitation learning
   
 
     
@@ -1472,14 +1412,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../10-residual-rl/" class="md-nav__link">
+      <a href="../08-residual-rl/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    10. Residual RL
+    08. Residual RL
   
 
     
@@ -1645,10 +1585,7 @@
   
 
 
-<h1 id="08-stopping-at-the-goal-the-deceleration-overshoot-problem">08. Stopping at the goal — the deceleration / overshoot problem<a class="headerlink" href="#08-stopping-at-the-goal-the-deceleration-overshoot-problem" title="Permanent link">&para;</a></h1>
-<div class="admonition note">
-<p class="admonition-title">Status: partially resolved (updated 2026-06-01)</p>
-</div>
+<h1 id="07-stopping-at-the-goal-the-deceleration-overshoot-problem">07. Stopping at the goal — the deceleration / overshoot problem<a class="headerlink" href="#07-stopping-at-the-goal-the-deceleration-overshoot-problem" title="Permanent link">&para;</a></h1>
 <p>The original <strong>overshoot</strong> problem below is resolved by widening the data
 envelope (see <em>Resolution</em>). Doing so surfaced <strong>two</strong> residual failures: an
 <em>over-braking</em> pirouette near the goal, and — only visible at larger sample — a
@@ -1667,7 +1604,7 @@ it skims past the goal circle and misses by a small margin, then loops back.</p>
 <p>After <a href="../03-action-bounds/">03 action bounds</a> and the bounds sweep, <code>data/libraries.npz</code>
 is collected with <strong>hybrid</strong> PE bounds <code>v ∈ [10, 20]</code>, <code>w ∈ [±π/2]</code> (paper-style
 forward-only <code>v</code>, but a fast turn rate). This removes the spin-in-place stall from
-<a href="../06-single-library-fails/">06</a>: forcing <code>v ≥ 10</code> makes "do nothing" infeasible.</p>
+<a href="../05-library-switching/">05</a>: forcing <code>v ≥ 10</code> makes "do nothing" infeasible.</p>
 <p>But the paper's task is continuous heart-curve <em>tracking</em> — the robot never stops.
 Ours is point-to-point <em>reaching</em>, which requires stopping within <code>goal_tolerance</code>
 (<code>0.5</code>). Forcing <code>v ≥ 10</code> means the robot moves a minimum of <code>v_min · Δt = 10 · 0.025
@@ -1855,7 +1792,7 @@ mode the section above describes:</p>
 <p>So the Resolution's "miss now lingers near the goal" claim holds only for a minority
 of seeds. On most failing seeds the robot <strong>never commits to forward motion</strong> and
 truncates far away — the same <code>v → 0</code> family as
-<a href="../06-single-library-fails/">06</a>, now seed-dependent rather than universal.</p>
+<a href="../05-library-switching/">05</a>, now seed-dependent rather than universal.</p>
 <figure>
 <video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
     <source src="../videos/far-field-v-collapse-stall.mp4" type="video/mp4">
@@ -1889,7 +1826,7 @@ truncates far away — the same <code>v → 0</code> family as
   units of path budget over 200 steps, far more than the 20-unit workspace diagonal.
   Failures end far away with low <code>v</code>, not "almost there after running out of steps"
   (only 7 / 48 ended &lt; 1.0).</li>
-<li><strong>Not the regularizers.</strong> <a href="../06-single-library-fails/">06</a> swept <code>λ_g</code>, <code>λ_y</code>, <code>N</code>,
+<li><strong>Not the regularizers.</strong> <a href="../05-library-switching/">05</a> swept <code>λ_g</code>, <code>λ_y</code>, <code>N</code>,
   <code>T_ini</code> against this exact <code>v → 0</code> mode and none moved it. λ is not the lever.</li>
 </ul>
 <h2 id="root-cause-of-the-v-collapse-a-hallucinated-prediction-from-a-degenerate-past-not-missing-data-and-not-a-bug">Root cause of the <code>v</code>-collapse — a hallucinated prediction from a degenerate past, not missing data (and not a bug)<a class="headerlink" href="#root-cause-of-the-v-collapse-a-hallucinated-prediction-from-a-degenerate-past-not-missing-data-and-not-a-bug" title="Permanent link">&para;</a></h2>
@@ -1941,7 +1878,7 @@ the predictor makes on real data, so it is <strong>not an implementation error</
 predicted future lands on the goal while its first control is <code>v = 0</code>. It is
 <strong>self-trapping</strong>: frozen init → stall → constant history → sustains the stall. The
 precise cause is the <em>conjunction</em>, the bilinear unfaithfulness of
-<a href="../06-single-library-fails/">06</a> <strong>gated on past-conditioning</strong>:</p>
+<a href="../05-library-switching/">05</a> <strong>gated on past-conditioning</strong>:</p>
 <blockquote>
 <p><strong>nonlinear dynamics</strong> (matching the past no longer guarantees a real future)
 <strong>+ an uninformative/constant past</strong> (so many blends satisfy the match)
@@ -1954,7 +1891,7 @@ precise cause is the <em>conjunction</em>, the bilinear unfaithfulness of
 <li><strong>Reweighting <code>Q</code>/<code>R</code>/<code>λ</code> will not reliably fix it.</strong> Lowering <code>R</code> only removes the
   tie-breaker; the QP is then <em>indifferent</em> between <code>v = 0</code> and <code>v = 12</code> (both falsely
   predicted to reach) and can still stall. The rot is in the prediction, which no cost
-  reweighting repairs. (Consistent with <a href="../06-single-library-fails/">06</a>'s λ sweep.)</li>
+  reweighting repairs. (Consistent with <a href="../05-library-switching/">05</a>'s λ sweep.)</li>
 <li><strong><code>--Q_heading 0</code> / <code>--no_bearing_ref</code></strong> still targets only the <em>near-goal
   pirouette</em> population (~15 episodes), not this dominant collapse.</li>
 <li><strong>Attack the trigger (cheap — now the leading lever).</strong> Because the predictor is
@@ -2120,7 +2057,7 @@ scored on the metrics above.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../07-library-switching/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 07. Library switching">
+          <a href="../05-library-switching/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 05. Library switching">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2130,20 +2067,20 @@ scored on the metrics above.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                07. Library switching
+                05. Library switching
               </div>
             </div>
           </a>
         
         
           
-          <a href="../09-imitation-learning/" class="md-footer__link md-footer__link--next" aria-label="Next: 09. Imitation learning">
+          <a href="../07-imitation-learning/" class="md-footer__link md-footer__link--next" aria-label="Next: 07. Imitation learning">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                09. Imitation learning
+                07. Imitation learning
               </div>
             </div>
             <div class="md-footer__button md-icon">

@@ -1119,10 +1119,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -1296,14 +1292,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/05-cold-start/" class="md-nav__link">
+      <a href="../../journey/05-library-switching/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    05. Cold-start bug
+    05. Library switching
   
 
     
@@ -1324,14 +1320,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/06-single-library-fails/" class="md-nav__link">
+      <a href="../../journey/06-stop-at-goal/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    06. Single library fails
+    06. Stopping at the goal
   
 
     
@@ -1352,14 +1348,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/07-library-switching/" class="md-nav__link">
+      <a href="../../journey/07-imitation-learning/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    07. Library switching
+    07. Imitation learning
   
 
     
@@ -1380,70 +1376,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/08-stop-at-goal/" class="md-nav__link">
+      <a href="../../journey/08-residual-rl/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    08. Stopping at the goal
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../journey/09-imitation-learning/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    09. Imitation learning
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../journey/10-residual-rl/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    10. Residual RL
+    08. Residual RL
   
 
     
@@ -1570,11 +1510,9 @@
 controller holds <code>N</code> data libraries (one per heading region) and, each step,
 feeds the library whose anchor heading is closest to the robot's current
 heading into one cached QP. There is no separate switcher class.</p>
-<p>This page is the <strong>reference</strong>. The "why" lives in two journey entries:</p>
-<ul>
-<li><a href="../../journey/06-single-library-fails/">Journey 06 — why one library isn't enough</a>: bilinear dynamics defeat a single linear predictor.</li>
-<li><a href="../../journey/07-library-switching/">Journey 07 — library switching</a>: how piecewise local linearization fixes it.</li>
-</ul>
+<p>This page is the <strong>reference</strong>. The "why" lives in <a href="../../journey/05-library-switching/">Journey 05 — library
+switching</a>: bilinear dynamics defeat a
+single linear predictor, and piecewise local linearization fixes it.</p>
 <h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
 <p><code>DeePC</code> holds <code>N</code> libraries' Hankel matrices and a single shared past-<code>(u, y)</code>
 buffer. The Hankel matrices of the <em>active</em> library live in <code>cp.Parameter</code>s, so

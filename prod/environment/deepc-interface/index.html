@@ -1108,10 +1108,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -1285,14 +1281,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/05-cold-start/" class="md-nav__link">
+      <a href="../../journey/05-library-switching/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    05. Cold-start bug
+    05. Library switching
   
 
     
@@ -1313,14 +1309,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/06-single-library-fails/" class="md-nav__link">
+      <a href="../../journey/06-stop-at-goal/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    06. Single library fails
+    06. Stopping at the goal
   
 
     
@@ -1341,14 +1337,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/07-library-switching/" class="md-nav__link">
+      <a href="../../journey/07-imitation-learning/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    07. Library switching
+    07. Imitation learning
   
 
     
@@ -1369,70 +1365,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/08-stop-at-goal/" class="md-nav__link">
+      <a href="../../journey/08-residual-rl/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    08. Stopping at the goal
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../journey/09-imitation-learning/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    09. Imitation learning
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../journey/10-residual-rl/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    10. Residual RL
+    08. Residual RL
   
 
     
@@ -1625,7 +1565,7 @@
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">y_ref_step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">base</span><span class="o">.</span><span class="n">goal</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">base</span><span class="o">.</span><span class="n">goal</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bearing</span><span class="p">])</span>
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">u_t</span> <span class="o">=</span> <span class="n">controller</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">y_ref_step</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Why this helps — and why disabling it (<code>--no_bearing_ref</code>) makes reaching worse — is covered in <a href="../../journey/08-stop-at-goal/">journey 08 — stopping at the goal</a>.</p>
+<p>Why this helps — and why disabling it (<code>--no_bearing_ref</code>) makes reaching worse — is covered in <a href="../../journey/06-stop-at-goal/">journey 06 — stopping at the goal</a>.</p>
 
 
 

@@ -1227,10 +1227,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -1404,14 +1400,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/05-cold-start/" class="md-nav__link">
+      <a href="../../journey/05-library-switching/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    05. Cold-start bug
+    05. Library switching
   
 
     
@@ -1432,14 +1428,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/06-single-library-fails/" class="md-nav__link">
+      <a href="../../journey/06-stop-at-goal/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    06. Single library fails
+    06. Stopping at the goal
   
 
     
@@ -1460,14 +1456,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/07-library-switching/" class="md-nav__link">
+      <a href="../../journey/07-imitation-learning/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    07. Library switching
+    07. Imitation learning
   
 
     
@@ -1488,70 +1484,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../journey/08-stop-at-goal/" class="md-nav__link">
+      <a href="../../journey/08-residual-rl/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    08. Stopping at the goal
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../journey/09-imitation-learning/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    09. Imitation learning
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../journey/10-residual-rl/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    10. Residual RL
+    08. Residual RL
   
 
     
@@ -2309,7 +2249,7 @@
 </tr>
 </tbody>
 </table>
-<p>Prints DeePC/clone/residual reach counts + rates + Wilson CIs, residual-vs-clone McNemar p-value, <code>rescued</code>/<code>regressions</code> counts, and median trajectory deviation vs clone — this is the source of the reach-rate numbers in the <a href="../../journey/10-residual-rl/">residual RL journey entry</a>.</p>
+<p>Prints DeePC/clone/residual reach counts + rates + Wilson CIs, residual-vs-clone McNemar p-value, <code>rescued</code>/<code>regressions</code> counts, and median trajectory deviation vs clone — this is the source of the reach-rate numbers in the <a href="../../journey/08-residual-rl/">residual RL journey entry</a>.</p>
 <h2 id="scriptseval_seed_showcasepy"><code>scripts/eval_seed_showcase.py</code><a class="headerlink" href="#scriptseval_seed_showcasepy" title="Permanent link">&para;</a></h2>
 <p>Writes per-step closed-loop trace CSVs (<code>traj_&lt;seed&gt;_{clone,residual}.csv</code>) for showcase seeds, consumed by <code>plot_seed_traces.py</code> and <code>render_dashboard_video.py</code>. Both closed loops are DeePC-free (clone/residual inference only, no QP), so this runs in well under a second per seed.</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/eval_seed_showcase.py<span class="w"> </span>--trace-seeds<span class="w"> </span><span class="m">4104626029</span>,4104626034
@@ -2346,7 +2286,7 @@
 <tr>
 <td><code>--trace-model</code></td>
 <td><code>data/residual_td3.zip</code></td>
-<td>Residual checkpoint — defaults to the <strong>200k</strong> checkpoint, matching the video embedded in <a href="../../journey/10-residual-rl/">journey 10</a></td>
+<td>Residual checkpoint — defaults to the <strong>200k</strong> checkpoint, matching the video embedded in <a href="../../journey/08-residual-rl/">journey 08</a></td>
 </tr>
 <tr>
 <td><code>--trace-seeds</code></td>

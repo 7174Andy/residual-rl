@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/06-single-library-fails/">
+        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/05-library-switching/">
       
       
-        <link rel="prev" href="../05-cold-start/">
+        <link rel="prev" href="../04-deepc-formulation/">
       
       
-        <link rel="next" href="../07-library-switching/">
+        <link rel="next" href="../06-stop-at-goal/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>06. Single library fails - two-wheeled-experiment</title>
+        <title>05. Library switching - two-wheeled-experiment</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#06-why-one-library-isnt-enough-bilinear-dynamics" class="md-skip">
+        <a href="#05-library-switching-one-library-cant-work-four-can" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              06. Single library fails
+              05. Library switching
             
           </span>
         </div>
@@ -1006,10 +1006,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -1183,34 +1179,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../05-cold-start/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    05. Cold-start bug
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -1230,7 +1198,7 @@
   <span class="md-ellipsis">
     
   
-    06. Single library fails
+    05. Library switching
   
 
     
@@ -1248,7 +1216,7 @@
   <span class="md-ellipsis">
     
   
-    06. Single library fails
+    05. Library switching
   
 
     
@@ -1285,10 +1253,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#context" class="md-nav__link">
+  <a href="#context-bilinear-dynamics-defeat-a-single-predictor" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Context
+        Context — bilinear dynamics defeat a single predictor
       
     </span>
   </a>
@@ -1296,10 +1264,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-this-looks-like-in-practice" class="md-nav__link">
+  <a href="#why-local-linearization-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What this looks like in practice
+        Why local linearization works
       
     </span>
   </a>
@@ -1307,10 +1275,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#considered" class="md-nav__link">
+  <a href="#implementation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Considered
+        Implementation
       
     </span>
   </a>
@@ -1322,6 +1290,28 @@
     <span class="md-ellipsis">
       
         Outcome
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Caveats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code
       
     </span>
   </a>
@@ -1344,14 +1334,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../07-library-switching/" class="md-nav__link">
+      <a href="../06-stop-at-goal/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    07. Library switching
+    06. Stopping at the goal
   
 
     
@@ -1372,14 +1362,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../08-stop-at-goal/" class="md-nav__link">
+      <a href="../07-imitation-learning/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    08. Stopping at the goal
+    07. Imitation learning
   
 
     
@@ -1400,42 +1390,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../09-imitation-learning/" class="md-nav__link">
+      <a href="../08-residual-rl/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    09. Imitation learning
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../10-residual-rl/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    10. Residual RL
+    08. Residual RL
   
 
     
@@ -1494,10 +1456,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#context" class="md-nav__link">
+  <a href="#context-bilinear-dynamics-defeat-a-single-predictor" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Context
+        Context — bilinear dynamics defeat a single predictor
       
     </span>
   </a>
@@ -1505,10 +1467,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-this-looks-like-in-practice" class="md-nav__link">
+  <a href="#why-local-linearization-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What this looks like in practice
+        Why local linearization works
       
     </span>
   </a>
@@ -1516,10 +1478,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#considered" class="md-nav__link">
+  <a href="#implementation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Considered
+        Implementation
       
     </span>
   </a>
@@ -1531,6 +1493,28 @@
     <span class="md-ellipsis">
       
         Outcome
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Caveats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code
       
     </span>
   </a>
@@ -1557,16 +1541,15 @@
   
 
 
-<h1 id="06-why-one-library-isnt-enough-bilinear-dynamics">06. Why one library isn't enough — bilinear dynamics<a class="headerlink" href="#06-why-one-library-isnt-enough-bilinear-dynamics" title="Permanent link">&para;</a></h1>
+<h1 id="05-library-switching-one-library-cant-work-four-can">05. Library switching — one library can't work, four can<a class="headerlink" href="#05-library-switching-one-library-cant-work-four-can" title="Permanent link">&para;</a></h1>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p>A <strong>single DeePC library cannot navigate the unicycle to a goal</strong>. The reason is structural, not a tuning problem. Switching to four libraries (next entry) is necessary.</p>
-<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p>A <strong>single DeePC library cannot navigate the unicycle to a goal</strong> — the reason is structural, not a tuning problem. So: <strong>pre-collect four data libraries, one per heading quadrant, and hand all four to a single <code>DeePC</code> controller.</strong> Each step, the controller selects the library whose anchor heading is closest to the robot's current heading, swaps its Hankel matrices into one cached QP, and solves. The robot keeps one controller; only the <em>data library</em> feeding the predictor changes.</p>
+<h2 id="context-bilinear-dynamics-defeat-a-single-predictor">Context — bilinear dynamics defeat a single predictor<a class="headerlink" href="#context-bilinear-dynamics-defeat-a-single-predictor" title="Permanent link">&para;</a></h2>
 <p>DeePC's behavioral predictor is a <strong>linear span</strong> of past trajectories. For an LTI system the lemma is exact. For a system that's "linear enough" locally, it approximates well. The unicycle is neither — its dynamics are <em>bilinear</em>:</p>
 <div class="arithmatex">\[
 x_{t+1} = x_t + \Delta t \cdot \cos(\delta_t) \cdot v_t
 \]</div>
 <p>The product <span class="arithmatex">\(\cos(\delta_t) \cdot v_t\)</span> cannot be represented as a linear function of <span class="arithmatex">\((v_t)\)</span> across the full range of <span class="arithmatex">\(\delta_t \in [-\pi, \pi]\)</span>. A single linear predictor trained on all-orientations data <strong>averages out the heading dependence</strong> — it predicts <code>cos(δ) ≈ 0</code> and <code>sin(δ) ≈ 0</code> on average over uniform δ.</p>
-<h2 id="what-this-looks-like-in-practice">What this looks like in practice<a class="headerlink" href="#what-this-looks-like-in-practice" title="Permanent link">&para;</a></h2>
 <p>Trained on a broad-PE library covering all orientations:</p>
 <ul>
 <li>The controller's predicted <code>Δx</code> for a given action depends almost entirely on where the data happened to land — not on the <em>current</em> heading.</li>
@@ -1579,18 +1562,92 @@ x_{t+1} = x_t + \Delta t \cdot \cos(\delta_t) \cdot v_t
 <li>Narrow-<code>w</code> collection + single library: <code>w</code> saturates at the bound; the robot moves in a tight circle.</li>
 <li>Adding bearing-aware <code>y_ref</code> + nonzero <code>Q[2, 2]</code>: <code>w</code> varies sensibly but <code>v</code> still collapses.</li>
 </ul>
-<p>Across many hyperparameter sweeps, the failure mode is the same. It's not tunable.</p>
-<h2 id="considered">Considered<a class="headerlink" href="#considered" title="Permanent link">&para;</a></h2>
+<p>Across many hyperparameter sweeps, the failure mode is the same. <strong>It's not tunable</strong> — the root cause is the dynamics, not the QP. This is worth stating explicitly because it isn't obvious from the formulation; several hours of sweeping hyperparameters and reading run-output gradients eventually points to "the predictor is too uncertain to commit to motion," and recognizing that earlier saves time on a future similar pivot.</p>
+<p>The paper's quote is the explicit acknowledgement that one library isn't enough: <em>"the data-driven constraint can be viewed as a local linear approximation, [so] our strategy is to switch the data library based on the robot's current state."</em> The fix is <strong>piecewise linearization</strong> — fit a separate local model in each operating region and route the controller through whichever region you're in.</p>
+<p>From <a href="https://arxiv.org/abs/2603.07395">arXiv:2603.07395</a> Appendix D:</p>
+<blockquote>
+<p><em>"For each prediction horizon W, we construct 4 corresponding data libraries Hd with Tini = 5, each approximately representing the local behavior of the nonlinear system within orientation intervals [0, π/2), [π/2, π), [π, 3π/2), and [3π/2, 2π). During online tracking, the data library associated with the robot's current orientation is selected to improve tracking performance."</em></p>
+</blockquote>
+<p>So four libraries cover the heading circle, each anchored at the midpoint of its quadrant.</p>
+<h2 id="why-local-linearization-works">Why local linearization works<a class="headerlink" href="#why-local-linearization-works" title="Permanent link">&para;</a></h2>
+<p>Within a fixed heading region — say <code>δ ≈ π/4</code> — both <code>cos(δ)</code> and <code>sin(δ)</code> are nearly constant (<code>≈ 0.71</code> each). The dynamics behave locally like:</p>
+<div class="arithmatex">\[
+\Delta x \approx \Delta t \cdot 0.71 \cdot v, \qquad \Delta y \approx \Delta t \cdot 0.71 \cdot v
+\]</div>
+<p>This is <strong>linear in <code>v</code></strong> with fixed slope. A linear behavioral predictor trained on data collected while the robot was near heading <code>π/4</code> will correctly capture this slope and produce confident, non-degenerate predictions.</p>
+<p>By collecting one library <em>starting from each of four orientations</em> (the paper's <code>π/4, 3π/4, 5π/4, 7π/4</code>), each library's data is concentrated in a roughly π/2-wide heading region around its anchor. At runtime we always have <strong>the right library for the current heading</strong>.</p>
+<h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
+<p>Switching lives <strong>inside <code>DeePC</code></strong> — there is no separate wrapper class. One controller holds:</p>
+<ul>
+<li>A list of N pre-collected libraries (each a <code>(Up, Uf, Yp, Yf)</code> Hankel tuple) plus their anchor headings.</li>
+<li>The active library's Hankels in <code>cp.Parameter</code>s, so swapping libraries means writing new parameter values into <strong>one compiled QP</strong> — no recompile per library.</li>
+<li><strong>One shared past-<code>(u, y)</code> buffer</strong> — the robot's actual history is the same regardless of which library predicts the future.</li>
+</ul>
+<p>On each <code>act(y_current, y_ref)</code>:</p>
 <ol>
-<li><strong>More regularization tuning.</strong> Tried <code>λ_g ∈ {0.1, 0.5, 2.0}</code>, <code>λ_y ∈ {1e3, 3e6}</code>, <code>N ∈ {6, 12, 24}</code>, <code>T_ini ∈ {5, 10}</code>. None helped.</li>
-<li><strong>Narrower PE bounds.</strong> Tried <code>w_abs_max = 0.2</code> so the data has fewer heading wraps. Predictor was less noisy but the robot's run-time turn rate was too low to navigate (180° turn would take 600+ steps; episode is 200).</li>
-<li><strong>Different reference / cost.</strong> Bearing-aware <code>y_ref</code> and non-zero <code>Q[2,2]</code> fixed the <code>w</code>-saturation but not the <code>v</code>-collapse.</li>
-<li><strong>A different controller family.</strong> Pure pursuit, NMPC with the known analytical model — would work but bypass the DeePC story entirely.</li>
-<li><strong>Library switching</strong> — what the paper does (chosen, see next entry).</li>
+<li><code>idx = argmin_i |wrap(y_current[heading_index] − anchor_i)|</code> (trivially 0 with a single library).</li>
+<li>If <code>idx</code> changed since last step, clear the warm-start <code>g</code> — its columns indexed the old library and are meaningless under the new one.</li>
+<li>Write <code>libraries[idx]</code>'s <code>(Up, Uf, Yp, Yf)</code> into the Hankel parameters and solve.</li>
+<li>Slide the shared buffer with the applied <code>(u_t, y_current)</code>.</li>
 </ol>
+<p>The four libraries come from offline rollouts started at the paper's four init headings (<code>controllers/data_collection.PAPER_INIT_HEADINGS</code>); each rollout's data concentrates around one quadrant anchor. <code>scripts/run_deepc.py</code> builds all four by default (<code>--single_library N</code> passes a one-element list for the single-library contrast) and prints <strong>per-episode library usage</strong> so you can see when switching actually triggered:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>episode 1: REACHED   after  94 steps  final_dist=0.46
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  library usage: [0, 0, 17, 77]    # Q3 → Q4 mid-flight
+</span></code></pre></div>
 <h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
-<p>Library switching solves the problem structurally. The paper's quote — <em>"the data-driven constraint can be viewed as a local linear approximation, [so] our strategy is to switch the data library based on the robot's current state"</em> — is the explicit acknowledgement that one library isn't enough. The paper, and now this repo, addresses the bilinear nonlinearity by <strong>piecewise linearization</strong> over four heading quadrants.</p>
-<p>This entry exists because the failure isn't obvious from the formulation. Spending several hours sweeping hyperparameters and reading run-output gradients eventually points to "the predictor is too uncertain to commit to motion" — but the root cause is the dynamics, not the QP. Recognizing that earlier saves time on a future similar pivot.</p>
+<p>Closed-loop test on broad-<code>w</code> data with library switching enabled (all four libraries loaded). Reproduce with <code>uv run python scripts/run_deepc.py --headless --episodes 4 --seed 0</code> (data: <code>data/libraries_v0.npz</code>, <code>T_ini=5</code>, <code>N=12</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Episode</th>
+<th>Outcome</th>
+<th>Steps</th>
+<th>Final dist</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>truncated</td>
+<td>200</td>
+<td>16.95</td>
+</tr>
+<tr>
+<td>1</td>
+<td><strong>REACHED</strong></td>
+<td>94</td>
+<td><strong>0.46</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>REACHED</strong></td>
+<td>35</td>
+<td><strong>0.46</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>REACHED</strong></td>
+<td>115</td>
+<td><strong>0.48</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Success rate <strong>3/4</strong> on this seed (mean steps-to-reach 81). This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where <code>v</code> was stuck at zero in all four episodes.</p>
+<p>Seed 0 is a lucky draw, though. Over a larger random sample (<code>--episodes 100 --random</code>, base seed <code>4104626029</code>, n=78 before the run was stopped) the aggregate is more sobering:</p>
+<ul>
+<li><strong>Reach rate ≈ 39%</strong> (30/78); the rest truncate at 200 steps.</li>
+<li><strong>QP failures: 0/78</strong> — the solver did not fail once across the whole sample (nor on seed 0).</li>
+<li>Steps-to-reach (successes): mean ≈ 103, range 7–174. Final distance: mean ≈ 4.0, max ≈ 15.8.</li>
+</ul>
+<p>So switching makes goal-reaching <em>possible</em> (~39% vs single-library's 0%), but it is far from reliable — the dominant failure is the truncation/spin mode below, not the QP.</p>
+<h2 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Switching only helps if the robot <strong>actually crosses quadrant boundaries</strong> during an episode. With narrow <code>w</code> data the turn rate is too low and switching becomes a no-op.</li>
+<li><strong>Truncation/spin is the dominant failure</strong> (~61% of random episodes). Episode 0 above is typical: 200 steps, ends 16.95 from goal despite cycling all four libraries — <code>w</code> saturates positive while <code>v</code> stays near zero, so the robot spins in place rather than driving out. Diagnosing these would benefit from logging the QP's <code>σ_y</code> and the controller's predicted vs actual trajectory.</li>
+<li><strong>QP solver failures did not appear</strong> in this measurement (0 across 82 episodes: 78 random + 4 at seed 0), so they are not the bottleneck here — the earlier "occasional <code>user_limit</code> failure" concern is not borne out on this build/data. The QP is still ill-conditioned at the paper's <code>λ_y ≈ 3e6</code> (see <code>deepc.py</code>), so a numerical breakdown remains <em>possible</em> on other data/solvers (SCS is chosen for robustness; CLARABEL can break down), but it is not what limits reaching.</li>
+</ul>
+<h2 id="code">Code<a class="headerlink" href="#code" title="Permanent link">&para;</a></h2>
+<p><code>two_wheel_robot/controllers/deepc.py::DeePC</code> — library switching is built into the controller (<code>libraries</code>, <code>anchor_headings</code>, <code>heading_index</code>; <code>last_library_idx</code> diagnostic). See <a href="../../controllers/library-switching/">library switching reference</a>.</p>
 
 
 
@@ -1626,7 +1683,7 @@ x_{t+1} = x_t + \Delta t \cdot \cos(\delta_t) \cdot v_t
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../05-cold-start/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 05. Cold-start bug">
+          <a href="../04-deepc-formulation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 04. DeePC formulation">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1636,20 +1693,20 @@ x_{t+1} = x_t + \Delta t \cdot \cos(\delta_t) \cdot v_t
                 Previous
               </span>
               <div class="md-ellipsis">
-                05. Cold-start bug
+                04. DeePC formulation
               </div>
             </div>
           </a>
         
         
           
-          <a href="../07-library-switching/" class="md-footer__link md-footer__link--next" aria-label="Next: 07. Library switching">
+          <a href="../06-stop-at-goal/" class="md-footer__link md-footer__link--next" aria-label="Next: 06. Stopping at the goal">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                07. Library switching
+                06. Stopping at the goal
               </div>
             </div>
             <div class="md-footer__button md-icon">
