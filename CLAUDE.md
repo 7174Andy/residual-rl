@@ -6,15 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Gymnasium environment and controller benchmark for a **kinematic unicycle (two-wheel) robot** navigating to a goal point in a continuous 2D workspace.
 
-The underlying dynamics are adapted from Appendix D of Pai, Shang, Qian, Zheng, *"Online Tracking with Predictions for Nonlinear Systems with Koopman Linear Embedding"* (arXiv:2603.07395), but the task here is **point-to-point goal-reaching**, not the paper's heart-curve trajectory tracking. See `docs/superpowers/specs/` for design rationale.
+The underlying dynamics are adapted from Appendix D of Pai, Shang, Qian, Zheng, *"Online Tracking with Predictions for Nonlinear Systems with Koopman Linear Embedding"* (arXiv:2603.07395), but the task here is **point-to-point goal-reaching**, not the paper's heart-curve trajectory tracking. Design rationale lives in `docs/journey/` (published decision log); `docs/superpowers/specs/` also has design notes but is local dev scratch (gitignored — not present in a fresh clone).
 
-Repo plan:
+Repo status:
 
-1. Gymnasium env for goal-reaching (`TwoWheelGoal-v0`).
-2. Classical controller baselines — **DeePC** (data-EnablEd predictive control, Coulson/Lygeros/Dörfler 2019; same family as the paper's DDPC).
-3. RL baselines via **stable-baselines3**.
+1. Gymnasium env for goal-reaching (`TwoWheelGoal-v0`) — done.
+2. Classical controller baseline — **DeePC** (data-EnablEd predictive control, Coulson/Lygeros/Dörfler 2019; same family as the paper's DDPC) with orientation-keyed library switching — done.
+3. Imitation-learned clone of DeePC (fast MLP surrogate) plus **TD3/SAC residual RL** correction on top, via stable-baselines3 — done; the residual lifts reach rate from ~39% (DeePC/clone) to 87–95% depending on training length (see `docs/journey/09-imitation-learning.md`, `docs/journey/10-residual-rl.md`).
 
-The env is the product; controllers are baselines that consume it.
+The env is the product; controllers/policies are baselines that consume it.
 
 ## Domain facts (do not re-derive these)
 
@@ -43,37 +43,47 @@ where `y = (x, y, δ)` is the 3-D output and `y_ref = (g_x, g_y, 0)`. Defaults: 
 
 Termination uses position-only error (`‖p − g‖ < goal_tolerance`); heading is irrelevant to "reached".
 
-## Planned layout (Option A — flat by role)
+## Repo layout (flat by role)
 
 ```
 two_wheel_robot/
     env/
         __init__.py        # registers Gym ID "TwoWheelGoal-v0"
-        dynamics.py        # pure unicycle step, no Gym deps
-        env.py             # UnicycleGoalEnv(gym.Env)
-        rendering.py       # PygameRenderer (handles "human" and "rgb_array")
+        dynamics.py         # pure unicycle step, no Gym deps
+        env.py              # UnicycleGoalEnv(gym.Env)
+        rendering.py        # PygameRenderer (handles "human" and "rgb_array")
     controllers/
-        base.py            # Controller protocol: reset(obs), act(obs) -> u
-        deepc.py           # DeePC data-driven predictive controller (CVXPY QP)
-        data_collection.py # offline rollouts to build Hankel data libraries
+        data_collection.py  # offline PE rollouts to build Hankel data libraries
+        hankel.py           # build_hankel() past/future block-Hankel matrices
+        deepc.py            # DeePC: orientation-keyed library-switching QP controller
     rl/
-        train_sb3.py       # PPO / SAC training entrypoint
-        wrappers.py        # observation normalization, action rescale, etc.
-    eval/
-        run.py             # CLI: pick a controller, run it, save metrics + plots
-        metrics.py         # success rate, time-to-goal, control effort, etc.
-configs/                   # YAML configs
-scripts/                   # standalone entrypoints (e.g. visualize_random.py)
+        clone.py             # imitation-learning clone MLP (train/save/load)
+        clone_data.py         # hybrid synthetic + on-policy dataset generation
+        clone_eval.py          # fidelity-gate stats (regression, McNemar, paired outcomes)
+        deepc_setup.py          # canonical DeePC config shared by clone/residual code
+        device.py                # cuda -> mps -> cpu device selection
+        features.py               # featurize() for the clone
+        residual_env.py            # ResidualDeePCEnv: clone + TD3/SAC residual correction
+        residual_eval.py            # 3-way benchmark: DeePC vs clone vs clone+residual
+        showcase_trace.py            # per-seed closed-loop trace cache generation
+        trace_io.py                   # CSV read/write for traces (no gym/torch deps)
+        trace_reward.py                 # recompute_reward() from a CSV trace
+        train_sb3.py                     # TD3/SAC residual training entrypoint
+        video_encoding.py                 # shared MP4 encoder (imageio)
+        wrappers.py                        # rescale_action_symmetric() for SB3 compatibility
+scripts/                   # 14 CLI entrypoints: data collection, DeePC/clone/residual run+train+eval, plotting, video
 tests/                     # pytest
-docs/superpowers/specs/    # design docs
+docs/superpowers/specs/    # local dev-scratch design notes (gitignored, not part of the published repo)
 ```
+
+There is no `two_wheel_robot/eval/` package and no `configs/` directory. Evaluation/metrics logic lives in `rl/clone_eval.py`, `rl/residual_eval.py`, and `rl/trace_reward.py`; every script takes CLI flags (argparse, hardcoded defaults) instead of YAML configs.
 
 Boundary rules:
 
 - `env/dynamics.py` imports only `numpy` — usable from controllers and tests without Gym.
-- `controllers/` is RL-library-agnostic. A controller implements the `Controller` protocol in `controllers/base.py`. Do not import `gym` from inside a controller.
-- `rl/` is the only place that imports `stable_baselines3`.
-- `eval/run.py` is the single CLI surface — runs any controller (classical or RL checkpoint) on the env and emits comparable metrics.
+- `controllers/` is RL-library-agnostic and has no `gym` import. There's no formal `Controller` base class yet — `DeePC` (`controllers/deepc.py`) exposes `reset(y_initial, u_initial=None)` / `act(y_current, y_ref)` as its de facto contract.
+- `rl/` is the only place that imports `stable_baselines3` (and the only place that imports `torch`, via the clone MLP).
+- `scripts/*.py` is the CLI surface — each script is a standalone `argparse` entrypoint over some combination of the env, a controller, and/or a trained checkpoint. See `docs/reference/cli.md` for the full flag reference.
 
 ## Public env attributes (consumed by classical controllers)
 

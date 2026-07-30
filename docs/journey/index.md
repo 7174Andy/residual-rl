@@ -15,6 +15,7 @@ Entries are roughly chronological, but each one stands alone — you can read th
 | [07](07-library-switching.md)    | Library switching — local linearization via 4 quadrants       |
 | [08](08-stop-at-goal.md)         | Stopping at the goal — overshoot (fixed) → over-braking (RL next) |
 | [09](09-imitation-learning.md)   | Imitation learning — cloning DeePC into a fast neural policy   |
+| [10](10-residual-rl.md)          | Residual RL — TD3 correction lifts reach rate 38.5%→94.9%      |
 
 ## Conventions
 

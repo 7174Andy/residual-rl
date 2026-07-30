@@ -12,11 +12,11 @@ with defaults:
 
 - $y = (x, y, \delta)$ — full 3-D output.
 - $y_{\text{ref}} = (g_x, g_y, 0)$ — goal position, heading don't-care by default.
-- $Q = \mathrm{diag}(1, 1, 0)$ — heading is in $y$ for the behavioral predictor, but unpenalized in cost.
+- $Q = \mathrm{diag}(1, 1, 2)$ — heading is penalized in cost, not just visible in $y$.
 - $R = 1.3 \cdot 10^{-3} I_2$ — paper value.
 - $b = 100$ — bonus on the step where the goal is reached.
 
-The 3×3 `Q` matches the [paper](https://arxiv.org/abs/2603.07395)'s convention exactly. With the third diagonal at zero, position dominates the cost, but the predictor still sees heading.
+The 3×3 `Q` matches the [paper](https://arxiv.org/abs/2603.07395)'s `Q_z` convention exactly (heading weight `2`). Pass `Q_heading=0` (e.g. `run_deepc.py --Q_heading 0`) for the heading-don't-care alternative, `Q = diag(1, 1, 0)`, where position dominates the cost but the predictor still sees heading.
 
 ## Termination vs truncation
 

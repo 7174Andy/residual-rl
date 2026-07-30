@@ -24,7 +24,7 @@ Pure reference for the env, controllers, and CLI scripts. No "why" — that live
 
     ---
 
-    `scripts/visualize_random.py`, `scripts/collect_data.py`, `scripts/run_deepc.py`. Flags, defaults, expected output.
+    All 14 scripts under `scripts/` — DeePC data collection/run, clone training/eval, TD3/SAC residual training/eval, and the plotting/video tools. Flags, defaults, expected output.
 
     [:octicons-arrow-right-24: CLI](cli.md)
 
@@ -50,4 +50,4 @@ Pure reference for the env, controllers, and CLI scripts. No "why" — that live
 
 ### CLI
 
-- [CLI scripts](cli.md) — full flag reference for the three runnable scripts.
+- [CLI scripts](cli.md) — full flag reference for all 14 runnable scripts.

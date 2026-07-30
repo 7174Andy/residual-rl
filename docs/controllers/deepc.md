@@ -39,7 +39,7 @@ The L1 on `g` is from the original Coulson/Lygeros/Dörfler 2019 paper; the L2 o
 | `N` | 12 | Paper's largest `W` |
 | `lambda_g` | 2.0 | Paper |
 | `lambda_y` | 3·10⁶ | Paper |
-| `Q` | `diag(1, 1, 0)` (from env) | Paper |
+| `Q` | `diag(1, 1, 2)` (from env) | Paper |
 | `R` | `1.3·10⁻³ · I₂` (from env) | Paper |
 
 ## Past-trajectory buffer

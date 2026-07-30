@@ -31,9 +31,6 @@ uv sync
 # Smoke-test the env
 uv run pytest tests/
 
-# Watch a random policy in a pygame window
-uv run python scripts/visualize_random.py --episodes 5 --seed 42
-
 # Generate offline data and run the DeePC controller in closed loop
 uv run python scripts/collect_data.py --v_min 0 --w_abs_max 1.5708 --out data/libraries.npz
 uv run python scripts/run_deepc.py --episodes 5 --seed 42

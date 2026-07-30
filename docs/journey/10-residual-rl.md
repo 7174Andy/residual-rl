@@ -75,7 +75,7 @@ bonus), 200k steps, single env, `net_arch=[256,256]`, action-noise σ = 0.1, CPU
 reward improved ~4× (−3.4·10⁴ → a noisy plateau around −8·10³; best −6.8·10³) as the residual
 learned to drive through the stall (curve below). The QP is never called during training.
 
-![TD3 residual training-return curve](../figures/residual_return.png)
+![TD3 residual training-return curve](figures/residual_return.png)
 
 *Mean episode return (SB3 `ep_rew_mean`) over training episodes — the shipped seed-0 run: a
 rapid climb (episodes ~20–200), then a noisy plateau (~−7k to −11k). The return plateaus and
@@ -98,15 +98,15 @@ drives through the stall" is paired with the quantitative channel that changed. 
 <tbody>
 <tr><td colspan="3" align="center"><b>seed 4104626029</b> — clone truncates at <b>12.91</b> (deep far-field stall); residual REACHES in <b>116 steps</b> → 0.39</td></tr>
 <tr>
-<td><video controls loop muted playsinline width="280"><source src="../videos/clone-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="280"><source src="../videos/residual-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><img src="../figures/seed_4104626029_metrics.png" width="280" alt="seed 4104626029 trajectory and v(t) trace"></td>
+<td><video controls loop muted playsinline width="280"><source src="videos/clone-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="videos/residual-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><img src="figures/seed_4104626029_metrics.png" width="280" alt="seed 4104626029 trajectory and v(t) trace"></td>
 </tr>
 <tr><td colspan="3" align="center"><b>seed 4104626034</b> — clone truncates at <b>6.75</b>; residual REACHES in <b>98 steps</b> → 0.43</td></tr>
 <tr>
-<td><video controls loop muted playsinline width="280"><source src="../videos/clone-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="280"><source src="../videos/residual-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><img src="../figures/seed_4104626034_metrics.png" width="280" alt="seed 4104626034 trajectory and v(t) trace"></td>
+<td><video controls loop muted playsinline width="280"><source src="videos/clone-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="videos/residual-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><img src="figures/seed_4104626034_metrics.png" width="280" alt="seed 4104626034 trajectory and v(t) trace"></td>
 </tr>
 </tbody>
 </table>
@@ -132,7 +132,7 @@ climbs instead of decaying and drives the reach. Regenerate with
 DeePC and the clone match at 30/78 — the clone reproduces the QP baseline exactly, confirming
 the harness is identical to [09](09-imitation-learning.md).
 
-![Reach rate bar chart — DeePC vs clone vs clone + TD3 residual (200k, 400k)](../figures/reach_rates.png)
+![Reach rate bar chart — DeePC vs clone vs clone + TD3 residual (200k, 400k)](figures/reach_rates.png)
 
 *Reach rate over the canonical 78-seed sweep, error bars = 95 % Wilson CI. DeePC and the
 clone are statistically indistinguishable (by construction); the residual is a clear jump
@@ -192,7 +192,7 @@ the shipped checkpoint. `ep_rew_mean` plateaus at a similar level to the 200k ru
 to −6.9·10³), so the aggregate training curve doesn't obviously look "still climbing" — the
 gain comes from continued fine convergence on the hard seeds, not an unfinished run.
 
-![TD3 residual training-return curve, 200k vs 400k steps overlaid](../figures/residual_return_comparison.png)
+![TD3 residual training-return curve, 200k vs 400k steps overlaid](figures/residual_return_comparison.png)
 
 *Mean episode return (SB3 `ep_rew_mean`) for both runs on the same axes. The two curves are
 close to indistinguishable up to ~episode 1,300 (same seed, same hyperparameters — only the
@@ -203,13 +203,9 @@ on individual hard seeds rather than a still-rising aggregate curve. Regenerate 
 `uv run python scripts/plot_training_return.py --compare 200k:docs/journey/figures/residual_return.csv
 400k:docs/journey/figures/residual_return_400k.csv` (both curve CSVs are committed data).*
 
-| controller           | reach rate            | rescued | regressions |
-| --------------------- | ---------------------- | ------- | ----------- |
-| clone + TD3 (200k)    | 68 / 78 = **87.2 %**   | 38      | 0           |
-| clone + TD3 (400k)    | 74 / 78 = **94.9 %**   | 44      | 0           |
-
-Of the 10 seeds that failed at 200k, **6 are fixed** by the longer run
-(`4104626037, 59, 64, 81, 90, 92`) and **4 still fail**
+Reach rate for both checkpoints is already in the [Three-way reach rate table](#three-way-reach-rate-78-seeds-base-seed-4104626029-canonical-config)
+above (68/78 → 74/78). Of the 10 seeds that failed at 200k, **6 are fixed** by the longer run
+(`4104626037, 59, 64, 81, 90, 92`) — lifting rescued from 38 to **44** — and **4 still fail**
 (`4104626056, 69, 83, 86`) — confirmed with **0 newly-introduced regressions**: every seed the
 200k model solved, the 400k model still solves.
 
@@ -236,7 +232,7 @@ Of the 10 seeds that failed at 200k, **6 are fixed** by the longer run
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="../videos/residual-400k-fail-4104626056.mp4" type="video/mp4">
+    <source src="videos/residual-400k-fail-4104626056.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>
@@ -247,7 +243,7 @@ Of the 10 seeds that failed at 200k, **6 are fixed** by the longer run
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="../videos/residual-400k-fail-4104626069.mp4" type="video/mp4">
+    <source src="videos/residual-400k-fail-4104626069.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>
@@ -257,7 +253,7 @@ Of the 10 seeds that failed at 200k, **6 are fixed** by the longer run
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="../videos/residual-400k-fail-4104626083.mp4" type="video/mp4">
+    <source src="videos/residual-400k-fail-4104626083.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>
@@ -269,7 +265,7 @@ Of the 10 seeds that failed at 200k, **6 are fixed** by the longer run
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
-    <source src="../videos/residual-400k-fail-4104626086.mp4" type="video/mp4">
+    <source src="videos/residual-400k-fail-4104626086.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <figcaption>

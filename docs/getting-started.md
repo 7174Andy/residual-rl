@@ -20,15 +20,6 @@ uv run pytest tests/
 
 You should see all tests green (~70+ tests).
 
-## Watch a random policy
-
-```bash
-uv run python scripts/visualize_random.py
-uv run python scripts/visualize_random.py --episodes 5 --seed 42
-```
-
-A pygame window opens. The blue triangle is the robot, the green ring is the goal (radius = `goal_tolerance`), and the trail shows recent positions. The HUD shows step count, distance to goal, and the applied `(v, w)`.
-
 ## Generate offline data for DeePC
 
 The DeePC controller needs an offline `(u, y)` trajectory to build its Hankel matrices. Generate one library per heading quadrant (paper's setup) with **broad** PE bounds so the data includes stopping, pivoting, and the full action range:
@@ -39,10 +30,12 @@ uv run python scripts/collect_data.py \
     --out data/libraries.npz
 ```
 
-For paper-faithful narrow PE bounds (suitable for trajectory tracking, less so for goal-reaching), use the defaults:
+For paper-faithful narrow PE bounds (suitable for trajectory tracking, less so for goal-reaching), pass the narrow bounds explicitly — the bare defaults are now the **broad** bounds above:
 
 ```bash
-uv run python scripts/collect_data.py --out data/libraries.npz   # v∈[10,20], w∈[-π/6,π/6]
+uv run python scripts/collect_data.py \
+    --v_min 10 --w_abs_max 0.5236 \
+    --out data/libraries.npz   # v∈[10,20], w∈[-π/6,π/6]
 ```
 
 The sample bounds are saved inside the `.npz` under `sample_bounds` so the run script reconstructs the env consistently.
