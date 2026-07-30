@@ -1206,8 +1206,6 @@
       
         
       
-        
-      
     
     
     
@@ -1305,34 +1303,6 @@
     
   
     02. Env design
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../journey/03-action-bounds/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    03. Action bounds
   
 
     
@@ -1735,7 +1705,7 @@
 <li><strong><code>v ∈ [10, 20]</code>, <code>w ∈ [-π/6, π/6]</code></strong> — paper-faithful; for trajectory tracking.</li>
 <li><strong><code>v ∈ [0, 20]</code>, <code>w ∈ [-π/2, π/2]</code></strong> — broad; for goal-reaching (allows stop and pivot).</li>
 </ul>
-<p>Pick based on the task; the rationale is in <a href="../../journey/03-action-bounds/">journey 03 — action bounds</a>.</p>
+<p>Pick based on the task.</p>
 <h2 id="hankel-construction">Hankel construction<a class="headerlink" href="#hankel-construction" title="Permanent link">&para;</a></h2>
 <p>Once <code>(u, y)</code> is in hand, build the past/future block-Hankels:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">two_wheel_robot.controllers.hankel</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_hankel</span>

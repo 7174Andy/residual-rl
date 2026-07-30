@@ -1128,8 +1128,6 @@
       
         
       
-        
-      
     
     
     
@@ -1227,34 +1225,6 @@
     
   
     02. Env design
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../journey/03-action-bounds/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    03. Action bounds
   
 
     
@@ -1613,7 +1583,7 @@ y_{t+1} &amp;= y_t + \Delta t \cdot \sin(\delta_t) \cdot v_t \\
 <p>The clipped value is exposed via <code>env.unwrapped.last_action</code>. It's also what gets serialized into the post-step <code>info</code> dict and into the observation's <code>v_prev</code>/<code>w_prev</code> slots.</p>
 <div class="admonition note">
 <p class="admonition-title">Paper bounds</p>
-<p>Appendix D of <a href="https://arxiv.org/abs/2603.07395">arXiv:2603.07395</a> uses <code>v ∈ [10, 20]</code>, <code>w ∈ [-π/6, π/6]</code>. These work for trajectory tracking but make goal-reaching infeasible because the robot cannot stop. See <a href="../../journey/03-action-bounds/">action-bounds journey entry</a>.</p>
+<p>Appendix D of <a href="https://arxiv.org/abs/2603.07395">arXiv:2603.07395</a> uses <code>v ∈ [10, 20]</code>, <code>w ∈ [-π/6, π/6]</code>. These work for trajectory tracking but make goal-reaching infeasible because the robot cannot stop.</p>
 </div>
 <h2 id="observation">Observation<a class="headerlink" href="#observation" title="Permanent link">&para;</a></h2>
 <p><code>Box(shape=(5,), dtype=float32)</code>, body-frame relative — rotation/translation invariant:</p>

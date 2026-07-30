@@ -1004,8 +1004,6 @@
       
         
       
-        
-      
     
     
     
@@ -1106,34 +1104,6 @@
     
   
     02. Env design
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../03-action-bounds/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    03. Action bounds
   
 
     
@@ -1358,10 +1328,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#open-questions" class="md-nav__link">
+  <a href="#open-question-metrics-beyond-success-rate" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Open questions
+        Open question — metrics beyond success rate
       
     </span>
   </a>
@@ -1555,10 +1525,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#open-questions" class="md-nav__link">
+  <a href="#open-question-metrics-beyond-success-rate" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Open questions
+        Open question — metrics beyond success rate
       
     </span>
   </a>
@@ -1586,22 +1556,15 @@
 
 
 <h1 id="07-stopping-at-the-goal-the-deceleration-overshoot-problem">07. Stopping at the goal — the deceleration / overshoot problem<a class="headerlink" href="#07-stopping-at-the-goal-the-deceleration-overshoot-problem" title="Permanent link">&para;</a></h1>
-<p>The original <strong>overshoot</strong> problem below is resolved by widening the data
-envelope (see <em>Resolution</em>). Doing so surfaced <strong>two</strong> residual failures: an
-<em>over-braking</em> pirouette near the goal, and — only visible at larger sample — a
-<strong>dominant <em>far-field <code>v</code>-collapse</em></strong> where the robot never drives in at all (see
-<em>Larger-sample reality check</em>). Reach rate over random seeds is <strong>~39%</strong>, not the
-2/3 the seed-42 sample suggested. A per-step trace pins the collapse on <strong>predictor
-infidelity</strong> (the QP hallucinates that a <code>v = 0</code> plan reaches the goal), <em>not</em>
-missing data — see <em>Root cause of the <code>v</code>-collapse</em>. Proposed fixes (faithful
-predictor / Koopman lift; RL + DeePC) still open. Read top-to-bottom as a sequence:
-overshoot → fix → residual problems → root cause → next direction.</p>
+<p>Overshoot → fixed by widening the data envelope → two residual failures surface: a
+near-goal pirouette and, dominant, a far-field <code>v</code>-collapse. Reach rate over random
+seeds is <strong>~39%</strong>, and the collapse traces to a hallucinating predictor, not missing data.</p>
 <h2 id="problem-one-line">Problem (one line)<a class="headerlink" href="#problem-one-line" title="Permanent link">&para;</a></h2>
 <p>With forward-only speed bounds (<code>v_min &gt; 0</code>), the controller drives the robot to
 the goal's neighborhood but <strong>cannot decelerate to land inside the tolerance</strong> —
 it skims past the goal circle and misses by a small margin, then loops back.</p>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p>After <a href="../03-action-bounds/">03 action bounds</a> and the bounds sweep, <code>data/libraries.npz</code>
+<p>After the action-bounds sweep, <code>data/libraries.npz</code>
 is collected with <strong>hybrid</strong> PE bounds <code>v ∈ [10, 20]</code>, <code>w ∈ [±π/2]</code> (paper-style
 forward-only <code>v</code>, but a fast turn rate). This removes the spin-in-place stall from
 <a href="../05-library-switching/">05</a>: forcing <code>v ≥ 10</code> makes "do nothing" infeasible.</p>
@@ -1820,15 +1783,6 @@ truncates far away — the same <code>v → 0</code> family as
     --record docs/journey/videos</code>.
   </figcaption>
 </figure>
-<p>We ruled out the two obvious culprits:</p>
-<ul>
-<li><strong>Not step size / horizon.</strong> At <code>v = 10</code>, displacement is <code>0.25</code> units/step → ~100
-  units of path budget over 200 steps, far more than the 20-unit workspace diagonal.
-  Failures end far away with low <code>v</code>, not "almost there after running out of steps"
-  (only 7 / 48 ended &lt; 1.0).</li>
-<li><strong>Not the regularizers.</strong> <a href="../05-library-switching/">05</a> swept <code>λ_g</code>, <code>λ_y</code>, <code>N</code>,
-  <code>T_ini</code> against this exact <code>v → 0</code> mode and none moved it. λ is not the lever.</li>
-</ul>
 <h2 id="root-cause-of-the-v-collapse-a-hallucinated-prediction-from-a-degenerate-past-not-missing-data-and-not-a-bug">Root cause of the <code>v</code>-collapse — a hallucinated prediction from a degenerate past, not missing data (and not a bug)<a class="headerlink" href="#root-cause-of-the-v-collapse-a-hallucinated-prediction-from-a-degenerate-past-not-missing-data-and-not-a-bug" title="Permanent link">&para;</a></h2>
 <p>A per-step trace settles the attribution — and it is <strong>not</strong> what "library quality"
 first suggests. <code>scripts/run_deepc.py --seed 4104626047 --episodes 1 --headless
@@ -1899,10 +1853,10 @@ precise cause is the <em>conjunction</em>, the bilinear unfaithfulness of
   the prediction to the current measurement (the buffer currently lags one step), seed
   the past with a short real motion instead of a frozen pose, or force a few forward
   steps at episode start before handing to DeePC. Untested.</li>
-<li><strong>Attack the root (model class).</strong> A <em>faithful</em> predictor — the Koopman lift
-  (<code>sin δ</code>, <code>cos δ</code> into <code>y</code>; journey 07's considered-#4) — makes the linear span hold
-  only physically realizable trajectories, so it cannot pair "reach goal" with "do
-  nothing now." A terminal constraint / move-blocking is a cheaper partial guard.</li>
+<li><strong>Attack the root (model class).</strong> A <em>faithful</em> predictor — a Koopman lift putting
+  <code>sin δ</code>, <code>cos δ</code> into <code>y</code> — makes the linear span hold only physically realizable
+  trajectories, so it cannot pair "reach goal" with "do nothing now." A terminal
+  constraint / move-blocking is a cheaper partial guard.</li>
 <li><strong>RL on the true env reward is immune</strong> — it learns from <em>real</em> transitions and is
   never fooled by the hallucinated predictor (next section).</li>
 </ul>
@@ -1911,53 +1865,24 @@ precise cause is the <em>conjunction</em>, the bilinear unfaithfulness of
 (horizon position RMSE ≈ 3.5 vs ≈ 0.1–0.5 for the others) — a separate data-quality
 issue worth its own look.</p>
 <h2 id="direction-combine-rl-with-deepc">Direction — combine RL with DeePC<a class="headerlink" href="#direction-combine-rl-with-deepc" title="Permanent link">&para;</a></h2>
-<p>The whole arc above points to one structural conclusion, and it sets up the next step.</p>
-<p><strong>The limitation.</strong> DeePC is <strong>model-free</strong>: its prediction <em>is</em> the data
-representation <code>[Up;Yp;Uf;Yf]·g = [uini;yini;u;y]</code> (DeeP-LCC, <a href="https://arxiv.org/abs/2203.10639">arXiv:2203.10639</a>
-Eq. 21 / Prop. 2), with <strong>no physics prior to flag a wrong one</strong>. Willems'
-fundamental lemma makes that representation <em>exact</em> for linear systems with
-informative data — but the two-wheel robot is nonlinear, so the representation is
-valid only locally, and on a degenerate past it fails silently. With no model to
-catch it, a wrong representation flows straight to the actuator → the <code>v</code>-collapse.
-That is the limit of "truly based on data": <strong>garbage representation in → garbage
-control out, unchecked.</strong></p>
-<p><strong>Why RL is the right tool for <em>this</em> limitation.</strong> RL optimizes the <strong>true</strong> env
-reward (including <code>reach_bonus</code>) and learns from <strong>real transitions</strong> — so it
-<strong>cannot be fooled by a hallucinated representation</strong>. It is grounded in what the
-robot actually does, exactly where DeePC's data-blend is ungrounded. That is the
-logical hinge: RL is not a generic upgrade, it covers the precise failure we traced.</p>
-<p><strong>The framing is <em>backstop</em>, not <em>polish</em>.</strong> The earlier premise — "DeePC navigates
-well, RL just refines the landing" — is wrong: the trace shows far-field navigation
-is the <em>dominant</em> DeePC failure. So the hybrid is:</p>
-<blockquote>
-<p><strong>DeePC supplies the strong prior where its representation is valid (~39 % of
-seeds); RL backstops the regime where the representation is invalid (the ~42 % it
-collapses).</strong> Each covers the other's gap.</p>
-</blockquote>
-<p><strong>Default architecture — residual RL.</strong> <code>u = u_DeePC + u_RL(obs)</code>, residual
-zero-initialized so initial behavior ≈ DeePC. The trace makes this the robust choice:
-on a collapse seed <code>u_DeePC ≈ (0, spin)</code> is a <strong>neutral</strong> baseline (not adversarial),
-so RL simply supplies the forward velocity the hallucinated predictor refuses to. The
-premise shifts honestly, though — the residual is <em>not</em> "small everywhere": tiny on
-the ~39 % DeePC solves, but it <em>carries</em> the navigation on the ~42 % it collapses.</p>
-<p><strong>Alternative — BC warm-start → fine-tune.</strong> Clone DeePC into a fast neural policy,
-then PPO/SAC on env reward. Avoids QP-in-loop, but is <em>worse</em> for this failure:
-cloning reproduces the <code>v = 0</code> stall on the states where DeePC collapses, so BC
-imports the dominant flaw and fine-tuning must unlearn it — only viable with the
-stalled demos heavily down-weighted.</p>
-<p><strong>The obstacle the plan must confront.</strong> Residual RL keeps the <strong>QP in the training
-loop</strong> — a ~0.5 s solve every step, ×200 steps/episode, ×millions of RL steps — which
-is likely prohibitive as-is. The story is not complete without an answer: speed up /
-cache the QP, train the residual only in a near-goal (or near-collapse) band, or
-accept BC warm-start (no QP-in-loop) with careful demo weighting. Name it now rather
-than discover it mid-implementation. (Aside: far-field go-to-goal is the <em>easy</em> part
-for RL — the body-frame observation is a standard go-to-goal state; the harder part is
-near-goal deceleration under the sparse <code>reach_bonus</code>.)</p>
-<p>(Scaffolding note: no <code>rl/</code> dir and <code>stable_baselines3</code> not yet installed — this is
-greenfield. Item 3 of the repo plan.)</p>
-<h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Permanent link">&para;</a></h2>
-<p><strong>1. What metrics beyond success rate?</strong> Success rate alone hides <em>how</em> a run fails
-(overshoot vs stall vs diverge) and how efficient the successes are. Candidates:</p>
+<p>DeePC is <strong>model-free</strong>: its prediction <em>is</em> the data representation
+<code>[Up;Yp;Uf;Yf]·g = [uini;yini;u;y]</code> (DeeP-LCC, <a href="https://arxiv.org/abs/2203.10639">arXiv:2203.10639</a>
+Eq. 21 / Prop. 2), with <strong>no physics prior to flag a wrong one</strong>. Willems' fundamental
+lemma makes that representation exact for <em>linear</em> systems with informative data — but
+this robot is nonlinear, so on a degenerate past the representation fails silently and
+flows straight to the actuator. That is the limit of "truly based on data": <strong>garbage
+representation in → garbage control out, unchecked.</strong></p>
+<p>RL optimizes the <strong>true</strong> env reward from <strong>real transitions</strong>, so it cannot be fooled
+by a hallucinated representation — it is grounded exactly where DeePC's data-blend is
+not. That makes the hybrid a <em>backstop</em>, not polish: DeePC supplies the prior on the
+~39 % of seeds where its representation is valid; RL carries the ~42 % where it
+collapses.</p>
+<p>Followed up in <a href="../07-imitation-learning/">07</a> — clone DeePC into a fast MLP, which also
+takes the ~0.5 s/step QP out of the training loop — and <a href="../08-residual-rl/">08</a>, a TD3
+residual on top: <strong>39 % → 87–95 %</strong> reach rate.</p>
+<h2 id="open-question-metrics-beyond-success-rate">Open question — metrics beyond success rate<a class="headerlink" href="#open-question-metrics-beyond-success-rate" title="Permanent link">&para;</a></h2>
+<p>Success rate alone hides <em>how</em> a run fails (overshoot vs stall vs diverge) and how
+efficient the successes are. Candidates:</p>
 <table>
 <thead>
 <tr>
@@ -2010,18 +1935,9 @@ greenfield. Item 3 of the repo plan.)</p>
 </tbody>
 </table>
 <p><code>path-length ratio</code> and <code>min distance</code> are the highest-value additions: together
-they distinguish all three observed failure modes that success rate collapses.</p>
-<p><strong>2. Will residual RL improve the current controller?</strong> <em>Hypothesis: yes for the
-near-goal landing and general robustness</em> — the residual is ~0 in the far field
-(DeePC already navigates well), small to learn, starts at the DeePC baseline (no
-regression risk), and is trained on the true reward, so it directly targets the
-terminal-maneuver gap. <em>Genuine uncertainties</em>: (a) QP-in-the-loop training cost
-may be prohibitive; (b) the reach bonus is sparse — may need reward shaping; (c) if
-the trivial <code>--Q_heading 0</code> fix already removes the stall, the <em>marginal</em> gain of
-residual RL over the config fix could be small. <strong>The real question is not "does RL
-help?" but "does residual RL beat the much cheaper heading-reference fix?"</strong> — which
-requires an ablation: <code>DeePC + heading-fix</code> vs <code>DeePC + residual-RL</code> vs both,
-scored on the metrics above.</p>
+they distinguish all three observed failure modes that success rate collapses. Still
+open — the benchmarks in <a href="../07-imitation-learning/">07</a> / <a href="../08-residual-rl/">08</a>
+report reach rate only.</p>
 
 
 
