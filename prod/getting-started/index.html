@@ -536,17 +536,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#watch-a-random-policy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Watch a random policy
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#generate-offline-data-for-deepc" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1516,17 +1505,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#watch-a-random-policy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Watch a random policy
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#generate-offline-data-for-deepc" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1591,38 +1569,35 @@
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/
 </span></code></pre></div>
 <p>You should see all tests green (~70+ tests).</p>
-<h2 id="watch-a-random-policy">Watch a random policy<a class="headerlink" href="#watch-a-random-policy" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/visualize_random.py
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/visualize_random.py<span class="w"> </span>--episodes<span class="w"> </span><span class="m">5</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">42</span>
-</span></code></pre></div>
-<p>A pygame window opens. The blue triangle is the robot, the green ring is the goal (radius = <code>goal_tolerance</code>), and the trail shows recent positions. The HUD shows step count, distance to goal, and the applied <code>(v, w)</code>.</p>
 <h2 id="generate-offline-data-for-deepc">Generate offline data for DeePC<a class="headerlink" href="#generate-offline-data-for-deepc" title="Permanent link">&para;</a></h2>
 <p>The DeePC controller needs an offline <code>(u, y)</code> trajectory to build its Hankel matrices. Generate one library per heading quadrant (paper's setup) with <strong>broad</strong> PE bounds so the data includes stopping, pivoting, and the full action range:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/collect_data.py<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span>--v_min<span class="w"> </span><span class="m">0</span><span class="w"> </span>--w_abs_max<span class="w"> </span><span class="m">1</span>.5708<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span>--out<span class="w"> </span>data/libraries.npz
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/collect_data.py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span>--v_min<span class="w"> </span><span class="m">0</span><span class="w"> </span>--w_abs_max<span class="w"> </span><span class="m">1</span>.5708<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span>--out<span class="w"> </span>data/libraries.npz
 </span></code></pre></div>
-<p>For paper-faithful narrow PE bounds (suitable for trajectory tracking, less so for goal-reaching), use the defaults:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/collect_data.py<span class="w"> </span>--out<span class="w"> </span>data/libraries.npz<span class="w">   </span><span class="c1"># v∈[10,20], w∈[-π/6,π/6]</span>
+<p>For paper-faithful narrow PE bounds (suitable for trajectory tracking, less so for goal-reaching), pass the narrow bounds explicitly — the bare defaults are now the <strong>broad</strong> bounds above:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/collect_data.py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span>--v_min<span class="w"> </span><span class="m">10</span><span class="w"> </span>--w_abs_max<span class="w"> </span><span class="m">0</span>.5236<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span>--out<span class="w"> </span>data/libraries.npz<span class="w">   </span><span class="c1"># v∈[10,20], w∈[-π/6,π/6]</span>
 </span></code></pre></div>
 <p>The sample bounds are saved inside the <code>.npz</code> under <code>sample_bounds</code> so the run script reconstructs the env consistently.</p>
 <h2 id="run-deepc-in-closed-loop">Run DeePC in closed-loop<a class="headerlink" href="#run-deepc-in-closed-loop" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_deepc.py<span class="w">                       </span><span class="c1"># 3 episodes, library switching on</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_deepc.py<span class="w"> </span>--episodes<span class="w"> </span><span class="m">5</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">42</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_deepc.py<span class="w">                       </span><span class="c1"># 3 episodes, library switching on</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_deepc.py<span class="w"> </span>--episodes<span class="w"> </span><span class="m">5</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">42</span>
 </span></code></pre></div>
 <p>By default the script uses <strong>all 4 libraries</strong> with orientation-keyed switching (see <a href="../controllers/library-switching/">library switching</a>). Each episode prints:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>episode 1: REACHED   after 107 steps  return=  -11998.2  final_dist=0.43
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  v: min=+0.572 max=+13.230 mean=+5.774 std=3.269
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  w: min=-1.371 max=+1.571 mean=+0.497 std=0.927
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  library usage: [0, 0, 17, 90]
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>episode 1: REACHED   after 107 steps  return=  -11998.2  final_dist=0.43
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  v: min=+0.572 max=+13.230 mean=+5.774 std=3.269
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  w: min=-1.371 max=+1.571 mean=+0.497 std=0.927
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  library usage: [0, 0, 17, 90]
 </span></code></pre></div>
 <p>The <code>library usage</code> row shows how many steps each of the 4 controllers was active.</p>
 <p>To compare against the single-library version:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_deepc.py<span class="w"> </span>--single_library<span class="w"> </span><span class="m">0</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_deepc.py<span class="w"> </span>--single_library<span class="w"> </span><span class="m">0</span>
 </span></code></pre></div>
 <p>(Expect worse results — see <a href="../journey/06-single-library-fails/">why single library fails</a>.)</p>
 <h2 id="build-the-docs-locally">Build the docs locally<a class="headerlink" href="#build-the-docs-locally" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>uv<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>serve
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>uv<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>serve
 </span></code></pre></div>
 <p>Open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>. Hot-reloads on file changes.</p>
 

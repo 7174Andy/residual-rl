@@ -1782,15 +1782,15 @@ drives through the stall" is paired with the quantitative channel that changed. 
 <tbody>
 <tr><td colspan="3" align="center"><b>seed 4104626029</b> — clone truncates at <b>12.91</b> (deep far-field stall); residual REACHES in <b>116 steps</b> → 0.39</td></tr>
 <tr>
-<td><video controls loop muted playsinline width="280"><source src="../videos/clone-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="280"><source src="../videos/residual-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><img src="../figures/seed_4104626029_metrics.png" width="280" alt="seed 4104626029 trajectory and v(t) trace"></td>
+<td><video controls loop muted playsinline width="280"><source src="videos/clone-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="videos/residual-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><img src="figures/seed_4104626029_metrics.png" width="280" alt="seed 4104626029 trajectory and v(t) trace"></td>
 </tr>
 <tr><td colspan="3" align="center"><b>seed 4104626034</b> — clone truncates at <b>6.75</b>; residual REACHES in <b>98 steps</b> → 0.43</td></tr>
 <tr>
-<td><video controls loop muted playsinline width="280"><source src="../videos/clone-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="280"><source src="../videos/residual-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><img src="../figures/seed_4104626034_metrics.png" width="280" alt="seed 4104626034 trajectory and v(t) trace"></td>
+<td><video controls loop muted playsinline width="280"><source src="videos/clone-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="280"><source src="videos/residual-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><img src="figures/seed_4104626034_metrics.png" width="280" alt="seed 4104626034 trajectory and v(t) trace"></td>
 </tr>
 </tbody>
 </table>
@@ -1925,32 +1925,9 @@ happens to sit at a similar level, consistent with the reach-rate gain coming fr
 on individual hard seeds rather than a still-rising aggregate curve. Regenerate with
 <code>uv run python scripts/plot_training_return.py --compare 200k:docs/journey/figures/residual_return.csv
 400k:docs/journey/figures/residual_return_400k.csv</code> (both curve CSVs are committed data).</em></p>
-<table>
-<thead>
-<tr>
-<th>controller</th>
-<th>reach rate</th>
-<th>rescued</th>
-<th>regressions</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>clone + TD3 (200k)</td>
-<td>68 / 78 = <strong>87.2 %</strong></td>
-<td>38</td>
-<td>0</td>
-</tr>
-<tr>
-<td>clone + TD3 (400k)</td>
-<td>74 / 78 = <strong>94.9 %</strong></td>
-<td>44</td>
-<td>0</td>
-</tr>
-</tbody>
-</table>
-<p>Of the 10 seeds that failed at 200k, <strong>6 are fixed</strong> by the longer run
-(<code>4104626037, 59, 64, 81, 90, 92</code>) and <strong>4 still fail</strong>
+<p>Reach rate for both checkpoints is already in the <a href="#three-way-reach-rate-78-seeds-base-seed-4104626029-canonical-config">Three-way reach rate table</a>
+above (68/78 → 74/78). Of the 10 seeds that failed at 200k, <strong>6 are fixed</strong> by the longer run
+(<code>4104626037, 59, 64, 81, 90, 92</code>) — lifting rescued from 38 to <strong>44</strong> — and <strong>4 still fail</strong>
 (<code>4104626056, 69, 83, 86</code>) — confirmed with <strong>0 newly-introduced regressions</strong>: every seed the
 200k model solved, the 400k model still solves.</p>
 <p><strong>The 4 that remain, re-examined:</strong></p>
@@ -1976,7 +1953,7 @@ on individual hard seeds rather than a still-rising aggregate curve. Regenerate 
 </ul>
 <figure>
 <video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
-    <source src="../videos/residual-400k-fail-4104626056.mp4" type="video/mp4">
+    <source src="videos/residual-400k-fail-4104626056.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 <figcaption>
@@ -1986,7 +1963,7 @@ on individual hard seeds rather than a still-rising aggregate curve. Regenerate 
 </figure>
 <figure>
 <video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
-    <source src="../videos/residual-400k-fail-4104626069.mp4" type="video/mp4">
+    <source src="videos/residual-400k-fail-4104626069.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 <figcaption>
@@ -1995,7 +1972,7 @@ on individual hard seeds rather than a still-rising aggregate curve. Regenerate 
 </figure>
 <figure>
 <video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
-    <source src="../videos/residual-400k-fail-4104626083.mp4" type="video/mp4">
+    <source src="videos/residual-400k-fail-4104626083.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 <figcaption>
@@ -2006,7 +1983,7 @@ on individual hard seeds rather than a still-rising aggregate curve. Regenerate 
 </figure>
 <figure>
 <video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
-    <source src="../videos/residual-400k-fail-4104626086.mp4" type="video/mp4">
+    <source src="videos/residual-400k-fail-4104626086.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 <figcaption>
