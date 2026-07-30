@@ -32,7 +32,7 @@ def test_ensure_traces_cache_hit_never_touches_models(tmp_path):
 
 @pytest.mark.integration
 def test_ensure_traces_generates_and_caches_when_missing(tmp_path):
-    seed = 4104626029  # known-good showcased seed (see docs/journey/10-residual-rl.md)
+    seed = 4104626029  # known-good showcased seed (see docs/journey/08-residual-rl.md)
     clone, residual = ensure_traces(
         seed, str(tmp_path),
         clone_path=CLONE, residual_model_path=RESIDUAL_MODEL, libraries_path=LIB,

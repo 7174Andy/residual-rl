@@ -4,18 +4,16 @@ This is the **decision log** for the project. Each entry captures a real fork in
 
 Entries are roughly chronological, but each one stands alone — you can read them in any order.
 
-| #                                | Topic                                                         |
-| -------------------------------- | ------------------------------------------------------------- |
-| [01](01-task-framing.md)         | Task framing — trajectory tracking vs goal-reaching           |
-| [02](02-env-design.md)           | Env design — observation, action, reward                      |
-| [03](03-action-bounds.md)        | Action bounds — paper-faithful vs broad                       |
-| [04](04-deepc-formulation.md)    | DeePC formulation — L1, L2, or hybrid regularization          |
-| [05](05-cold-start.md)           | Cold-start bug — when the synthetic past locks the controller |
-| [06](06-single-library-fails.md) | Why one library isn't enough — bilinear dynamics              |
-| [07](07-library-switching.md)    | Library switching — local linearization via 4 quadrants       |
-| [08](08-stop-at-goal.md)         | Stopping at the goal — overshoot (fixed) → over-braking (RL next) |
-| [09](09-imitation-learning.md)   | Imitation learning — cloning DeePC into a fast neural policy   |
-| [10](10-residual-rl.md)          | Residual RL — TD3 correction lifts reach rate 38.5%→94.9%      |
+| #                                | Topic                                                             |
+| -------------------------------- | ----------------------------------------------------------------- |
+| [01](01-task-framing.md)         | Task framing — trajectory tracking vs goal-reaching               |
+| [02](02-env-design.md)           | Env design — observation, action, reward                          |
+| [03](03-action-bounds.md)        | Action bounds — paper-faithful vs broad                           |
+| [04](04-deepc-formulation.md)    | DeePC formulation — L1, L2, or hybrid regularization              |
+| [05](05-library-switching.md)    | Library switching — bilinear dynamics force 4 local libraries      |
+| [06](06-stop-at-goal.md)         | Stopping at the goal — overshoot (fixed) → over-braking (RL next) |
+| [07](07-imitation-learning.md)   | Imitation learning — cloning DeePC into a fast neural policy      |
+| [08](08-residual-rl.md)          | Residual RL — TD3 correction lifts reach rate 38.5%→94.9%         |
 
 ## Conventions
 

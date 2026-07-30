@@ -119,9 +119,7 @@ nav:
       - 02. Env design: journey/02-env-design.md
       - 03. Action bounds: journey/03-action-bounds.md
       - 04. DeePC formulation: journey/04-deepc-formulation.md
-      - 05. Cold-start bug: journey/05-cold-start.md
-      - 06. Single library fails: journey/06-single-library-fails.md
-      - 07. Library switching: journey/07-library-switching.md
-      - 08. Stopping at the goal: journey/08-stop-at-goal.md
-      - 09. Imitation learning: journey/09-imitation-learning.md
-      - 10. Residual RL: journey/10-residual-rl.md
+      - 05. Library switching: journey/05-library-switching.md
+      - 06. Stopping at the goal: journey/06-stop-at-goal.md
+      - 07. Imitation learning: journey/07-imitation-learning.md
+      - 08. Residual RL: journey/08-residual-rl.md

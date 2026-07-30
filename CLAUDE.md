@@ -12,7 +12,7 @@ Repo status:
 
 1. Gymnasium env for goal-reaching (`TwoWheelGoal-v0`) — done.
 2. Classical controller baseline — **DeePC** (data-EnablEd predictive control, Coulson/Lygeros/Dörfler 2019; same family as the paper's DDPC) with orientation-keyed library switching — done.
-3. Imitation-learned clone of DeePC (fast MLP surrogate) plus **TD3/SAC residual RL** correction on top, via stable-baselines3 — done; the residual lifts reach rate from ~39% (DeePC/clone) to 87–95% depending on training length (see `docs/journey/09-imitation-learning.md`, `docs/journey/10-residual-rl.md`).
+3. Imitation-learned clone of DeePC (fast MLP surrogate) plus **TD3/SAC residual RL** correction on top, via stable-baselines3 — done; the residual lifts reach rate from ~39% (DeePC/clone) to 87–95% depending on training length (see `docs/journey/07-imitation-learning.md`, `docs/journey/08-residual-rl.md`).
 
 The env is the product; controllers/policies are baselines that consume it.
 

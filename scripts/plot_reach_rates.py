@@ -3,7 +3,7 @@
 
 Default input is the committed benchmark-results CSV
 (`docs/journey/figures/reach_rates.csv`, columns ``label,k,n``) transcribed from
-the 78-seed canonical sweep in docs/journey/10-residual-rl.md, so the figure
+the 78-seed canonical sweep in docs/journey/08-residual-rl.md, so the figure
 regenerates without re-running the (QP-bound, ~minutes-per-seed) benchmark:
 
     uv run python scripts/plot_reach_rates.py

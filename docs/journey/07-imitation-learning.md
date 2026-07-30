@@ -1,4 +1,4 @@
-# 09. Imitation learning — cloning DeePC into a neural policy
+# 08. Imitation learning — cloning DeePC into a neural policy
 
 !!! note "Status: complete (2026-07-07)"
 A small MLP was trained by **behavioral cloning** to imitate the canonical DeePC
@@ -7,7 +7,7 @@ controller. It reproduces DeePC's closed-loop behavior on a 78-seed random sweep
 **82 % seed-by-seed outcome agreement**, and bounded trajectory drift (~0.93 units
 median) — while replacing the **~0.6 s QP solve** with a **23 µs forward pass**
 (~26,000× faster). This clone is the frozen baseline $f_\theta$ for the
-residual-RL step proposed in [08](08-stop-at-goal.md). It faithfully reproduces
+residual-RL step proposed in [06](06-stop-at-goal.md). It faithfully reproduces
 DeePC's _failures_ too (the far-field `v`-collapse) — that is by design: the clone's
 job is fidelity, RL's job is the fix.
 
@@ -20,7 +20,7 @@ baseline is a microsecond forward pass instead of a solver call.
 
 ## Context
 
-[08](08-stop-at-goal.md) ended on a structural conclusion: DeePC navigates well on
+[06](06-stop-at-goal.md) ended on a structural conclusion: DeePC navigates well on
 ~39 % of seeds and **collapses** on the rest (the hallucinated-prediction
 `v`-collapse), so the next step is a **hybrid** — DeePC supplies the prior where its
 data representation is valid, RL backstops the regime where it is not. The default
@@ -50,12 +50,12 @@ the single action DeePC would apply:
 **Featurization (40-D).** Heading is encoded as `(sin δ, cos δ)` so the `±π` wrap is
 continuous. Layout `6·T_ini + 6 + N_lib = 30 + 6 + 4 = 40`:
 
-| block            | dims          | contents                                  |
-| ---------------- | ------------- | ----------------------------------------- |
-| past buffer      | `6·T_ini = 30`| 5 steps of `(v, w, x, y, sin δ, cos δ)`   |
-| current output   | `4`           | `x, y, sin δ, cos δ`                       |
-| goal             | `2`           | `g_x, g_y`                                 |
-| library one-hot  | `N_lib = 4`   | which heading library DeePC would use      |
+| block           | dims           | contents                                |
+| --------------- | -------------- | --------------------------------------- |
+| past buffer     | `6·T_ini = 30` | 5 steps of `(v, w, x, y, sin δ, cos δ)` |
+| current output  | `4`            | `x, y, sin δ, cos δ`                    |
+| goal            | `2`            | `g_x, g_y`                              |
+| library one-hot | `N_lib = 4`    | which heading library DeePC would use   |
 
 The one-hot is the key design choice: DeePC's prediction is **piecewise** (a different
 local-linear library per heading quadrant), so telling the MLP which library is active
@@ -68,14 +68,14 @@ one-hot tail passes through unscaled). CPU forward pass ≈ **23 µs**.
 strategy covers both "everywhere the state space could be" and "where the closed loop
 actually goes", so the set is mixed:
 
-| source          | count  | share  | purpose                                            |
-| --------------- | ------ | ------ | -------------------------------------------------- |
-| synthetic       | 15,024 | 42.9 % | broad coverage — random poses, goals, past buffers |
-| on-policy       | 15,023 | 42.9 % | the distribution the clone will actually see       |
-| degenerate      | 4,976  | 14.2 % | frozen/constant-past stall states (the hard regime)|
+| source     | count  | share  | purpose                                             |
+| ---------- | ------ | ------ | --------------------------------------------------- |
+| synthetic  | 15,024 | 42.9 % | broad coverage — random poses, goals, past buffers  |
+| on-policy  | 15,023 | 42.9 % | the distribution the clone will actually see        |
+| degenerate | 4,976  | 14.2 % | frozen/constant-past stall states (the hard regime) |
 
 The **degenerate** slice is deliberately over-represented: it is the `v`-collapse
-regime from [08](08-stop-at-goal.md), where the QP target is hardest to reproduce and
+regime from [06](06-stop-at-goal.md), where the QP target is hardest to reproduce and
 where the downstream RL will do its work — so the clone must at least see it. Labels
 are the QP's own solution at each state, under the **canonical config** (bearing
 reference, `Q = diag(1, 1, 2)`, `R = 1.3·10⁻³ I`, `T_ini = 5`, `N = 12`,
@@ -129,38 +129,38 @@ the unbiased measure.
 Held-out split (`n = 3502`, never seen in training). Errors are in physical units
 (`v` in units/s, `w` in rad/s):
 
-| regime      | n     | MAE `v` | MAE `w` | RMSE `v` | RMSE `w` |
-| ----------- | ----- | ------- | ------- | -------- | -------- |
-| on-policy   | 1,525 | 0.58    | 0.13    | 0.94     | 0.22     |
-| synthetic   | 1,495 | 1.13    | 0.22    | 1.68     | 0.37     |
-| degenerate  | 482   | 2.78    | 0.25    | 4.06     | 0.44     |
-| **overall** | 3,502 | **1.12**| **0.18**| **1.97** | **0.33** |
+| regime      | n     | MAE `v`  | MAE `w`  | RMSE `v` | RMSE `w` |
+| ----------- | ----- | -------- | -------- | -------- | -------- |
+| on-policy   | 1,525 | 0.58     | 0.13     | 0.94     | 0.22     |
+| synthetic   | 1,495 | 1.13     | 0.22     | 1.68     | 0.37     |
+| degenerate  | 482   | 2.78     | 0.25     | 4.06     | 0.44     |
+| **overall** | 3,502 | **1.12** | **0.18** | **1.97** | **0.33** |
 
 Held-out correlation with the QP target: `corr(v) = 0.94`, `corr(w) = 0.97`
 (normalized MSE 0.092). The clone is **most accurate exactly where it operates**
 (on-policy: MAE `v` ≈ 0.58 units/s against a `[0, 20]` range) and least accurate on the
 **degenerate** stall states — expected, because there the QP itself is ill-posed (a
 near-constant past is matched by many solutions, so the target is nearly arbitrary; see
-[08](08-stop-at-goal.md) _Root cause_). The clone cannot be more certain than DeePC is.
+[06](06-stop-at-goal.md) _Root cause_). The clone cannot be more certain than DeePC is.
 
 ### (2)+(3) Closed-loop behavioral equivalence — 78 random seeds
 
 `scripts/validate_clone.py`, base seed `4104626029`, canonical config:
 
-| metric                              | DeePC              | Clone              |
-| ----------------------------------- | ------------------ | ------------------ |
-| reach rate                          | 30 / 78 = **38.5 %** | 30 / 78 = **38.5 %** |
-| reach-rate 95 % CI (Wilson)         | [0.284, 0.496]     | [0.284, 0.496]     |
-| median solve/inference time per step| ~0.6 s (QP)        | **23 µs** (MLP)    |
+| metric                               | DeePC                | Clone                |
+| ------------------------------------ | -------------------- | -------------------- |
+| reach rate                           | 30 / 78 = **38.5 %** | 30 / 78 = **38.5 %** |
+| reach-rate 95 % CI (Wilson)          | [0.284, 0.496]       | [0.284, 0.496]       |
+| median solve/inference time per step | ~0.6 s (QP)          | **23 µs** (MLP)      |
 
 Paired agreement (the decisive test):
 
-| paired metric                      | value                                       |
-| ---------------------------------- | ------------------------------------------- |
-| seed-by-seed outcome agreement     | **64 / 78 = 82.1 %**                         |
-| confusion (both / DeePC-only / clone-only / neither) | 23 / 7 / 7 / 41           |
-| McNemar $p$                        | **1.0** (disagreements balanced → no bias)  |
-| median trajectory position deviation | **0.94 units** median · **2.01** p95 (per-seed) |
+| paired metric                                        | value                                           |
+| ---------------------------------------------------- | ----------------------------------------------- |
+| seed-by-seed outcome agreement                       | **64 / 78 = 82.1 %**                            |
+| confusion (both / DeePC-only / clone-only / neither) | 23 / 7 / 7 / 41                                 |
+| McNemar $p$                                          | **1.0** (disagreements balanced → no bias)      |
+| median trajectory position deviation                 | **0.94 units** median · **2.01** p95 (per-seed) |
 
 ## Reading the numbers
 
@@ -175,7 +175,7 @@ Paired agreement (the decisive test):
   (45 vs 41; 71 vs 58) but lands equivalently.
 - **The failures transfer too.** On seed 4104626061 both stall in the far field — the
   clone inherits DeePC's dominant flaw. This is the honest, expected outcome of cloning
-  (flagged in [08](08-stop-at-goal.md)'s "BC warm-start" note) and is _acceptable here_:
+  (flagged in [06](06-stop-at-goal.md)'s "BC warm-start" note) and is _acceptable here_:
   the clone is the baseline, and the residual RL is what supplies the forward velocity
   the hallucinated predictor refuses to.
 - **The speedup is the point.** 0.6 s → 23 µs (~26,000×) is what turns "QP in the RL
@@ -184,7 +184,7 @@ Paired agreement (the decisive test):
 ## What this unlocks — residual RL
 
 The clone is the frozen $f_\theta$ for the hybrid proposed in
-[08](08-stop-at-goal.md):
+[06](06-stop-at-goal.md):
 
 $$u = \operatorname{clip}\big(f_\theta(\text{state}) + u_\text{RL}(\text{obs})\big)$$
 
@@ -196,7 +196,7 @@ already solves and _carries_ the ~42 % it collapses — exactly the far-field
 
 Open question carried forward: does residual RL beat the much cheaper
 `--Q_heading 0` / `--no_bearing_ref` heading-reference fix from
-[08](08-stop-at-goal.md)? That ablation is the next entry.
+[06](06-stop-at-goal.md)? That ablation is the next entry.
 
 ## Reproduce
 

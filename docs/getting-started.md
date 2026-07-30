@@ -64,7 +64,7 @@ To compare against the single-library version:
 uv run python scripts/run_deepc.py --single_library 0
 ```
 
-(Expect worse results — see [why single library fails](journey/06-single-library-fails.md).)
+(Expect worse results — see [why single library fails](journey/05-library-switching.md).)
 
 ## Build the docs locally
 

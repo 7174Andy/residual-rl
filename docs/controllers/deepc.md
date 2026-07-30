@@ -54,7 +54,7 @@ y_buf : shape (T_ini, p_y)  — last T_ini observed outputs (before each action)
 On `reset(y_initial, u_initial)`, both are filled with `T_ini` copies of the initial values. This "synthetic past" is consistent for any zero-velocity initial condition, and the soft `λ_y ‖σ_y‖²` penalty absorbs the inconsistency for other cases.
 
 !!! warning "Cold-start gotcha"
-    If `u_initial` is `0` and the data has only non-negative `v` (e.g., paper-PE collection or broad bounds with `v ≥ 0`), the QP gets locked into outputting `u ≈ 0`. The fix is to prime `u_initial` at the **midpoint of `action_bounds`** instead. `scripts/run_deepc.py` does this automatically. See [cold-start journey entry](../journey/05-cold-start.md).
+    If `u_initial` is `0` and the data has only non-negative `v` (e.g., paper-PE collection or broad bounds with `v ≥ 0`), the QP gets locked into outputting `u ≈ 0`. The fix is to prime `u_initial` at the **midpoint of `action_bounds`** instead. `scripts/run_deepc.py` does this automatically.
 
 ## Libraries and orientation switching
 

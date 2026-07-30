@@ -7,7 +7,7 @@ showcase seeds, for both clone and residual, to
 Both closed loops are DeePC-free (clone/residual only -- no QP), so this runs
 in well under a second per seed. Defaults to `--trace-model
 data/residual_td3.zip` (the 200k checkpoint) to match the checkpoint used to
-record that seed's embedded video in docs/journey/10-residual-rl.md.
+record that seed's embedded video in docs/journey/08-residual-rl.md.
 """
 from __future__ import annotations
 

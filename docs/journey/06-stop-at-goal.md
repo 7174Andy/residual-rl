@@ -1,6 +1,5 @@
-# 08. Stopping at the goal — the deceleration / overshoot problem
+# 07. Stopping at the goal — the deceleration / overshoot problem
 
-!!! note "Status: partially resolved (updated 2026-06-01)"
 The original **overshoot** problem below is resolved by widening the data
 envelope (see _Resolution_). Doing so surfaced **two** residual failures: an
 _over-braking_ pirouette near the goal, and — only visible at larger sample — a
@@ -23,7 +22,7 @@ it skims past the goal circle and misses by a small margin, then loops back.
 After [03 action bounds](03-action-bounds.md) and the bounds sweep, `data/libraries.npz`
 is collected with **hybrid** PE bounds `v ∈ [10, 20]`, `w ∈ [±π/2]` (paper-style
 forward-only `v`, but a fast turn rate). This removes the spin-in-place stall from
-[06](06-single-library-fails.md): forcing `v ≥ 10` makes "do nothing" infeasible.
+[05](05-library-switching.md): forcing `v ≥ 10` makes "do nothing" infeasible.
 
 But the paper's task is continuous heart-curve _tracking_ — the robot never stops.
 Ours is point-to-point _reaching_, which requires stopping within `goal_tolerance`
@@ -79,12 +78,12 @@ now contains stopping/slow motion and DeePC can represent deceleration.
 
 Closed-loop on the new data (**seed 42, 3 episodes**):
 
-| metric              | old `v ∈ [10, 20]` | new `v ∈ [0, 20]`        |
-| ------------------- | ------------------ | ------------------------ |
-| success rate        | 1 / 3              | **2 / 3**                |
-| `v` min observed    | +10.0 (floored)    | **+0.0 — it brakes**     |
-| `v` mean            | ~11.5              | 3.2 – 7.4                |
-| worst `final_dist`  | 8 – 20 (spirals)   | **2.75 (lingers)**       |
+| metric             | old `v ∈ [10, 20]` | new `v ∈ [0, 20]`    |
+| ------------------ | ------------------ | -------------------- |
+| success rate       | 1 / 3              | **2 / 3**            |
+| `v` min observed   | +10.0 (floored)    | **+0.0 — it brakes** |
+| `v` mean           | ~11.5              | 3.2 – 7.4            |
+| worst `final_dist` | 8 – 20 (spirals)   | **2.75 (lingers)**   |
 
 With `v_min = 0` the goal is a genuine equilibrium, the controller brakes, and a
 miss now _lingers near_ the goal instead of spiraling across the box.
@@ -162,15 +161,15 @@ stopped; `libraries_v0.npz`) reframes the picture:
 That splits the residual failure into **two populations**, not the single near-goal
 mode the section above describes:
 
-| population                          | count (of 48 truncations) | signature                                              | matches                |
-| ----------------------------------- | ------------------------- | ------------------------------------------------------ | ---------------------- |
-| near-goal pirouette / over-brake    | 15 (final_dist < 3.0)     | reaches the neighborhood, then stalls / spins          | the "New problem" above |
-| **far-field `v`-collapse**          | **33 (final_dist ≥ 3.0)** | never drives in; `v̄` stays ≈ 1.6 across the whole run | **dominant; new**      |
+| population                       | count (of 48 truncations) | signature                                             | matches                 |
+| -------------------------------- | ------------------------- | ----------------------------------------------------- | ----------------------- |
+| near-goal pirouette / over-brake | 15 (final_dist < 3.0)     | reaches the neighborhood, then stalls / spins         | the "New problem" above |
+| **far-field `v`-collapse**       | **33 (final_dist ≥ 3.0)** | never drives in; `v̄` stays ≈ 1.6 across the whole run | **dominant; new**       |
 
 So the Resolution's "miss now lingers near the goal" claim holds only for a minority
 of seeds. On most failing seeds the robot **never commits to forward motion** and
 truncates far away — the same `v → 0` family as
-[06](06-single-library-fails.md), now seed-dependent rather than universal.
+[05](05-library-switching.md), now seed-dependent rather than universal.
 
 <figure markdown>
   <video controls loop muted playsinline width="480">
@@ -207,7 +206,7 @@ We ruled out the two obvious culprits:
   units of path budget over 200 steps, far more than the 20-unit workspace diagonal.
   Failures end far away with low `v`, not "almost there after running out of steps"
   (only 7 / 48 ended < 1.0).
-- **Not the regularizers.** [06](06-single-library-fails.md) swept `λ_g`, `λ_y`, `N`,
+- **Not the regularizers.** [05](05-library-switching.md) swept `λ_g`, `λ_y`, `N`,
   `T_ini` against this exact `v → 0` mode and none moved it. λ is not the lever.
 
 ## Root cause of the `v`-collapse — a hallucinated prediction from a degenerate past, not missing data (and not a bug)
@@ -264,7 +263,7 @@ A (near-)constant past is matched by **many** `g`'s — the constraints `Up·g =
 predicted future lands on the goal while its first control is `v = 0`. It is
 **self-trapping**: frozen init → stall → constant history → sustains the stall. The
 precise cause is the _conjunction_, the bilinear unfaithfulness of
-[06](06-single-library-fails.md) **gated on past-conditioning**:
+[05](05-library-switching.md) **gated on past-conditioning**:
 
 > **nonlinear dynamics** (matching the past no longer guarantees a real future)
 > **+ an uninformative/constant past** (so many blends satisfy the match)
@@ -278,7 +277,7 @@ Nonlinearity alone would not do it — on a real, varied past the predictor is a
 - **Reweighting `Q`/`R`/`λ` will not reliably fix it.** Lowering `R` only removes the
   tie-breaker; the QP is then _indifferent_ between `v = 0` and `v = 12` (both falsely
   predicted to reach) and can still stall. The rot is in the prediction, which no cost
-  reweighting repairs. (Consistent with [06](06-single-library-fails.md)'s λ sweep.)
+  reweighting repairs. (Consistent with [05](05-library-switching.md)'s λ sweep.)
 - **`--Q_heading 0` / `--no_bearing_ref`** still targets only the _near-goal
   pirouette_ population (~15 episodes), not this dominant collapse.
 - **Attack the trigger (cheap — now the leading lever).** Because the predictor is
@@ -356,16 +355,16 @@ greenfield. Item 3 of the repo plan.)
 **1. What metrics beyond success rate?** Success rate alone hides _how_ a run fails
 (overshoot vs stall vs diverge) and how efficient the successes are. Candidates:
 
-| group       | metric                                    | catches                          |
-| ----------- | ----------------------------------------- | -------------------------------- |
-| success     | success rate; success rate 95% CI         | headline + variance across seeds |
-| proximity   | **min distance** ever reached; final dist | near-miss (0.68/0.88) vs stall (2.75) |
-| efficiency  | steps-to-reach; **path-length ratio** (actual ÷ straight-line, optimal = 1) | looping / pirouetting |
-| effort      | Σ‖u‖² (energy); Σ‖Δu‖ (smoothness/jerk)    | chattering, wasted control       |
-| diagnostic  | `w`-saturation fraction; mean `v` in final approach | spin-stall vs overshoot |
-| settling    | dwell time inside tolerance               | can-it-stay (≈0 if `v_min>0`)    |
-| failure tax | overshoot / stall / diverge / wall-pin %  | _why_ it failed, not just that   |
-| compute     | QP failure rate; solve time; warm-start hit rate | controller health           |
+| group       | metric                                                                      | catches                               |
+| ----------- | --------------------------------------------------------------------------- | ------------------------------------- |
+| success     | success rate; success rate 95% CI                                           | headline + variance across seeds      |
+| proximity   | **min distance** ever reached; final dist                                   | near-miss (0.68/0.88) vs stall (2.75) |
+| efficiency  | steps-to-reach; **path-length ratio** (actual ÷ straight-line, optimal = 1) | looping / pirouetting                 |
+| effort      | Σ‖u‖² (energy); Σ‖Δu‖ (smoothness/jerk)                                     | chattering, wasted control            |
+| diagnostic  | `w`-saturation fraction; mean `v` in final approach                         | spin-stall vs overshoot               |
+| settling    | dwell time inside tolerance                                                 | can-it-stay (≈0 if `v_min>0`)         |
+| failure tax | overshoot / stall / diverge / wall-pin %                                    | _why_ it failed, not just that        |
+| compute     | QP failure rate; solve time; warm-start hit rate                            | controller health                     |
 
 `path-length ratio` and `min distance` are the highest-value additions: together
 they distinguish all three observed failure modes that success rate collapses.

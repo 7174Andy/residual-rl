@@ -217,7 +217,7 @@ uv run python scripts/eval_residual.py --model data/residual_td3.zip \
 | `--algo` | `td3` | `td3` or `sac` |
 | `--device` | `cpu` | Inference device |
 
-Prints DeePC/clone/residual reach counts + rates + Wilson CIs, residual-vs-clone McNemar p-value, `rescued`/`regressions` counts, and median trajectory deviation vs clone — this is the source of the reach-rate numbers in the [residual RL journey entry](../journey/10-residual-rl.md).
+Prints DeePC/clone/residual reach counts + rates + Wilson CIs, residual-vs-clone McNemar p-value, `rescued`/`regressions` counts, and median trajectory deviation vs clone — this is the source of the reach-rate numbers in the [residual RL journey entry](../journey/08-residual-rl.md).
 
 ## `scripts/eval_seed_showcase.py`
 
@@ -233,7 +233,7 @@ uv run python scripts/eval_seed_showcase.py --trace-seeds 4104626029,4104626034
 | `--libraries` | `data/libraries_v0.npz` | DeePC offline data libraries |
 | `--outdir` | `docs/journey/figures` | Output directory for the trace CSVs |
 | `--device` | `cpu` | Inference device |
-| `--trace-model` | `data/residual_td3.zip` | Residual checkpoint — defaults to the **200k** checkpoint, matching the video embedded in [journey 10](../journey/10-residual-rl.md) |
+| `--trace-model` | `data/residual_td3.zip` | Residual checkpoint — defaults to the **200k** checkpoint, matching the video embedded in [journey 08](../journey/08-residual-rl.md) |
 | `--trace-seeds` | `"4104626029,4104626034"` | Comma-separated seeds to trace |
 
 Prints one `wrote <path> (N steps)` line per seed per controller.

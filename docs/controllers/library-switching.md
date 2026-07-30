@@ -5,10 +5,9 @@ controller holds `N` data libraries (one per heading region) and, each step,
 feeds the library whose anchor heading is closest to the robot's current
 heading into one cached QP. There is no separate switcher class.
 
-This page is the **reference**. The "why" lives in two journey entries:
-
-- [Journey 06 — why one library isn't enough](../journey/06-single-library-fails.md): bilinear dynamics defeat a single linear predictor.
-- [Journey 07 — library switching](../journey/07-library-switching.md): how piecewise local linearization fixes it.
+This page is the **reference**. The "why" lives in [Journey 05 — library
+switching](../journey/05-library-switching.md): bilinear dynamics defeat a
+single linear predictor, and piecewise local linearization fixes it.
 
 ## How it works
 

@@ -1,4 +1,4 @@
-# 10. Residual RL — RL + MPC over the frozen clone
+# 09. Residual RL — RL + MPC over the frozen clone
 
 !!! note "Status: complete (2026-07-08; extended 2026-07-20)"
 A **TD3 residual** trained on top of the frozen DeePC clone turns the far-field
@@ -6,7 +6,7 @@ A **TD3 residual** trained on top of the frozen DeePC clone turns the far-field
 `u = clip(f_θ + μ)` reaches **68/78 = 87.2 %** vs the clone's (and DeePC's) **30/78 =
 38.5 %** — it **rescues 38** of the 48 seeds the clone stalls on with **0 regressions**
 (it never breaks a seed the clone already solved), McNemar $p < 10^{-4}$. The residual is
-**zero-initialized**, so at step 0 it *is* the clone; RL only adds the forward velocity the
+**zero-initialized**, so at step 0 it _is_ the clone; RL only adds the forward velocity the
 hallucinated predictor refused to. The QP never re-enters the loop: control is a **103 µs**
 two-MLP forward pass. This is the paper's **RL + MPC** architecture
 ([arXiv:2510.03354](https://arxiv.org/abs/2510.03354), Eq. 18) on the unicycle task.
@@ -18,14 +18,14 @@ to 400k steps" section below.
 ## Motivation (one line)
 
 The clone faithfully reproduces DeePC — including its ~39 % ceiling and the far-field stall
-([09](09-imitation-learning.md)). Add a learned residual that fixes the stall while keeping
+([07](07-imitation-learning.md)). Add a learned residual that fixes the stall while keeping
 everything DeePC already gets right.
 
 ## Context
 
-[08](08-stop-at-goal.md) diagnosed the ceiling: DeePC navigates well on ~39 % of seeds and
+[06](06-stop-at-goal.md) diagnosed the ceiling: DeePC navigates well on ~39 % of seeds and
 **collapses** on the rest — a hallucinated-prediction `v`-collapse where the QP commits
-`v ≈ 0` and the robot stalls in the far field. [09](09-imitation-learning.md) amortized DeePC
+`v ≈ 0` and the robot stalls in the far field. [07](07-imitation-learning.md) amortized DeePC
 into a 23 µs neural clone `f_θ` that reproduces both its **successes and its failures** —
 by design, so that a learned residual has a fast, faithful baseline to correct. This entry
 is that residual.
@@ -47,21 +47,21 @@ $$u = \operatorname{clip}\!\big(\underbrace{f_\theta(\text{features})}_{\text{fr
 
 and slides the buffer with `(applied u, pre-step y)` — the exact convention the clone was
 labeled under, so the two stay comparable. The residual authority `ρ = residual_frac` defaults
-to **1.0** (full range): the far-field fix needs a *large* `v` correction to escape the stall,
+to **1.0** (full range): the far-field fix needs a _large_ `v` correction to escape the stall,
 and the final `clip` keeps `u` in bounds regardless.
 
 **Zero-init = no-regression at init.** The TD3 actor's output head is zero-initialized, so at
 step 0 the residual is exactly 0 and the policy is **bit-for-bit identical to the clone**
 (a unit-test pins this: a zero-residual rollout reproduces the clone's closed loop exactly).
-RL can then only *add* to a known-good baseline — the floor is "no worse than clone."
+RL can then only _add_ to a known-good baseline — the floor is "no worse than clone."
 
 **Observation / action.** The actor sees a 7-D obs — the env's body-frame state (5) plus the
 baseline's proposed `u_base` (2), min-max normalized to $[-1,1]$ — and emits a residual in
-$[-1,1]^2$. Feeding it `u_base` lets it learn *how much to correct the baseline* rather than
+$[-1,1]^2$. Feeding it `u_base` lets it learn _how much to correct the baseline_ rather than
 rediscovering the baseline.
 
 **Why TD3 — not PPO or classic DDPG.** The earlier roadmap defaulted to **PPO**; the paper
-uses **classic DDPG**; we use **TD3**. PPO is on-policy, so it discards the *rare* stall-escape
+uses **classic DDPG**; we use **TD3**. PPO is on-policy, so it discards the _rare_ stall-escape
 transitions this problem hinges on — an off-policy **replay buffer** reuses them — and its
 stochastic policy has no clean "start exactly at the clone and stay there until it helps"
 init. Classic DDPG is the right family (off-policy, deterministic actor — which is what makes
@@ -77,11 +77,11 @@ learned to drive through the stall (curve below). The QP is never called during 
 
 ![TD3 residual training-return curve](figures/residual_return.png)
 
-*Mean episode return (SB3 `ep_rew_mean`) over training episodes — the shipped seed-0 run: a
+_Mean episode return (SB3 `ep_rew_mean`) over training episodes — the shipped seed-0 run: a
 rapid climb (episodes ~20–200), then a noisy plateau (~−7k to −11k). The return plateaus and
 even dips late while the **reach rate is 87.2 %** — the reward also charges control effort
 `−uᵀRu`, so a lower return does not mean fewer reaches (TD3 also saves the final, not the best,
-policy). Regenerate from the committed curve with `uv run python scripts/plot_training_return.py`.*
+policy). Regenerate from the committed curve with `uv run python scripts/plot_training_return.py`._
 
 ## Side-by-side — clone vs clone+residual
 
@@ -89,7 +89,7 @@ Two **rescued** seeds under the canonical config (same start/goal for both contr
 = the clone (stalls in the far field); middle = clone + residual (reaches); right = the same
 two closed loops as a static trajectory + `v(t)` trace, so the video's qualitative "it
 drives through the stall" is paired with the quantitative channel that changed. These are the
-`v`-collapse seeds from [08](08-stop-at-goal.md) — the exact regime the residual was built for.
+`v`-collapse seeds from [06](06-stop-at-goal.md) — the exact regime the residual was built for.
 
 <table>
 <thead>
@@ -111,57 +111,57 @@ drives through the stall" is paired with the quantitative channel that changed. 
 </tbody>
 </table>
 
-*Trajectory panel: clone (dashed gray, stalls) vs clone + TD3 residual (blue, reaches), goal
+_Trajectory panel: clone (dashed gray, stalls) vs clone + TD3 residual (blue, reaches), goal
 marked with a star and the 0.5-unit tolerance circle. `v(t)` panel: the same two closed loops'
 forward-velocity channel — the clone's `v` decays toward 0 (the collapse), the residual's `v`
 climbs instead of decaying and drives the reach. Regenerate with
 `uv run python scripts/plot_seed_traces.py --seed 4104626029` (reads the committed
-`traj_<seed>_{clone,residual}.csv`, written once by `scripts/eval_seed_showcase.py`).*
+`traj_<seed>_{clone,residual}.csv`, written once by `scripts/eval_seed_showcase.py`)._
 
 ## Metrics
 
 ### Three-way reach rate — 78 seeds, base seed `4104626029`, canonical config
 
-| controller                | reach rate           | 95 % CI (Wilson) | per-step control |
-| ------------------------- | -------------------- | ---------------- | ---------------- |
-| DeePC (QP)                | 30 / 78 = **38.5 %** | [0.284, 0.496]   | ~0.6 s (QP)      |
-| clone `f_θ` (surrogate)   | 30 / 78 = **38.5 %** | [0.284, 0.496]   | 23 µs (MLP)      |
-| **clone + TD3 residual**  | 68 / 78 = **87.2 %** | [0.780, 0.929]   | **103 µs** (2 MLPs) |
-| **clone + TD3 residual (400k)** | 74 / 78 = **94.9 %** | [0.875, 0.980] | **103 µs** (2 MLPs) |
+| controller                      | reach rate           | 95 % CI (Wilson) | per-step control    |
+| ------------------------------- | -------------------- | ---------------- | ------------------- |
+| DeePC (QP)                      | 30 / 78 = **38.5 %** | [0.284, 0.496]   | ~0.6 s (QP)         |
+| clone `f_θ` (surrogate)         | 30 / 78 = **38.5 %** | [0.284, 0.496]   | 23 µs (MLP)         |
+| **clone + TD3 residual**        | 68 / 78 = **87.2 %** | [0.780, 0.929]   | **103 µs** (2 MLPs) |
+| **clone + TD3 residual (400k)** | 74 / 78 = **94.9 %** | [0.875, 0.980]   | **103 µs** (2 MLPs) |
 
 DeePC and the clone match at 30/78 — the clone reproduces the QP baseline exactly, confirming
-the harness is identical to [09](09-imitation-learning.md).
+the harness is identical to [07](07-imitation-learning.md).
 
 ![Reach rate bar chart — DeePC vs clone vs clone + TD3 residual (200k, 400k)](figures/reach_rates.png)
 
-*Reach rate over the canonical 78-seed sweep, error bars = 95 % Wilson CI. DeePC and the
+_Reach rate over the canonical 78-seed sweep, error bars = 95 % Wilson CI. DeePC and the
 clone are statistically indistinguishable (by construction); the residual is a clear jump
 outside either baseline's CI, and doubling the training budget lifts it further still.
 Regenerate with `uv run python scripts/plot_reach_rates.py` (reads the committed
-`docs/journey/figures/reach_rates.csv` — no benchmark re-run needed).*
+`docs/journey/figures/reach_rates.csv` — no benchmark re-run needed)._
 
 ### Paired — residual vs clone (the decisive test)
 
-| paired metric                                          | value                              |
-| ------------------------------------------------------ | ---------------------------------- |
-| confusion (both / clone-only / residual-only / neither) | **30 / 0 / 38 / 10**              |
-| **rescued** (clone fails → residual reaches)           | **38**                             |
-| **regressions** (clone reaches → residual fails)       | **0**                              |
+| paired metric                                           | value                                                       |
+| ------------------------------------------------------- | ----------------------------------------------------------- |
+| confusion (both / clone-only / residual-only / neither) | **30 / 0 / 38 / 10**                                        |
+| **rescued** (clone fails → residual reaches)            | **38**                                                      |
+| **regressions** (clone reaches → residual fails)        | **0**                                                       |
 | McNemar $p$                                             | **$< 10^{-4}$** (highly significant, one-sided improvement) |
-| trajectory position deviation vs clone                 | median **2.45** · median-of-p95 **5.90** (units) |
+| trajectory position deviation vs clone                  | median **2.45** · median-of-p95 **5.90** (units)            |
 
 ## Reading the numbers
 
 - **It fixes the failure regime, not a random slice.** The 38 rescued seeds are exactly the
-  far-field `v`-collapse cases from [08](08-stop-at-goal.md). Reach rate goes 38.5 % → 87.2 %
+  far-field `v`-collapse cases from [06](06-stop-at-goal.md). Reach rate goes 38.5 % → 87.2 %
   by solving the hard 62 %, not by trading one set of seeds for another.
 - **Zero regressions — the no-regression property held through training.** Every seed the
   clone solved, the residual still solves (clone-only = 0). Zero-init guaranteed this at step
-  0; 200k steps of TD3 never gave it back. This is the payoff of adding a residual *on top of*
+  0; 200k steps of TD3 never gave it back. This is the payoff of adding a residual _on top of_
   a good baseline rather than fine-tuning away from it.
 - **Larger trajectory deviation is the point here.** Unlike the clone (which was built to
-  *track* DeePC, ~0.9-unit deviation in [09](09-imitation-learning.md)), the residual is built
-  to *diverge* where DeePC stalls — hence median 2.45 units. The deviation concentrates on the
+  _track_ DeePC, ~0.9-unit deviation in [07](07-imitation-learning.md)), the residual is built
+  to _diverge_ where DeePC stalls — hence median 2.45 units. The deviation concentrates on the
   rescued seeds, where the clone sits still and the residual drives to the goal.
 - **The 10 that remain.** 10/78 are solved by none of the three — the residual is a large
   improvement, not a universal solver. These are the next frontier.
@@ -175,14 +175,6 @@ the prior where its data representation is valid, and a conservatively-initializ
 backstops the regime where it is not — recovering more than half the task's failures at no cost
 to its successes and no QP in the loop.
 
-Open questions carried forward:
-
-- Does residual RL beat the much cheaper `--Q_heading 0` / `--no_bearing_ref` heading-reference
-  fix floated in [08](08-stop-at-goal.md)? (Direct A/B still open.)
-- The 10 unsolved seeds — geometry-hard, or reachable with more training / SAC's stronger
-  exploration (`--algo sac`)? **Partially answered below: more training alone rescues 6 of the
-  10; the remaining 4 look structural, not just undertrained.**
-
 ## Follow-up — training to 400k steps (2026-07-20)
 
 The first open question above ("reachable with more training?") is cheap to test directly:
@@ -194,14 +186,14 @@ gain comes from continued fine convergence on the hard seeds, not an unfinished 
 
 ![TD3 residual training-return curve, 200k vs 400k steps overlaid](figures/residual_return_comparison.png)
 
-*Mean episode return (SB3 `ep_rew_mean`) for both runs on the same axes. The two curves are
+_Mean episode return (SB3 `ep_rew_mean`) for both runs on the same axes. The two curves are
 close to indistinguishable up to ~episode 1,300 (same seed, same hyperparameters — only the
 horizon differs), then visibly diverge before the 200k run ends at ~episode 1,550: the 400k
 run is not simply "the 200k run, continued," it's a fresh zero-init run whose noisy plateau
 happens to sit at a similar level, consistent with the reach-rate gain coming from convergence
 on individual hard seeds rather than a still-rising aggregate curve. Regenerate with
 `uv run python scripts/plot_training_return.py --compare 200k:docs/journey/figures/residual_return.csv
-400k:docs/journey/figures/residual_return_400k.csv` (both curve CSVs are committed data).*
+400k:docs/journey/figures/residual_return_400k.csv` (both curve CSVs are committed data)._
 
 Reach rate for both checkpoints is already in the [Three-way reach rate table](#three-way-reach-rate-78-seeds-base-seed-4104626029-canonical-config)
 above (68/78 → 74/78). Of the 10 seeds that failed at 200k, **6 are fixed** by the longer run
