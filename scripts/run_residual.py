@@ -15,31 +15,7 @@ import numpy as np
 
 from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
 from two_wheel_robot.rl.train_sb3 import load_residual
-
-
-def _encode_video(frames, path, fps) -> bool:
-    if not frames:
-        print(f"  warning: no frames for {path}", file=sys.stderr)
-        return False
-    try:
-        import imageio.v2 as imageio
-    except ImportError:
-        print(
-            "  warning: imageio not installed; cannot record. "
-            "Install with `uv add imageio imageio-ffmpeg`.",
-            file=sys.stderr,
-        )
-        return False
-    writer = imageio.get_writer(
-        path, mode="I", fps=fps, codec="libx264",
-        pixelformat="yuv420p", macro_block_size=None,
-    )
-    try:
-        for fr in frames:
-            writer.append_data(np.ascontiguousarray(fr, dtype=np.uint8))
-    finally:
-        writer.close()
-    return True
+from two_wheel_robot.rl.video_encoding import encode_video
 
 
 def main() -> int:
@@ -84,7 +60,7 @@ def main() -> int:
                   f"final_dist={info['distance']:.2f}")
             if recording:
                 out = os.path.join(args.record, f"episode_{s}.mp4")
-                if _encode_video(frames, out, fps):
+                if encode_video(frames, out, fps):
                     print(f"  wrote {out} ({len(frames)} frames @ {fps} fps)")
     finally:
         env.close()

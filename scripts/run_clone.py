@@ -34,37 +34,7 @@ from two_wheel_robot.env.env import UnicycleGoalEnv
 from two_wheel_robot.rl.clone import load_clone
 from two_wheel_robot.rl.deepc_setup import bearing_y_ref, build_canonical_deepc
 from two_wheel_robot.rl.features import featurize
-
-
-def _encode_video(frames: list[np.ndarray], path: str, fps: int) -> bool:
-    """Encode `(H, W, 3)` uint8 RGB frames to an MP4 at `path`.
-
-    Uses imageio with its bundled ffmpeg (imageio-ffmpeg), matching
-    `scripts/run_deepc.py`. yuv420p keeps the file browser-playable; the 600x600
-    renderer satisfies the even-dimension requirement.
-    """
-    if not frames:
-        print(f"  warning: no frames to write for {path}", file=sys.stderr)
-        return False
-    try:
-        import imageio.v2 as imageio
-    except ImportError:
-        print(
-            "  warning: imageio not installed; cannot record. "
-            "Install with `uv add imageio imageio-ffmpeg`.",
-            file=sys.stderr,
-        )
-        return False
-    writer = imageio.get_writer(
-        path, mode="I", fps=fps,
-        codec="libx264", pixelformat="yuv420p", macro_block_size=None,
-    )
-    try:
-        for fr in frames:
-            writer.append_data(np.ascontiguousarray(fr, dtype=np.uint8))
-    finally:
-        writer.close()
-    return True
+from two_wheel_robot.rl.video_encoding import encode_video
 
 
 def main() -> int:
@@ -176,7 +146,7 @@ def main() -> int:
                       f"w: mean={arr[:,1].mean():+.2f} std={arr[:,1].std():.2f}")
             if recording:
                 out_path = os.path.join(args.record, f"episode_{s}.mp4")
-                if _encode_video(frames, out_path, record_fps):
+                if encode_video(frames, out_path, record_fps):
                     print(f"  wrote {out_path} ({len(frames)} frames @ {record_fps} fps)")
 
         if records:

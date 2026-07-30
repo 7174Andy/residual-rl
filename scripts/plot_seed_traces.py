@@ -17,30 +17,19 @@ prose next to the video.
 from __future__ import annotations
 
 import argparse
-import csv
 
 import matplotlib
 
 matplotlib.use("Agg")  # headless: write a PNG, never open a window
 import matplotlib.patches as mpatches  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
+
+from two_wheel_robot.rl.trace_io import read_trace  # noqa: E402
+from two_wheel_robot.rl.trace_reward import DEFAULT_GOAL_TOLERANCE  # noqa: E402
 
 _GRAY = "#898781"
 _INK = "#52514e"
-_TOLERANCE = 0.5
-
-
-def _read_trace(path: str) -> dict:
-    with open(path) as f:
-        rows = list(csv.DictReader(f))
-    return {
-        "step": np.array([int(r["step"]) for r in rows]),
-        "x": np.array([float(r["x"]) for r in rows]),
-        "y": np.array([float(r["y"]) for r in rows]),
-        "v": np.array([float(r["v"]) for r in rows]),
-        "goal": np.array([float(rows[0]["goal_x"]), float(rows[0]["goal_y"])]),
-    }
+_TOLERANCE = DEFAULT_GOAL_TOLERANCE  # two_wheel_robot/rl/trace_reward.py's copy of env.py's default
 
 
 def main() -> int:
@@ -52,8 +41,8 @@ def main() -> int:
     p.add_argument("--out", default=None)
     args = p.parse_args()
 
-    clone = _read_trace(f"{args.figdir}/traj_{args.seed}_clone.csv")
-    residual = _read_trace(f"{args.figdir}/traj_{args.seed}_residual.csv")
+    clone = read_trace(f"{args.figdir}/traj_{args.seed}_clone.csv")
+    residual = read_trace(f"{args.figdir}/traj_{args.seed}_residual.csv")
     out = args.out or f"{args.figdir}/seed_{args.seed}_metrics.png"
 
     fig, (ax_xy, ax_v) = plt.subplots(2, 1, figsize=(4.2, 6.2), height_ratios=[1.3, 1])
