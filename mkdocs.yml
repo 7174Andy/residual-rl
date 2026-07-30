@@ -117,7 +117,6 @@ nav:
       - journey/index.md
       - 01. Task framing: journey/01-task-framing.md
       - 02. Env design: journey/02-env-design.md
-      - 03. Action bounds: journey/03-action-bounds.md
       - 04. DeePC formulation: journey/04-deepc-formulation.md
       - 05. Library switching: journey/05-library-switching.md
       - 06. Stopping at the goal: journey/06-stop-at-goal.md

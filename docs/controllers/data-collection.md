@@ -62,7 +62,7 @@ Two canonical configurations:
 - **`v ∈ [10, 20]`, `w ∈ [-π/6, π/6]`** — paper-faithful; for trajectory tracking.
 - **`v ∈ [0, 20]`, `w ∈ [-π/2, π/2]`** — broad; for goal-reaching (allows stop and pivot).
 
-Pick based on the task; the rationale is in [journey 03 — action bounds](../journey/03-action-bounds.md).
+Pick based on the task.
 
 ## Hankel construction
 

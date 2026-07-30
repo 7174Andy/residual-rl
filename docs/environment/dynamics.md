@@ -54,7 +54,7 @@ $u = (v, w) \in \mathbb{R}^2$. Clipped to `action_bounds` on every `step()`.
 The clipped value is exposed via `env.unwrapped.last_action`. It's also what gets serialized into the post-step `info` dict and into the observation's `v_prev`/`w_prev` slots.
 
 !!! note "Paper bounds"
-    Appendix D of [arXiv:2603.07395](https://arxiv.org/abs/2603.07395) uses `v ∈ [10, 20]`, `w ∈ [-π/6, π/6]`. These work for trajectory tracking but make goal-reaching infeasible because the robot cannot stop. See [action-bounds journey entry](../journey/03-action-bounds.md).
+    Appendix D of [arXiv:2603.07395](https://arxiv.org/abs/2603.07395) uses `v ∈ [10, 20]`, `w ∈ [-π/6, π/6]`. These work for trajectory tracking but make goal-reaching infeasible because the robot cannot stop.
 
 ## Observation
 

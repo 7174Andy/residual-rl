@@ -8,7 +8,6 @@ Entries are roughly chronological, but each one stands alone — you can read th
 | -------------------------------- | ----------------------------------------------------------------- |
 | [01](01-task-framing.md)         | Task framing — trajectory tracking vs goal-reaching               |
 | [02](02-env-design.md)           | Env design — observation, action, reward                          |
-| [03](03-action-bounds.md)        | Action bounds — paper-faithful vs broad                           |
 | [04](04-deepc-formulation.md)    | DeePC formulation — L1, L2, or hybrid regularization              |
 | [05](05-library-switching.md)    | Library switching — bilinear dynamics force 4 local libraries      |
 | [06](06-stop-at-goal.md)         | Stopping at the goal — overshoot (fixed) → over-braking (RL next) |
