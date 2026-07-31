@@ -10,13 +10,11 @@
       
       
       
-        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/07-imitation-learning/">
+        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/09-vanilla-rl/">
       
       
-        <link rel="prev" href="../06-stop-at-goal/">
+        <link rel="prev" href="../08-residual-rl/">
       
-      
-        <link rel="next" href="../08-residual-rl/">
       
       
         
@@ -27,7 +25,7 @@
     
     
       
-        <title>07. Imitation learning - two-wheeled-experiment</title>
+        <title>09. Vanilla RL - two-wheeled-experiment</title>
       
     
     
@@ -80,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#08-imitation-learning-cloning-deepc-into-a-neural-policy" class="md-skip">
+        <a href="#10-vanilla-rl-what-the-mpc-prior-actually-buys" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              07. Imitation learning
+              09. Vanilla RL
             
           </span>
         </div>
@@ -1207,6 +1205,62 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-imitation-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07. Imitation learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-residual-rl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08. Residual RL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1226,7 +1280,7 @@
   <span class="md-ellipsis">
     
   
-    07. Imitation learning
+    09. Vanilla RL
   
 
     
@@ -1244,7 +1298,7 @@
   <span class="md-ellipsis">
     
   
-    07. Imitation learning
+    09. Vanilla RL
   
 
     
@@ -1292,10 +1346,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-was-built" class="md-nav__link">
+  <a href="#environment-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What was built
+        Environment setup
       
     </span>
   </a>
@@ -1303,10 +1357,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#side-by-side-deepc-vs-the-clone" class="md-nav__link">
+  <a href="#which-algorithm-and-why" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Side-by-side — DeePC vs the clone
+        Which algorithm, and why
       
     </span>
   </a>
@@ -1314,22 +1368,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#metrics" class="md-nav__link">
+  <a href="#learning-speed-the-headline-result" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Metrics
+        Learning speed — the headline result
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Metrics">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#side-by-side-clone-vs-vanilla-td3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Side-by-side — clone vs vanilla TD3
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#final-performance-5-training-seeds-78-eval-seeds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final performance — 5 training seeds × 78 eval seeds
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Final performance — 5 training seeds × 78 eval seeds">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-open-loop-fidelity-does-the-clone-reproduce-deepcs-action" class="md-nav__link">
+  <a href="#why-5-seeds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        (1) Open-loop fidelity — does the clone reproduce DeePC's action?
+        Why 5 seeds
       
     </span>
   </a>
@@ -1337,10 +1413,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#23-closed-loop-behavioral-equivalence-78-random-seeds" class="md-nav__link">
+  <a href="#residual_frac-was-the-residuals-real-bottleneck" class="md-nav__link">
     <span class="md-ellipsis">
       
-        (2)+(3) Closed-loop behavioral equivalence — 78 random seeds
+        residual_frac was the residual's real bottleneck
       
     </span>
   </a>
@@ -1353,10 +1429,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reading-the-numbers" class="md-nav__link">
+  <a href="#conclusions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reading the numbers
+        Conclusions
       
     </span>
   </a>
@@ -1364,10 +1440,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-this-unlocks-residual-rl" class="md-nav__link">
+  <a href="#open-not-yet-reported" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What this unlocks — residual RL
+        Open / not yet reported
       
     </span>
   </a>
@@ -1389,62 +1465,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../08-residual-rl/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    08. Residual RL
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../09-vanilla-rl/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    09. Vanilla RL
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -1506,10 +1526,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-was-built" class="md-nav__link">
+  <a href="#environment-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What was built
+        Environment setup
       
     </span>
   </a>
@@ -1517,10 +1537,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#side-by-side-deepc-vs-the-clone" class="md-nav__link">
+  <a href="#which-algorithm-and-why" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Side-by-side — DeePC vs the clone
+        Which algorithm, and why
       
     </span>
   </a>
@@ -1528,22 +1548,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#metrics" class="md-nav__link">
+  <a href="#learning-speed-the-headline-result" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Metrics
+        Learning speed — the headline result
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Metrics">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#side-by-side-clone-vs-vanilla-td3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Side-by-side — clone vs vanilla TD3
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#final-performance-5-training-seeds-78-eval-seeds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final performance — 5 training seeds × 78 eval seeds
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Final performance — 5 training seeds × 78 eval seeds">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-open-loop-fidelity-does-the-clone-reproduce-deepcs-action" class="md-nav__link">
+  <a href="#why-5-seeds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        (1) Open-loop fidelity — does the clone reproduce DeePC's action?
+        Why 5 seeds
       
     </span>
   </a>
@@ -1551,10 +1593,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#23-closed-loop-behavioral-equivalence-78-random-seeds" class="md-nav__link">
+  <a href="#residual_frac-was-the-residuals-real-bottleneck" class="md-nav__link">
     <span class="md-ellipsis">
       
-        (2)+(3) Closed-loop behavioral equivalence — 78 random seeds
+        residual_frac was the residual's real bottleneck
       
     </span>
   </a>
@@ -1567,10 +1609,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reading-the-numbers" class="md-nav__link">
+  <a href="#conclusions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reading the numbers
+        Conclusions
       
     </span>
   </a>
@@ -1578,10 +1620,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-this-unlocks-residual-rl" class="md-nav__link">
+  <a href="#open-not-yet-reported" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What this unlocks — residual RL
+        Open / not yet reported
       
     </span>
   </a>
@@ -1619,320 +1661,369 @@
   
 
 
-<h1 id="08-imitation-learning-cloning-deepc-into-a-neural-policy">08. Imitation learning — cloning DeePC into a neural policy<a class="headerlink" href="#08-imitation-learning-cloning-deepc-into-a-neural-policy" title="Permanent link">&para;</a></h1>
+<h1 id="10-vanilla-rl-what-the-mpc-prior-actually-buys">10. Vanilla RL — what the MPC prior actually buys<a class="headerlink" href="#10-vanilla-rl-what-the-mpc-prior-actually-buys" title="Permanent link">&para;</a></h1>
 <div class="admonition note">
-<p class="admonition-title">Status: complete (2026-07-07)</p>
+<p class="admonition-title">Status: complete (2026-07-31)</p>
 </div>
-<p>A small MLP was trained by <strong>behavioral cloning</strong> to imitate the canonical DeePC
-controller. It reproduces DeePC's closed-loop behavior on a 78-seed random sweep —
-<strong>identical 38.5 % reach rate</strong>, <strong>McNemar <span class="arithmatex">\(p = 1.0\)</span></strong> (no systematic bias),
-<strong>82 % seed-by-seed outcome agreement</strong>, and bounded trajectory drift (~0.93 units
-median) — while replacing the <strong>~0.6 s QP solve</strong> with a <strong>23 µs forward pass</strong>
-(~26,000× faster). This clone is the frozen baseline <span class="arithmatex">\(f_\theta\)</span> for the
-residual-RL step proposed in <a href="../06-stop-at-goal/">06</a>. It faithfully reproduces
-DeePC's <em>failures</em> too (the far-field <code>v</code>-collapse) — that is by design: the clone's
-job is fidelity, RL's job is the fix.</p>
+<p>A <strong>from-scratch TD3 agent</strong> — no DeePC, no clone, same env, same reward — reaches
+<strong>0.992 ± 0.015</strong> on the canonical 78-seed sweep against DeePC's <strong>0.385</strong>. It also
+matches the clone+residual hybrid: on reach rate the two are <strong>statistically
+indistinguishable</strong> (0.992 vs 0.997, overlapping CIs). So the MPC prior does <strong>not</strong>
+raise the ceiling on this task. What it does buy is measurable and narrower:
+<strong>2.3× fewer environment steps</strong> to a given return, a <strong>~10× tighter spread across
+training seeds</strong>, a small but clean <strong>return advantage</strong> (complete rank separation,
+<span class="arithmatex">\(p = 0.0079\)</span>), and an exact <strong>no-regression-at-init</strong> guarantee. All numbers below are
+over <strong>5 training seeds per arm</strong>, because the single-seed version of this result was
+misleading — see "Why 5 seeds".</p>
 <h2 id="motivation-one-line">Motivation (one line)<a class="headerlink" href="#motivation-one-line" title="Permanent link">&para;</a></h2>
-<p>Residual RL — <code>u = u_DeePC + u_RL(obs)</code> — needs the DeePC baseline evaluated at
-<strong>every RL training step</strong>, and keeping the <strong>QP in the loop</strong> (~0.6 s × 200 steps ×
-millions of steps) is prohibitive. Clone DeePC into a fast neural policy so the
-baseline is a microsecond forward pass instead of a solver call.</p>
+<p><a href="../08-residual-rl/">08</a> showed a residual lifts DeePC's 38.5 % to 94.9 %. Missing control:
+how much of that is the <em>residual</em>, and how much is just <em>RL on this task</em>?</p>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p><a href="../06-stop-at-goal/">06</a> ended on a structural conclusion: DeePC navigates well on
-~39 % of seeds and <strong>collapses</strong> on the rest (the hallucinated-prediction
-<code>v</code>-collapse), so the next step is a <strong>hybrid</strong> — DeePC supplies the prior where its
-data representation is valid, RL backstops the regime where it is not. The default
-architecture is <strong>residual RL</strong> with a DeePC baseline. That plan named one concrete
-obstacle:</p>
-<blockquote>
-<p>"Residual RL keeps the <strong>QP in the training loop</strong> — a ~0.5 s solve every step … likely
-prohibitive as-is."</p>
-</blockquote>
-<p>This entry removes that obstacle. It builds the "BC warm-start" artifact 08 listed as
-an alternative, but repurposed: not as a policy to fine-tune away from, but as a
-<strong>frozen, amortized copy of DeePC</strong> to add a learned residual <em>on top of</em>. Either way
-the prerequisite is the same — a neural policy that behaves like DeePC — and that is
-what is validated here.</p>
-<h2 id="what-was-built">What was built<a class="headerlink" href="#what-was-built" title="Permanent link">&para;</a></h2>
-<p><strong>The contract.</strong> The clone sees exactly what DeePC's QP consumes each step and emits
-the single action DeePC would apply:</p>
+<p>Every arm so far shares DeePC's DNA — the clone imitates it, the residual corrects it. That
+leaves the obvious question unanswered: on a 2-D kinematic unicycle with a dense shaped
+reward and free simulation, does an agent need DeePC at all? Without that baseline, the
+residual's 94.9 % has nothing to be measured against except the 38.5 % it improves on, which
+flatters it.</p>
+<p>This entry adds the control arm and reports what survives.</p>
+<h2 id="environment-setup">Environment setup<a class="headerlink" href="#environment-setup" title="Permanent link">&para;</a></h2>
+<p>The vanilla agent sees <strong>exactly the env</strong>, with no controller in the loop.</p>
+<p><strong>Action space — DeePC's own bounds, in physical units.</strong></p>
+<div class="arithmatex">\[u = (v, w) \in [0, 20] \times [-\tfrac{\pi}{2}, \tfrac{\pi}{2}]\]</div>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Box(low=[0.0, -1.5707964], high=[20.0, 1.5707964], shape=(2,), float32)
+</span></code></pre></div>
+<p>Read from <code>sample_bounds</code> in <code>data/libraries_v0.npz</code> via <code>canonical_action_bounds()</code> — the
+same array handed to <code>DeePC(u_bounds=...)</code>, so the reachable command set is <em>identical</em>, not
+merely similar. <code>v ≥ 0</code> means the robot may stall but never reverses.</p>
+<p>There is deliberately <strong>no <code>RescaleAction</code> wrapper</strong>. SB3's off-policy algorithms already
+normalize a non-symmetric <code>Box</code> internally (<code>policy.scale_action</code> / <code>unscale_action</code>) for the
+actor head, the action noise and the replay buffer, so wrapping would add a second identical
+affine map and hide <code>(v, w)</code> behind <code>Box(-1, 1)</code>. Two consequences worth knowing: the
+exploration noise <code>σ = 0.1</code> lives in the <em>normalized</em> frame, so per axis it is
+<span class="arithmatex">\(0.1 \times \tfrac{1}{2}(u_{\max}-u_{\min})\)</span> — <strong>±1.0 units/s on <code>v</code>, ±0.157 rad/s on <code>w</code></strong> —
+and the replay buffer stores normalized actions, so a checkpoint is only meaningful in an env
+with matching bounds.</p>
+<p><strong>Observation space — the env's 5-D body-frame vector, min-max normalized.</strong></p>
+<table>
+<thead>
+<tr>
+<th>idx</th>
+<th>channel</th>
+<th>raw range</th>
+<th>normalization</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><code>distance = ‖g − p‖</code></td>
+<td><code>[0, 28.2843]</code></td>
+<td><code>d/14.142 − 1</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>sin(bearing_rel)</code></td>
+<td><code>[-1, 1]</code></td>
+<td>identity</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>cos(bearing_rel)</code></td>
+<td><code>[-1, 1]</code></td>
+<td>identity</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>v_prev</code></td>
+<td><code>[0, 20]</code></td>
+<td><code>v/10 − 1</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>w_prev</code></td>
+<td><code>[-π/2, π/2]</code></td>
+<td><code>w/(π/2)</code></td>
+</tr>
+</tbody>
+</table>
+<p>where <code>bearing_rel = wrap_to_pi(atan2(g_y − y, g_x − x) − δ)</code>. This is the same vector the
+residual actor consumes, <strong>minus its 2-D <code>u_base</code> block</strong> — a from-scratch agent has no clone
+to read a base action from. Normalization is <code>gymnasium.wrappers.RescaleObservation</code>, matching
+the residual env's own min-max scheme, so the two policies are conditioned alike.</p>
+<p>Three design points carried over from <a href="../02-env-design/">02</a>: the observation is <strong>body-frame</strong>
+(no world <code>x, y, δ, g_x, g_y</code>), which makes the policy invariant to where in the workspace the
+episode happens; headings are <code>(sin, cos)</code> rather than an angle, avoiding the <code>±π</code> wrap
+discontinuity; and <code>v_prev, w_prev</code> expose the previous command.</p>
+<p><strong>Reward — the env's native DeePC-form cost, unmodified.</strong> Same <code>Q = diag(1,1,2)</code>,
+<code>R = 1.3e-3 I</code>, <code>reach_bonus = 100</code>, <code>max_steps = 200</code>, <code>goal_tolerance = 0.5</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">The vanilla arm is formally a POMDP</p>
+</div>
+<p>The reward's heading term is <span class="arithmatex">\(Q_{22}\,\delta^2\)</span> in <strong>absolute world heading</strong>, and <code>δ</code>
+appears nowhere in the body-frame observation. Three states with byte-identical
+observations produce three different rewards:</p>
+<div class="language-text highlight"><pre><span></span><code>```
+δ=+0.000  obs=[5. 0. 1. 0. 0.]  reward=−25.0000   = 25 + 0
+δ=+1.571  obs=[5. 0. 1. 0. 0.]  reward=−29.9348   = 25 + 2(π/2)²
+δ=+3.142  obs=[5. 0. 1. 0. 0.]  reward=−44.7392   = 25 + 2π²
+```
+
+Up to **19.7 reward per step** is unexplainable from the agent&#39;s view. It still learns
+the task — termination and the reach bonus are position-only, which *is* observable — but
+its value function cannot be exact. The residual arm is partly shielded from this: its
+`u_base` comes from the clone, whose features include `y_current = (x, y, sin δ, cos δ)`,
+so it has indirect access to `δ`. **The vanilla-vs-residual gap therefore mixes two
+effects: learning from scratch, and an observability difference.**
+</code></pre></div>
+<h2 id="which-algorithm-and-why">Which algorithm, and why<a class="headerlink" href="#which-algorithm-and-why" title="Permanent link">&para;</a></h2>
+<p><strong>TD3</strong>, same as the residual arm — and for the vanilla arm that choice was <strong>forced rather
+than optimized</strong>. The control arm must differ from the residual in exactly one dimension (no
+DeePC). Switching the optimizer too would confound "no MPC prior" with "different algorithm."</p>
+<p>The residual's own reasons for TD3 over PPO and classic DDPG are in
+<a href="../08-residual-rl/">08</a>; the short version, plus what this entry adds:</p>
 <ul>
-<li><strong>Input</strong> — the DeePC-faithful state: the <code>T_ini = 5</code>-step past buffer
-  <code>(u_ini, y_ini)</code>, the current measurement <code>y = (x, y, δ)</code>, the goal <code>(g_x, g_y)</code>, and a
-  one-hot of the <strong>orientation-keyed library</strong> DeePC would select (4 heading anchors).</li>
-<li><strong>Output</strong> — the single applied action <code>u = (v, w)</code> (what the receding-horizon QP
-  actually commits, not the whole plan).</li>
+<li><strong>Off-policy replay.</strong> The fix the residual needs lives in a <em>rare</em> region — the far-field
+  stalls. Replay revisits those transitions; PPO discards its rollouts after each update.</li>
+<li><strong>A deterministic actor makes zero-init exact.</strong> This is the sharpest reason and it is
+  specific to the residual. Zeroing TD3's final actor layer gives <code>tanh(0) = 0</code> for <em>every</em>
+  state, so the residual is exactly 0 and the policy is bit-for-bit the clone at step 0.
+  Zeroing PPO's <em>mean</em> head does not do this: SB3's default <code>log_std = 0</code> means <code>σ = 1</code>, and
+  61 % of sampled residuals exceed half of full authority — <strong>±7.2 units/s on <code>v</code></strong> at init.
+  TD3 separates the deployed policy from the exploration behaviour (external <code>action_noise</code>,
+  collection only); PPO fuses them, so "behaves like the prior" and "explores" cannot hold at
+  once.</li>
+<li><strong>A single non-vectorized env is PPO's worst case.</strong> Everything here runs <code>DummyVecEnv</code>
+  with one env; PPO's advantage needs thousands of parallel rollouts.</li>
 </ul>
-<p><strong>Featurization (40-D).</strong> Heading is encoded as <code>(sin δ, cos δ)</code> so the <code>±π</code> wrap is
-continuous. Layout <code>6·T_ini + 6 + N_lib = 30 + 6 + 4 = 40</code>:</p>
+<p>Two honest corrections to the folklore around this choice:</p>
+<ol>
+<li><strong>TD3 is not the paper's algorithm.</strong> <a href="https://arxiv.org/abs/2510.03354">arXiv:2510.03354</a>
+   uses classic <strong>DDPG</strong>; PPO was this repo's own earlier default. TD3 is a deliberate
+   deviation <em>within</em> DDPG's family — DDPG plus twin critics, target-policy smoothing and
+   delayed updates.</li>
+<li><strong>"High-dimensional tasks favour TD3" is not a valid reason.</strong> If anything the reverse:
+   off-policy methods get harder as action dimension grows, and PPO is what scales to
+   high-DoF locomotion and RLHF. Here the point is moot — a 2-D action and 5-D observation
+   are nowhere near either method's limit.</li>
+</ol>
+<p><strong>None of this is measured.</strong> Everything above reasons from algorithm properties. PPO on the
+vanilla arm remains an open follow-up — and the POMDP box above gives it a principled shot,
+since a stochastic policy can be optimal in a POMDP where a deterministic one is not.</p>
+<h2 id="learning-speed-the-headline-result">Learning speed — the headline result<a class="headerlink" href="#learning-speed-the-headline-result" title="Permanent link">&para;</a></h2>
+<p><img alt="Training return vs environment steps, vanilla TD3 vs clone+residual, 5 seeds each" src="../figures/learning_curves.png" /></p>
+<p>Environment steps for the 100-episode rolling-mean return to first clear <strong>−6000</strong>:</p>
 <table>
 <thead>
 <tr>
-<th>block</th>
-<th>dims</th>
-<th>contents</th>
+<th>arm</th>
+<th>steps to −6000</th>
+<th>per training seed</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>past buffer</td>
-<td><code>6·T_ini = 30</code></td>
-<td>5 steps of <code>(v, w, x, y, sin δ, cos δ)</code></td>
+<td>vanilla TD3</td>
+<td>69,547 ± 24,348</td>
+<td>85,593 / 105,517 / 49,423 / 69,402 / 37,800</td>
 </tr>
 <tr>
-<td>current output</td>
-<td><code>4</code></td>
-<td><code>x, y, sin δ, cos δ</code></td>
-</tr>
-<tr>
-<td>goal</td>
-<td><code>2</code></td>
-<td><code>g_x, g_y</code></td>
-</tr>
-<tr>
-<td>library one-hot</td>
-<td><code>N_lib = 4</code></td>
-<td>which heading library DeePC would use</td>
+<td><strong>clone + residual (frac 2.0)</strong></td>
+<td><strong>30,816 ± 5,214</strong></td>
+<td>29,067 / 24,517 / 34,788 / 38,731 / 26,975</td>
 </tr>
 </tbody>
 </table>
-<p>The one-hot is the key design choice: DeePC's prediction is <strong>piecewise</strong> (a different
-local-linear library per heading quadrant), so telling the MLP which library is active
-spares it from having to rediscover that switching boundary from the raw heading.</p>
-<p><strong>Architecture.</strong> MLP <code>40 → 256 → 256 → 2</code>, ReLU, standardized inputs/targets (the
-one-hot tail passes through unscaled). CPU forward pass ≈ <strong>23 µs</strong>.</p>
-<p><strong>Data (hybrid, 35,023 labeled <code>state → DeePC action</code> pairs).</strong> No single sampling
-strategy covers both "everywhere the state space could be" and "where the closed loop
-actually goes", so the set is mixed:</p>
+<p><strong>2.3× on the means</strong>, with complete rank separation — the residual's slowest seed (38,731)
+still beats vanilla's fastest (37,800), so the exact two-sided Mann–Whitney test gives
+<span class="arithmatex">\(p = 0.0079\)</span>. The <strong>variance ratio is 4.7×</strong>: vanilla's time-to-threshold varies 2.8× on seed
+alone (37.8k → 105.5k), the residual's 1.6×.</p>
+<div class="admonition warning">
+<p class="admonition-title">This is a better initialization, not a faster learner</p>
+</div>
+<p>Read where the curves <em>start</em>. The residual's first plotted point is already near
+<strong>−12,000</strong>; vanilla's is <strong>−26,000</strong> with its band reaching −35,000. That gap is
+zero-init: at step 0 the residual <em>is</em> the clone, a 38.5 %-reach policy, while vanilla is
+random. Once vanilla passes the residual's <em>starting</em> return around 30k steps, the two
+curves rise at broadly similar rates and converge by ~90k. So the honest claim is "you
+skip the first ~40k steps because you already own a controller," which is worth something
+only when environment steps are expensive. In free simulation, 40k steps is ~2.5 minutes.</p>
+<p>Also note these are <em>training</em> returns, so they include exploration noise — the behaviour
+policy, not the deployed one — and the −6000 threshold is arbitrary; the ratio moves if you
+pick another level.</p>
+<h2 id="side-by-side-clone-vs-vanilla-td3">Side-by-side — clone vs vanilla TD3<a class="headerlink" href="#side-by-side-clone-vs-vanilla-td3" title="Permanent link">&para;</a></h2>
+<p>Same two canonical showcase seeds as <a href="../07-imitation-learning/">07</a> and
+<a href="../08-residual-rl/">08</a>, so the arms are directly comparable across entries. The clone stalls
+in the far field; the from-scratch agent, which never saw DeePC, drives through and reaches.</p>
 <table>
-<thead>
+<tr><th>Clone — the DeePC surrogate (stalls)</th><th>Vanilla TD3 — from scratch (reaches)</th></tr>
+<tr><td colspan="2"><b>seed 4104626029</b></td></tr>
 <tr>
-<th>source</th>
-<th>count</th>
-<th>share</th>
-<th>purpose</th>
+<td colspan="2"><video controls loop muted playsinline width="560"><source src="../videos/clone-vs-vanilla-4104626029.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
 </tr>
-</thead>
-<tbody>
+<tr><td colspan="2"><b>seed 4104626034</b></td></tr>
 <tr>
-<td>synthetic</td>
-<td>15,024</td>
-<td>42.9 %</td>
-<td>broad coverage — random poses, goals, past buffers</td>
+<td colspan="2"><video controls loop muted playsinline width="560"><source src="../videos/clone-vs-vanilla-4104626034.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
 </tr>
-<tr>
-<td>on-policy</td>
-<td>15,023</td>
-<td>42.9 %</td>
-<td>the distribution the clone will actually see</td>
-</tr>
-<tr>
-<td>degenerate</td>
-<td>4,976</td>
-<td>14.2 %</td>
-<td>frozen/constant-past stall states (the hard regime)</td>
-</tr>
-</tbody>
-</table>
-<p>The <strong>degenerate</strong> slice is deliberately over-represented: it is the <code>v</code>-collapse
-regime from <a href="../06-stop-at-goal/">06</a>, where the QP target is hardest to reproduce and
-where the downstream RL will do its work — so the clone must at least see it. Labels
-are the QP's own solution at each state, under the <strong>canonical config</strong> (bearing
-reference, <code>Q = diag(1, 1, 2)</code>, <code>R = 1.3·10⁻³ I</code>, <code>T_ini = 5</code>, <code>N = 12</code>,
-<code>λ_g = 2</code>, <code>λ_y = 3·10⁶</code>, <code>libraries_v0.npz</code>).</p>
-<p><strong>Validation gate (3 layers).</strong> Marginal reach-rate parity is <em>not</em> sufficient — two
-controllers can hit the same success rate on disjoint seeds. So fidelity is checked at
-three levels: (1) open-loop regression on a held-out split, by regime; (2) closed-loop
-trajectory deviation (does the clone's rollout track DeePC's path?); (3) <strong>paired
-per-seed outcomes</strong> with a McNemar test (does it agree seed-by-seed, and is any
-disagreement unbiased?).</p>
-<h2 id="side-by-side-deepc-vs-the-clone">Side-by-side — DeePC vs the clone<a class="headerlink" href="#side-by-side-deepc-vs-the-clone" title="Permanent link">&para;</a></h2>
-<p>Three random seeds under the canonical config. The env seed fixes the <strong>same</strong> start
-pose and goal for both controllers, so each row is the two controllers attempting an
-identical task. Left = DeePC (QP); right = the clone (MLP).</p>
-<table>
-<thead>
-<tr><th>DeePC — the QP controller (~0.6 s/step)</th><th>Clone — the neural policy (23 µs/step)</th></tr>
-</thead>
-<tbody>
-<tr><td colspan="2" align="center"><b>seed 4104626050 · both REACH</b> — DeePC 41 steps → 0.31; clone 45 steps → 0.32; path deviation 0.80 median / 1.53 p95</td></tr>
-<tr>
-<td><video controls loop muted playsinline width="330"><source src="../videos/deepc-4104626050.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="330"><source src="../videos/clone-4104626050.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-</tr>
-<tr><td colspan="2" align="center"><b>seed 4104626042 · both REACH</b> — DeePC 58 steps → 0.42; clone 71 steps → 0.46; path deviation 1.40 median / 2.15 p95</td></tr>
-<tr>
-<td><video controls loop muted playsinline width="330"><source src="../videos/deepc-4104626042.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="330"><source src="../videos/clone-4104626042.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-</tr>
-<tr><td colspan="2" align="center"><b>seed 4104626061 · both FAIL</b> — DeePC truncates at 1.06; clone truncates at 0.54 (a near-miss at the 0.5 edge); path deviation 0.57 median / 1.35 p95. The clone reproduces the far-field stall, not just the reaches.</td></tr>
-<tr>
-<td><video controls loop muted playsinline width="330"><source src="../videos/deepc-4104626061.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="330"><source src="../videos/clone-4104626061.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-</tr>
-</tbody>
 </table>
 
-<p>All three video seeds fall in the <strong>82 % agreeing</strong> set (both reach, or both fail).
-They were chosen from the clone's own reaches plus one shared failure to illustrate the
-match, so they are a favorable-but-representative sample — the aggregate table below is
-the unbiased measure.</p>
-<h2 id="metrics">Metrics<a class="headerlink" href="#metrics" title="Permanent link">&para;</a></h2>
-<h3 id="1-open-loop-fidelity-does-the-clone-reproduce-deepcs-action">(1) Open-loop fidelity — does the clone reproduce DeePC's action?<a class="headerlink" href="#1-open-loop-fidelity-does-the-clone-reproduce-deepcs-action" title="Permanent link">&para;</a></h3>
-<p>Held-out split (<code>n = 3502</code>, never seen in training). Errors are in physical units
-(<code>v</code> in units/s, <code>w</code> in rad/s):</p>
+<p><em>Each panel: trajectory (trail, goal ★, tolerance circle, heading marker) plus live <code>v(t)</code>,
+<code>w(t)</code> and cumulative-reward sparklines, real time at 40 fps. On seed 4104626029 the clone
+truncates at step 200 with <code>v</code> decayed to ~1.0; vanilla reaches at step 116, cumulative
+reward −23k vs the clone's −48k.</em></p>
+<p>And the residual-vs-vanilla pairing on the four seeds where the <code>frac=1.0</code> residual failed:</p>
+<table>
+<tr><th>clone + residual vs vanilla TD3 — seeds 4104626056 / 069 / 083 / 086</th></tr>
+<tr><td><video controls loop muted playsinline width="560"><source src="../videos/residual-vs-vanilla-4104626083.mp4" type="video/mp4">Your browser does not support the video tag.</video></td></tr>
+</table>
+
+<p><em>Seed 4104626083 is the hardest in the sweep — the only seed any <code>frac=2.0</code> model fails, and
+one of vanilla's three. The <code>frac=1.0</code> residual misses it by <strong>0.022 units</strong> (final distance
+0.522 against a 0.5 tolerance).</em></p>
+<h2 id="final-performance-5-training-seeds-78-eval-seeds">Final performance — 5 training seeds × 78 eval seeds<a class="headerlink" href="#final-performance-5-training-seeds-78-eval-seeds" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>regime</th>
-<th>n</th>
-<th>MAE <code>v</code></th>
-<th>MAE <code>w</code></th>
-<th>RMSE <code>v</code></th>
-<th>RMSE <code>w</code></th>
+<th>arm</th>
+<th>reach per training seed</th>
+<th>reach rate</th>
+<th>pooled (390 ep)</th>
+<th>return</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>on-policy</td>
-<td>1,525</td>
-<td>0.58</td>
-<td>0.13</td>
-<td>0.94</td>
-<td>0.22</td>
+<td>DeePC (QP)</td>
+<td>— (deterministic)</td>
+<td>30/78 = 0.385</td>
+<td>—</td>
+<td>−13,799.6</td>
 </tr>
 <tr>
-<td>synthetic</td>
-<td>1,495</td>
-<td>1.13</td>
-<td>0.22</td>
-<td>1.68</td>
-<td>0.37</td>
+<td>clone <code>f_θ</code></td>
+<td>— (deterministic)</td>
+<td>30/78 = 0.385</td>
+<td>—</td>
+<td>−14,355.6</td>
 </tr>
 <tr>
-<td>degenerate</td>
-<td>482</td>
-<td>2.78</td>
-<td>0.25</td>
-<td>4.06</td>
-<td>0.44</td>
+<td>clone + residual, <code>frac=1.0</code></td>
+<td>74 73 70 76 69</td>
+<td>0.928 ± 0.033</td>
+<td>362/390 [0.898, 0.950]</td>
+<td>−7,067.7 ± 102.7</td>
 </tr>
 <tr>
-<td><strong>overall</strong></td>
-<td>3,502</td>
-<td><strong>1.12</strong></td>
-<td><strong>0.18</strong></td>
-<td><strong>1.97</strong></td>
-<td><strong>0.33</strong></td>
+<td><strong>clone + residual, <code>frac=2.0</code></strong></td>
+<td>78 78 77 78 78</td>
+<td><strong>0.997 ± 0.005</strong></td>
+<td>389/390 [0.986, 1.000]</td>
+<td><strong>−4,777.3 ± 7.3</strong></td>
+</tr>
+<tr>
+<td><strong>vanilla TD3</strong></td>
+<td>78 78 78 78 <strong>75</strong></td>
+<td><strong>0.992 ± 0.015</strong></td>
+<td>387/390 [0.978, 0.997]</td>
+<td>−4,853.5 ± 77.1</td>
 </tr>
 </tbody>
 </table>
-<p>Held-out correlation with the QP target: <code>corr(v) = 0.94</code>, <code>corr(w) = 0.97</code>
-(normalized MSE 0.092). The clone is <strong>most accurate exactly where it operates</strong>
-(on-policy: MAE <code>v</code> ≈ 0.58 units/s against a <code>[0, 20]</code> range) and least accurate on the
-<strong>degenerate</strong> stall states — expected, because there the QP itself is ill-posed (a
-near-constant past is matched by many solutions, so the target is nearly arbitrary; see
-<a href="../06-stop-at-goal/">06</a> <em>Root cause</em>). The clone cannot be more certain than DeePC is.</p>
-<h3 id="23-closed-loop-behavioral-equivalence-78-random-seeds">(2)+(3) Closed-loop behavioral equivalence — 78 random seeds<a class="headerlink" href="#23-closed-loop-behavioral-equivalence-78-random-seeds" title="Permanent link">&para;</a></h3>
-<p><code>scripts/validate_clone.py</code>, base seed <code>4104626029</code>, canonical config:</p>
-<table>
-<thead>
-<tr>
-<th>metric</th>
-<th>DeePC</th>
-<th>Clone</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>reach rate</td>
-<td>30 / 78 = <strong>38.5 %</strong></td>
-<td>30 / 78 = <strong>38.5 %</strong></td>
-</tr>
-<tr>
-<td>reach-rate 95 % CI (Wilson)</td>
-<td>[0.284, 0.496]</td>
-<td>[0.284, 0.496]</td>
-</tr>
-<tr>
-<td>median solve/inference time per step</td>
-<td>~0.6 s (QP)</td>
-<td><strong>23 µs</strong> (MLP)</td>
-</tr>
-</tbody>
-</table>
-<p>Paired agreement (the decisive test):</p>
-<table>
-<thead>
-<tr>
-<th>paired metric</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>seed-by-seed outcome agreement</td>
-<td><strong>64 / 78 = 82.1 %</strong></td>
-</tr>
-<tr>
-<td>confusion (both / DeePC-only / clone-only / neither)</td>
-<td>23 / 7 / 7 / 41</td>
-</tr>
-<tr>
-<td>McNemar <span class="arithmatex">\(p\)</span></td>
-<td><strong>1.0</strong> (disagreements balanced → no bias)</td>
-</tr>
-<tr>
-<td>median trajectory position deviation</td>
-<td><strong>0.94 units</strong> median · <strong>2.01</strong> p95 (per-seed)</td>
-</tr>
-</tbody>
-</table>
-<h2 id="reading-the-numbers">Reading the numbers<a class="headerlink" href="#reading-the-numbers" title="Permanent link">&para;</a></h2>
+<p>What is and is not statistically supported (exact two-sided Mann–Whitney on 5 vs 5, so
+<span class="arithmatex">\(p = 0.0079\)</span> is the floor for complete rank separation):</p>
 <ul>
-<li><strong>Equivalent, not merely comparable.</strong> Identical marginal reach rate <em>and</em> McNemar
-  <span class="arithmatex">\(p = 1.0\)</span> mean the clone is neither better nor worse than DeePC — the 14 disagreeing
-  seeds split exactly 7/7, so they are boundary noise (near-miss seeds that tip either
-  way), not a systematic skew. This is the property that a raw success-rate match cannot
-  certify.</li>
-<li><strong>Same paths, not just same outcomes.</strong> Median trajectory deviation ~0.94 units
-  (worst-case p95 ~2.01, on a 20-unit workspace diagonal) says the clone follows nearly the same route, not just
-  ends in the same place. On the video seeds the clone takes a few more steps
-  (45 vs 41; 71 vs 58) but lands equivalently.</li>
-<li><strong>The failures transfer too.</strong> On seed 4104626061 both stall in the far field — the
-  clone inherits DeePC's dominant flaw. This is the honest, expected outcome of cloning
-  (flagged in <a href="../06-stop-at-goal/">06</a>'s "BC warm-start" note) and is <em>acceptable here</em>:
-  the clone is the baseline, and the residual RL is what supplies the forward velocity
-  the hallucinated predictor refuses to.</li>
-<li><strong>The speedup is the point.</strong> 0.6 s → 23 µs (~26,000×) is what turns "QP in the RL
-  training loop" from prohibitive into a non-issue.</li>
+<li><strong>vanilla ≫ DeePC / clone</strong> — decisive, no ambiguity.</li>
+<li><strong><code>frac=2.0</code> &gt; <code>frac=1.0</code> on reach</strong> — complete rank separation, <span class="arithmatex">\(p = 0.0079\)</span>,
+  non-overlapping pooled CIs.</li>
+<li><strong><code>frac=2.0</code> &gt; vanilla on return</strong> — complete rank separation, <span class="arithmatex">\(p = 0.0079\)</span>. All five
+  residual runs beat all five vanilla runs.</li>
+<li><strong><code>frac=2.0</code> vs vanilla on reach — NOT separable.</strong> 77–78 vs 75–78 overlap.</li>
 </ul>
-<h2 id="what-this-unlocks-residual-rl">What this unlocks — residual RL<a class="headerlink" href="#what-this-unlocks-residual-rl" title="Permanent link">&para;</a></h2>
-<p>The clone is the frozen <span class="arithmatex">\(f_\theta\)</span> for the hybrid proposed in
-<a href="../06-stop-at-goal/">06</a>:</p>
-<div class="arithmatex">\[u = \operatorname{clip}\big(f_\theta(\text{state}) + u_\text{RL}(\text{obs})\big)\]</div>
-<p>with the residual zero-initialized (initial behavior ≈ DeePC, no regression risk) and
-trained on the <strong>true env reward</strong>. Because <span class="arithmatex">\(f_\theta\)</span> is a 23 µs forward pass, the QP
-never enters the training loop. The residual is tiny on the ~39 % of seeds DeePC
-already solves and <em>carries</em> the ~42 % it collapses — exactly the far-field
-<code>v</code>-collapse the clone was just shown to reproduce.</p>
-<p>Open question carried forward: does residual RL beat the much cheaper
-<code>--Q_heading 0</code> / <code>--no_bearing_ref</code> heading-reference fix from
-<a href="../06-stop-at-goal/">06</a>? That ablation is the next entry.</p>
+<p><strong>The variance is the sharpest difference.</strong> Return spread across training seeds:
+<code>frac=2.0</code> <strong>22</strong>, vanilla <strong>204</strong>, <code>frac=1.0</code> <strong>266</strong>. The residual is roughly <strong>10× more
+reproducible</strong>; the DeePC base anchors where training lands. For a controller you intend to
+deploy, that consistency may matter more than a fractional reach-rate difference.</p>
+<h3 id="why-5-seeds">Why 5 seeds<a class="headerlink" href="#why-5-seeds" title="Permanent link">&para;</a></h3>
+<p>The first version of this experiment used one training seed and reported vanilla at
+<strong>78/78 = 100 %</strong>. That was real for that checkpoint and <strong>not a property of the method</strong> —
+training seed 4 gives 75/78. Every number on this page is over 5 seeds because of it. Do not
+quote a single-seed reach rate for this project.</p>
+<h3 id="residual_frac-was-the-residuals-real-bottleneck"><code>residual_frac</code> was the residual's real bottleneck<a class="headerlink" href="#residual_frac-was-the-residuals-real-bottleneck" title="Permanent link">&para;</a></h3>
+<p>The <code>frac=1.0</code> default is <em>underpowered</em>, and this is a parameterization artifact rather than
+a knowledge deficit. The composition centres authority on the base and then clips:</p>
+<div class="arithmatex">\[u = \operatorname{clip}(u_{\text{base}} + \rho \cdot \tfrac{1}{2}(u_{\max}-u_{\min}) \cdot a_{\text{res}})\]</div>
+<p>On the seeds it fails, the clone's <code>u_base</code> for <code>v</code> sits near zero (29–48 % of steps at
+<em>exactly</em> 0), so the maximum <code>v</code> the residual can command averages <strong>~11 of 20</strong> and
+<strong>73–93 % of steps clip</strong>. Worse, every <code>a_res ≤ 0</code> collapses to the same applied <code>v = 0</code> — a
+<strong>dead zone</strong> the trained policy drifts into (mean <code>a_res</code> for <code>v</code> = <strong>−0.53</strong> on seed
+4104626083). Setting <code>ρ = 2.0</code> restores the full range from a stalled base and recovers all
+four failures, <strong>gained 4 / lost 0</strong>. The feared wider dead zone never materialized.</p>
+<h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>From-scratch TD3 solves what DeePC cannot</strong> — 0.992 vs 0.385. DeePC's ceiling is its
+   orientation-keyed local-linear libraries on a system that isn't globally
+   Koopman-linearizable, not a limit of the task.</li>
+<li><strong>The MPC prior does not raise the ceiling here.</strong> Reach rate cannot distinguish vanilla
+   from <code>frac=2.0</code>.</li>
+<li><strong>What the prior does buy, measurably:</strong> 2.3× fewer steps to a given return (mostly a
+   better initialization), a ~10× tighter return spread across seeds, a clean return
+   advantage (<span class="arithmatex">\(p = 0.0079\)</span>), and an exact, unit-testable no-regression-at-init guarantee that
+   vanilla cannot offer at any price.</li>
+<li><strong>Reach rate hides real differences.</strong> Per step, vanilla is the <em>worst</em> arm on the two
+   terms it isn't effectively supervised on — heading cost/step 6.64 vs <code>frac=2.0</code>'s 6.41 and
+   <code>frac=1.0</code>'s 6.21, and control cost/step 0.127 vs 0.082 for <code>frac=1.0</code>. It wins per-episode
+   totals by finishing in 68 steps instead of 163.</li>
+<li><strong>Don't over-generalize from this benchmark.</strong> It is close to the <em>least</em> favourable test
+   of RL + MPC: dense shaped reward, deterministic and fully observed plant, 2-D action, free
+   unlimited simulation, no safety constraint binding during learning — precisely where
+   end-to-end RL should win outright. And the prior being improved is a 38.5 % controller, so
+   there is little knowledge to inherit. The method's premise is a <em>decent</em> model-based
+   controller you want to improve.</li>
+</ol>
+<h2 id="open-not-yet-reported">Open / not yet reported<a class="headerlink" href="#open-not-yet-reported" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>PPO on the vanilla arm.</strong> The whole TD3-over-PPO argument is reasoning from properties,
+  not measurement. The POMDP result gives PPO a principled shot.</li>
+<li><strong>Paper action bounds</strong> (<code>v ∈ [10,20]</code>, <code>w ∈ [±π/6]</code>) — forward-only, 3× weaker turning.
+  This is where end-to-end RL should struggle and the prior should matter; it needs a DeePC
+  library re-collect under those bounds to be fair. <strong>The strongest remaining test of
+  conclusion 5.</strong></li>
+<li><strong>Heading-augmented vanilla observation.</strong> Appending <code>(sin δ, cos δ)</code> would close the
+  POMDP hole; does the per-step heading cost drop toward DeePC's?</li>
+<li><strong>Robustness to plant perturbation.</strong> Wrappers exist (<code>two_wheel_robot/env/perturbations.py</code>:
+  state disturbance, actuator-gain mismatch, control latency), but <strong>no results are reported
+  here</strong> — the metric isn't settled yet. Two blockers: the frozen clone is a poor stand-in for
+  DeePC on exactly this axis (DeePC re-solves its QP every step; the clone cannot), and at 5
+  training seeds the per-model scatter swamps the between-arm differences.</li>
+<li><strong>Reach rate at intermediate checkpoints.</strong> The sample-efficiency claim here is on training
+  <em>return</em>; reach rate at 25k/50k/100k/200k would be the cleaner version.</li>
+</ul>
 <h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># generate the hybrid dataset (state -&gt; DeePC action pairs)</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/gen_clone_data.py<span class="w"> </span>--out<span class="w"> </span>data/clone_dataset.npz
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># train the clone</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_clone.py<span class="w"> </span>--data<span class="w"> </span>data/clone_dataset.npz<span class="w"> </span>--out<span class="w"> </span>data/clone.pt
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># the 3-layer fidelity gate (open-loop regression + closed-loop paired outcomes)</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/validate_clone.py<span class="w"> </span>--clone<span class="w"> </span>data/clone.pt<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span>--data<span class="w"> </span>data/clone_dataset.npz<span class="w"> </span>--n_seeds<span class="w"> </span><span class="m">78</span><span class="w"> </span>--base_seed<span class="w"> </span><span class="m">4104626029</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># side-by-side videos (DeePC left, clone right)</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_deepc.py<span class="w"> </span>--seed<span class="w"> </span><span class="m">4104626050</span><span class="w"> </span>--episodes<span class="w"> </span><span class="m">1</span><span class="w"> </span>--record<span class="w"> </span>docs/journey/videos<span class="w">  </span><span class="c1"># -&gt; episode_0.mp4, rename to deepc-4104626050.mp4</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_clone.py<span class="w"> </span>--record<span class="w"> </span>docs/journey/videos<span class="w"> </span>--seeds<span class="w"> </span><span class="m">4104626050</span><span class="w">              </span><span class="c1"># -&gt; clone-... via episode_&lt;seed&gt;.mp4</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># train the from-scratch baseline (no DeePC, no clone; same reward and bounds)</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_vanilla.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span>--out<span class="w"> </span>data/vanilla_td3_400k.zip<span class="w"> </span>--monitor-out<span class="w"> </span>data/vanilla_400k_monitor
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># four-way benchmark: DeePC (QP) vs clone vs clone+residual vs vanilla, 78 seeds</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># (QP-bound: ~0.29 s per DeePC step, ~1 h for the sweep)</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/eval_residual.py<span class="w"> </span>--model<span class="w"> </span>data/residual_td3_400k_frac2.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span>--vanilla<span class="w"> </span>data/vanilla_td3_400k.zip
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1"># the residual with full authority -- the frac=1.0 default is underpowered</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span>--out<span class="w"> </span>data/residual_td3_400k_frac2.zip<span class="w"> </span>--monitor-out<span class="w"> </span>data/residual_frac2_400k_monitor
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="c1"># 5-seed sweep behind every number on this page (15 runs; ~25 min each, 6 in parallel)</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="k">for</span><span class="w"> </span>s<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="m">4</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">  </span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_vanilla.py<span class="w">  </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="nv">$s</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">      </span>--out<span class="w"> </span>data/seedsweep/van_s<span class="nv">$s</span>.zip<span class="w">    </span>--monitor-out<span class="w"> </span>data/seedsweep/van_s<span class="si">${</span><span class="nv">s</span><span class="si">}</span>_mon
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">  </span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="nv">$s</span><span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">      </span>--out<span class="w"> </span>data/seedsweep/res_f2_s<span class="nv">$s</span>.zip<span class="w"> </span>--monitor-out<span class="w"> </span>data/seedsweep/res_f2_s<span class="si">${</span><span class="nv">s</span><span class="si">}</span>_mon
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="k">done</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="c1"># learning-speed figure + steps-to-threshold table (reads the monitor CSVs above)</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_learning_curves.py
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="c1"># side-by-side videos: clone vs vanilla on the canonical showcase seeds</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/render_dashboard_video.py<span class="w"> </span>--compare<span class="w"> </span>clone-vanilla<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">    </span>--vanilla-model<span class="w"> </span>data/seedsweep/van_s0.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">4104626029</span>,4104626034
 </span></code></pre></div>
 
 
@@ -1969,7 +2060,7 @@ already solves and <em>carries</em> the ~42 % it collapses — exactly the far-f
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../06-stop-at-goal/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 06. Stopping at the goal">
+          <a href="../08-residual-rl/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 08. Residual RL">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1979,27 +2070,11 @@ already solves and <em>carries</em> the ~42 % it collapses — exactly the far-f
                 Previous
               </span>
               <div class="md-ellipsis">
-                06. Stopping at the goal
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="../08-residual-rl/" class="md-footer__link md-footer__link--next" aria-label="Next: 08. Residual RL">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
                 08. Residual RL
               </div>
             </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
           </a>
+        
         
       </nav>
     
