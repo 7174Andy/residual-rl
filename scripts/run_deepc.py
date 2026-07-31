@@ -31,7 +31,7 @@ import numpy as np
 import two_wheel_robot.env  # noqa: F401  registers Gym ID
 from two_wheel_robot.controllers.data_collection import (
     PAPER_INIT_HEADINGS,
-    PAPER_SAMPLE_BOUNDS,
+    DEFAULT_SAMPLE_BOUNDS,
 )
 from two_wheel_robot.controllers.deepc import DeePC
 from two_wheel_robot.controllers.hankel import build_hankel
@@ -72,12 +72,12 @@ def _encode_video(frames: list[np.ndarray], path: str, fps: int) -> bool:
 
 
 def _resolve_sample_bounds(data) -> np.ndarray:
-    """Read `sample_bounds` from the .npz; fall back to paper bounds for old files."""
+    """Read `sample_bounds` from the .npz; fall back to the default for old files."""
     if "sample_bounds" in data.files:
         bounds = np.asarray(data["sample_bounds"], dtype=np.float64)
         return bounds
-    print("warning: no sample_bounds key in libraries file; assuming PAPER_SAMPLE_BOUNDS.")
-    return PAPER_SAMPLE_BOUNDS
+    print("warning: no sample_bounds key in libraries file; assuming DEFAULT_SAMPLE_BOUNDS.")
+    return DEFAULT_SAMPLE_BOUNDS
 
 
 def _trace_step(step, cur_dist, goal, u_t, controller, diag, trace_rows) -> None:

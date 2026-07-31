@@ -114,12 +114,18 @@ def run_clone_closed_loop(predictor, info: dict, env, seed: int):
     return reached, traj
 
 
-def run_deepc_closed_loop(deepc, info: dict, env, seed: int):
-    """Run the real DeePC in the loop. Returns `(reached, trajectory (T+1, 3))`."""
+def run_deepc_closed_loop_with_actions(deepc, info: dict, env, seed: int):
+    """Like `run_deepc_closed_loop`, also returning the per-step applied action.
+
+    A QP failure (`RuntimeError`) ends the episode early, so `actions` stays
+    `len(traj) - 1` long even on an aborted solve.
+    Returns `(reached, trajectory (T+1, 3), actions (T, 2))`.
+    """
     base = cast(UnicycleGoalEnv, env.unwrapped)
     env.reset(seed=seed)
     deepc.reset(base.y, u_initial=info["u_init_midpoint"])
     traj = [base.state.copy()]
+    actions = []
     term = trunc = False
     last_info: dict = {}
     while not (term or trunc):
@@ -130,7 +136,14 @@ def run_deepc_closed_loop(deepc, info: dict, env, seed: int):
             break
         _, _, term, trunc, last_info = env.step(u)
         traj.append(base.state.copy())
-    return _reached(last_info), np.asarray(traj)
+        actions.append(base.last_action.copy())
+    return _reached(last_info), np.asarray(traj), np.asarray(actions)
+
+
+def run_deepc_closed_loop(deepc, info: dict, env, seed: int):
+    """Run the real DeePC in the loop. Returns `(reached, trajectory (T+1, 3))`."""
+    reached, traj, _ = run_deepc_closed_loop_with_actions(deepc, info, env, seed)
+    return reached, traj
 
 
 def trajectory_deviation(traj_clone: np.ndarray, traj_deepc: np.ndarray) -> dict:

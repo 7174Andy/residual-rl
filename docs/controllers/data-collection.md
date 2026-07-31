@@ -33,14 +33,14 @@ The pair `(u_traj[t], y_traj[t])` is aligned: `y_traj[t]` is the system's output
 
 ```python
 from two_wheel_robot.controllers.data_collection import (
-    collect_libraries, paper_init_states, PAPER_SAMPLE_BOUNDS,
+    collect_libraries, paper_init_states, DEFAULT_SAMPLE_BOUNDS,
 )
 
 libraries = collect_libraries(
     env, T=1500,
     init_states=paper_init_states(),   # 4 states at headings π/4, 3π/4, 5π/4, 7π/4
     rng=np.random.default_rng(42),
-    sample_bounds=PAPER_SAMPLE_BOUNDS, # v ∈ [10, 20], w ∈ [-π/6, π/6]
+    sample_bounds=DEFAULT_SAMPLE_BOUNDS, # v ∈ [0, 20], w ∈ [-π/2, π/2]
 )
 # libraries[i] = (u_traj_i, y_traj_i)
 ```

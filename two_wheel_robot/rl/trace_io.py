@@ -13,12 +13,21 @@ import os
 import numpy as np
 
 
+def trace_path(figdir: str, seed: int, tag: str) -> str:
+    """`<figdir>/traj_<seed>_<tag>.csv` — `tag` names the controller arm."""
+    return os.path.join(figdir, f"traj_{seed}_{tag}.csv")
+
+
 def clone_trace_path(figdir: str, seed: int) -> str:
-    return os.path.join(figdir, f"traj_{seed}_clone.csv")
+    return trace_path(figdir, seed, "clone")
 
 
 def residual_trace_path(figdir: str, seed: int) -> str:
-    return os.path.join(figdir, f"traj_{seed}_residual.csv")
+    return trace_path(figdir, seed, "residual")
+
+
+def vanilla_trace_path(figdir: str, seed: int) -> str:
+    return trace_path(figdir, seed, "vanilla")
 
 
 def write_trace(path: str, traj: np.ndarray, actions: np.ndarray, goal: np.ndarray) -> None:

@@ -1,4 +1,5 @@
-"""Train the RL residual over the frozen DeePC clone (RL + MPC).
+"""Train the RL residual over the frozen DeePC clone (RL + MPC), plus the
+from-scratch (vanilla) RL baseline that learns the same task with no DeePC at all.
 
 TD3 (default) or SAC (fallback for the hard-exploration collapse regime) — both are
 SB3 off-policy continuous-control algorithms on the same env/benchmark. The only
@@ -16,7 +17,9 @@ from stable_baselines3.common.noise import NormalActionNoise
 from stable_baselines3.common.vec_env import DummyVecEnv
 from torch import nn
 
+from two_wheel_robot.rl.deepc_setup import DEFAULT_LIBRARIES, canonical_action_bounds
 from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
+from two_wheel_robot.rl.wrappers import vanilla_rl_env
 
 _ALGOS = {"td3": TD3, "sac": SAC}
 
@@ -43,6 +46,46 @@ def make_residual_env(
         return Monitor(env, filename=monitor_path)
 
     return DummyVecEnv([_factory])
+
+
+def make_vanilla_env(
+    libraries_path: str = DEFAULT_LIBRARIES,
+    monitor_path: str | None = None,
+) -> DummyVecEnv:
+    """Single-env DummyVecEnv over the from-scratch (vanilla) RL env.
+
+    No DeePC and no clone anywhere in this path — the library file is read only for
+    the canonical action bounds. See `wrappers.vanilla_rl_env` for the spaces.
+    ``monitor_path`` behaves as in `make_residual_env`.
+    """
+    action_bounds = canonical_action_bounds(libraries_path)
+
+    def _factory():
+        return Monitor(vanilla_rl_env(action_bounds), filename=monitor_path)
+
+    return DummyVecEnv([_factory])
+
+
+def _build_model(algo: str, venv, learning_rate, device, seed, verbose, action_noise_sigma):
+    """Construct the SB3 model. TD3 gets Gaussian action noise; SAC explores via entropy."""
+    Algo = _ALGOS[algo]
+    kwargs = dict(
+        policy="MlpPolicy", env=venv, learning_rate=learning_rate,
+        policy_kwargs=dict(net_arch=[256, 256]), device=device, seed=seed, verbose=verbose,
+    )
+    if algo == "td3":
+        n_actions = int(venv.action_space.shape[0])
+        kwargs["action_noise"] = NormalActionNoise(
+            mean=np.zeros(n_actions), sigma=action_noise_sigma * np.ones(n_actions)
+        )
+    return Algo(**kwargs)
+
+
+def _check_algo(algo: str) -> str:
+    algo = algo.lower()
+    if algo not in _ALGOS:
+        raise ValueError(f"algo must be one of {sorted(_ALGOS)}, got {algo!r}")
+    return algo
 
 
 def _zero_init_actor(model) -> None:
@@ -92,22 +135,11 @@ def train_residual(
     ``monitor_path`` (optional): persist per-episode returns to
     ``<monitor_path>.monitor.csv`` for the training-return plot.
     """
-    algo = algo.lower()
-    if algo not in _ALGOS:
-        raise ValueError(f"algo must be one of {sorted(_ALGOS)}, got {algo!r}")
-    Algo = _ALGOS[algo]
+    algo = _check_algo(algo)
     venv = make_residual_env(clone_path, libraries_path, residual_frac, device=device,
                              monitor_path=monitor_path)
-    n_actions = int(venv.action_space.shape[0])
-    kwargs = dict(
-        policy="MlpPolicy", env=venv, learning_rate=learning_rate,
-        policy_kwargs=dict(net_arch=[256, 256]), device=device, seed=seed, verbose=verbose,
-    )
-    if algo == "td3":  # SAC explores via entropy; it takes no action noise
-        kwargs["action_noise"] = NormalActionNoise(
-            mean=np.zeros(n_actions), sigma=action_noise_sigma * np.ones(n_actions)
-        )
-    model = Algo(**kwargs)
+    model = _build_model(algo, venv, learning_rate, device, seed, verbose,
+                         action_noise_sigma)
     _zero_init_actor(model)
     try:
         model.learn(total_timesteps=total_timesteps, progress_bar=False)
@@ -117,11 +149,42 @@ def train_residual(
     return model
 
 
+def train_vanilla(
+    libraries_path: str = DEFAULT_LIBRARIES,
+    out_path: str = "data/vanilla_td3.zip",
+    algo: str = "td3",
+    total_timesteps: int = 200_000,
+    action_noise_sigma: float = 0.1,
+    learning_rate: float = 1e-3,
+    device: str = "cpu",
+    seed: int = 0,
+    verbose: int = 1,
+    monitor_path: str | None = None,
+):
+    """Train the from-scratch RL baseline (no DeePC, no clone). Returns the model.
+
+    Same algorithm, hyperparameters, spaces, reward and episode budget as the
+    residual run, so the only difference measured is "learn the whole controller"
+    vs "learn a correction on top of DeePC". No zero-init here: a from-scratch
+    actor has nothing to stay close to.
+    """
+    algo = _check_algo(algo)
+    venv = make_vanilla_env(libraries_path, monitor_path=monitor_path)
+    model = _build_model(algo, venv, learning_rate, device, seed, verbose,
+                         action_noise_sigma)
+    try:
+        model.learn(total_timesteps=total_timesteps, progress_bar=False)
+        model.save(out_path)
+    finally:
+        venv.close()
+    return model
+
+
 def load_residual(path: str, algo: str = "td3", device: str = "cpu"):
-    """Load a trained residual with the matching class (keeps sb3 import confined to rl/)."""
-    algo = algo.lower()
-    if algo not in _ALGOS:
-        raise ValueError(f"algo must be one of {sorted(_ALGOS)}, got {algo!r}")
+    """Load a trained residual (or vanilla) checkpoint with the matching class.
+
+    Keeps the sb3 import confined to `rl/`.
+    """
     # `algo` must match the class the checkpoint was trained with; SB3's .load()
     # does not record it in the zip, so a mismatch fails or loads the wrong policy.
-    return _ALGOS[algo].load(path, device=device)
+    return _ALGOS[_check_algo(algo)].load(path, device=device)

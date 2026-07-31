@@ -16,7 +16,7 @@ import numpy as np
 import two_wheel_robot.env  # noqa: F401  registers Gym ID
 from two_wheel_robot.controllers.data_collection import (
     PAPER_INIT_HEADINGS,
-    PAPER_SAMPLE_BOUNDS,
+    DEFAULT_SAMPLE_BOUNDS,
 )
 from two_wheel_robot.controllers.deepc import DeePC
 from two_wheel_robot.controllers.hankel import build_hankel
@@ -36,6 +36,18 @@ def bearing_y_ref(state: np.ndarray, goal: np.ndarray) -> np.ndarray:
     goal = np.asarray(goal, dtype=np.float64)
     bearing = float(np.arctan2(goal[1] - state[1], goal[0] - state[0]))
     return np.array([goal[0], goal[1], bearing], dtype=np.float64)
+
+
+def canonical_action_bounds(libraries_path: str = DEFAULT_LIBRARIES) -> np.ndarray:
+    """The `(2, 2)` action bounds the canonical DeePC actuates within.
+
+    Read from the data library's recorded `sample_bounds` so any controller or
+    policy compared against DeePC shares its actuation envelope exactly.
+    """
+    with np.load(libraries_path) as data:
+        if "sample_bounds" in data.files:
+            return np.asarray(data["sample_bounds"], dtype=np.float64)
+    return DEFAULT_SAMPLE_BOUNDS.copy()
 
 
 def build_canonical_deepc(
@@ -59,7 +71,7 @@ def build_canonical_deepc(
         if "sample_bounds" in data.files:
             sample_bounds = np.asarray(data["sample_bounds"], dtype=np.float64)
         else:
-            sample_bounds = PAPER_SAMPLE_BOUNDS
+            sample_bounds = DEFAULT_SAMPLE_BOUNDS
         uy = [(data[f"u_{i}"], data[f"y_{i}"]) for i in range(4)]
 
     env = gym.make("TwoWheelGoal-v0", action_bounds=sample_bounds)

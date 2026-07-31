@@ -24,6 +24,7 @@ from two_wheel_robot.rl.trace_io import (
     clone_trace_path,
     read_trace,
     residual_trace_path,
+    vanilla_trace_path,
     write_trace,
 )
 
@@ -69,6 +70,39 @@ def generate_trace_pair(
     write_trace(residual_csv, traj_r, act_r, goal_r)
 
     return read_trace(clone_csv), read_trace(residual_csv)
+
+
+def ensure_vanilla_trace(
+    seed: int,
+    figdir: str,
+    vanilla_model_path: str = "data/vanilla_td3_400k.zip",
+    algo: str = "td3",
+    libraries_path: str = "data/libraries_v0.npz",
+    device: str = "cpu",
+) -> dict:
+    """Return the from-scratch RL trace for `seed`, generating + caching the CSV if missing.
+
+    No clone and no DeePC in this path — only the canonical action bounds, so the
+    vanilla arm renders on the same footing as the others.
+    """
+    from two_wheel_robot.rl.deepc_setup import canonical_action_bounds
+    from two_wheel_robot.rl.residual_eval import run_vanilla_closed_loop_with_actions
+    from two_wheel_robot.rl.wrappers import vanilla_rl_env
+
+    csv_path = vanilla_trace_path(figdir, seed)
+    if os.path.exists(csv_path):
+        return read_trace(csv_path)
+
+    os.makedirs(figdir, exist_ok=True)
+    model = load_residual(vanilla_model_path, algo=algo, device=device)
+    env = vanilla_rl_env(canonical_action_bounds(libraries_path))
+    try:
+        _, traj, act = run_vanilla_closed_loop_with_actions(model, env, seed)
+        goal = cast(UnicycleGoalEnv, env.unwrapped).goal
+    finally:
+        env.close()
+    write_trace(csv_path, traj, act, goal)
+    return read_trace(csv_path)
 
 
 def ensure_traces(

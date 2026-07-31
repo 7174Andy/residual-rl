@@ -109,7 +109,7 @@ def test_runs_on_real_collected_trajectory():
     import gymnasium as gym
     import two_wheel_robot.env  # noqa: F401
     from two_wheel_robot.controllers.data_collection import (
-        PAPER_SAMPLE_BOUNDS,
+        DEFAULT_SAMPLE_BOUNDS,
         collect_trajectory,
     )
 
@@ -119,7 +119,7 @@ def test_runs_on_real_collected_trajectory():
         T=200,
         rng=np.random.default_rng(0),
         init_state=np.array([0.0, 0.0, np.pi / 4]),
-        sample_bounds=PAPER_SAMPLE_BOUNDS,
+        sample_bounds=DEFAULT_SAMPLE_BOUNDS,
     )
     Up, Uf, Yp, Yf = build_hankel(u, y, T_ini=5, N=12)
     n_cols = 200 - 17 + 1  # = 184

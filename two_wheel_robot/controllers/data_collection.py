@@ -19,11 +19,14 @@ import numpy as np
 from two_wheel_robot.env.env import UnicycleGoalEnv
 
 
-# ---- Paper (arXiv:2603.07395 Appendix D) data-collection settings -----------
+# ---- Data-collection settings ------------------------------------------------
 
-PAPER_SAMPLE_BOUNDS: np.ndarray = np.array(
+# Broadened from the paper's PE bounds (v in [10, 20], w in [-pi/6, pi/6]) so the
+# libraries also cover stopping and pivoting, which goal-reaching needs.
+DEFAULT_SAMPLE_BOUNDS: np.ndarray = np.array(
     [[0.0, 20.0], [-np.pi / 2, np.pi / 2]], dtype=np.float64
 )
+# Paper (arXiv:2603.07395 Appendix D): 4 trajectories x 1500 steps.
 PAPER_INIT_HEADINGS: tuple[float, ...] = (
     np.pi / 4,
     3 * np.pi / 4,

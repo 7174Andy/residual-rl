@@ -10,8 +10,8 @@ import pytest
 
 import two_wheel_robot.env  # noqa: F401  registers Gym ID
 from two_wheel_robot.controllers.data_collection import (
+    DEFAULT_SAMPLE_BOUNDS,
     PAPER_INIT_HEADINGS,
-    PAPER_SAMPLE_BOUNDS,
     collect_libraries,
     collect_trajectory,
     paper_init_states,
@@ -44,17 +44,16 @@ def test_rejects_zero_T():
         collect_trajectory(_env(), T=0, rng=np.random.default_rng(0))
 
 
-def test_actions_within_paper_sample_bounds():
+def test_actions_within_default_sample_bounds():
     u, _ = collect_trajectory(
         _env(),
         T=300,
         rng=np.random.default_rng(0),
-        sample_bounds=PAPER_SAMPLE_BOUNDS,
+        sample_bounds=DEFAULT_SAMPLE_BOUNDS,
     )
-    assert (u[:, 0] >= 10.0 - 1e-9).all()
-    assert (u[:, 0] <= 20.0 + 1e-9).all()
-    assert (u[:, 1] >= -np.pi / 6 - 1e-9).all()
-    assert (u[:, 1] <= np.pi / 6 + 1e-9).all()
+    low, high = DEFAULT_SAMPLE_BOUNDS[:, 0], DEFAULT_SAMPLE_BOUNDS[:, 1]
+    assert (u >= low - 1e-9).all()
+    assert (u <= high + 1e-9).all()
 
 
 def test_init_state_is_first_y():

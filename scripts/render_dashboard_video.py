@@ -28,7 +28,7 @@ import matplotlib.patches as mpatches  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
-from two_wheel_robot.rl.showcase_trace import ensure_traces  # noqa: E402
+from two_wheel_robot.rl.showcase_trace import ensure_traces, ensure_vanilla_trace  # noqa: E402
 from two_wheel_robot.rl.trace_reward import DEFAULT_GOAL_TOLERANCE, recompute_reward  # noqa: E402
 from two_wheel_robot.rl.video_encoding import encode_video  # noqa: E402
 
@@ -36,6 +36,11 @@ _GRAY = "#898781"
 _BLUE = "#3987e5"
 _INK = "#52514e"
 _RED = "#e34948"
+# vanilla-TD3 arm, distinct from the residual's blue. Validated with the dataviz
+# skill alongside #898781/#3987e5: clears the 3:1 surface-contrast check that the
+# lighter #d9822b failed. Same hex as scripts/plot_robustness.py, so the arm keeps
+# one identity across figures and videos.
+_ORANGE = "#c1701c"
 _TOLERANCE = DEFAULT_GOAL_TOLERANCE  # two_wheel_robot/rl/trace_reward.py's copy of env.py's default
 
 
@@ -163,7 +168,16 @@ def _fig_to_rgb(fig) -> np.ndarray:
     return buf[:, :, :3].reshape(h, w, 3).copy()
 
 
-def _render_seed_video(seed: int, clone: dict, residual: dict, outdir: str, fps: int) -> str:
+def _render_seed_video(
+    seed: int, clone: dict, residual: dict, outdir: str, fps: int,
+    left_label: str = "CLONE", right_label: str = "CLONE + TD3 RESIDUAL",
+    left_color: str = _GRAY, right_color: str = _BLUE, prefix: str = "dashboard",
+    fail_word: str = "stalls",
+) -> str:
+    """Render a two-column dashboard. `clone`/`residual` are just the left/right traces;
+    the labels/colors/prefix parameterize which arms they are (defaults reproduce the
+    original clone-vs-residual video exactly).
+    """
     reward_c = recompute_reward(
         clone["x"], clone["y"], clone["heading"], clone["v"], clone["w"], clone["goal"],
     )
@@ -179,16 +193,18 @@ def _render_seed_video(seed: int, clone: dict, residual: dict, outdir: str, fps:
 
     clone_reached = bool(reward_c["reached"][-1])
     residual_reached = bool(reward_r["reached"][-1])
-    clone_title = f"CLONE ({'reaches' if clone_reached else 'stalls'})"
-    residual_title = f"CLONE + TD3 RESIDUAL ({'reaches' if residual_reached else 'stalls'})"
+    clone_title = f"{left_label} ({'reaches' if clone_reached else fail_word})"
+    residual_title = f"{right_label} ({'reaches' if residual_reached else fail_word})"
 
     fig = plt.figure(figsize=(9.5, 7.5), dpi=100)
     outer = fig.add_gridspec(1, 2, wspace=0.28)
     gs_left = outer[0].subgridspec(4, 1, height_ratios=[2.6, 1, 1, 1], hspace=0.55)
     gs_right = outer[1].subgridspec(4, 1, height_ratios=[2.6, 1, 1, 1], hspace=0.55)
-    left = _setup_panel(fig, gs_left, clone, reward_c, _GRAY, clone_title, xlim, ylim, full_len)
+    left = _setup_panel(
+        fig, gs_left, clone, reward_c, left_color, clone_title, xlim, ylim, full_len
+    )
     right = _setup_panel(
-        fig, gs_right, residual, reward_r, _BLUE, residual_title, xlim, ylim, full_len
+        fig, gs_right, residual, reward_r, right_color, residual_title, xlim, ylim, full_len
     )
     fig.suptitle(f"seed {seed}", fontsize=11, color=_INK)
 
@@ -202,7 +218,7 @@ def _render_seed_video(seed: int, clone: dict, residual: dict, outdir: str, fps:
         plt.close(fig)
 
     os.makedirs(outdir, exist_ok=True)
-    out_path = os.path.join(outdir, f"dashboard-{seed}.mp4")
+    out_path = os.path.join(outdir, f"{prefix}-{seed}.mp4")
     encode_video(frames, out_path, fps)
     return out_path
 
@@ -218,6 +234,12 @@ def main() -> int:
     parser.add_argument("--outdir", default="docs/journey/videos")
     parser.add_argument("--fps", type=int, default=40)
     parser.add_argument("--device", default="cpu")
+    parser.add_argument(
+        "--compare", default="clone-residual",
+        choices=["clone-residual", "residual-vanilla", "clone-vanilla"],
+        help="which two arms to put side by side (default: clone vs clone+residual)",
+    )
+    parser.add_argument("--vanilla-model", default="data/vanilla_td3_400k.zip")
     args = parser.parse_args()
 
     seeds = [int(s) for s in args.seeds.split(",") if s.strip()]
@@ -228,14 +250,35 @@ def main() -> int:
                 clone_path=args.clone, residual_model_path=args.residual_model,
                 algo=args.algo, libraries_path=args.libraries, device=args.device,
             )
+            if args.compare in ("residual-vanilla", "clone-vanilla"):
+                vanilla = ensure_vanilla_trace(
+                    seed, args.figdir, vanilla_model_path=args.vanilla_model,
+                    algo=args.algo, libraries_path=args.libraries, device=args.device,
+                )
         except FileNotFoundError as e:
             print(
                 f"error: {e}. Train the missing checkpoint first "
-                f"(scripts/train_clone.py / scripts/train_residual.py).",
+                f"(scripts/train_clone.py / scripts/train_residual.py / "
+                f"scripts/train_vanilla.py).",
                 file=sys.stderr,
             )
             return 1
-        out_path = _render_seed_video(seed, clone, residual, args.outdir, args.fps)
+        if args.compare == "residual-vanilla":
+            out_path = _render_seed_video(
+                seed, residual, vanilla, args.outdir, args.fps,
+                left_label="CLONE + TD3 RESIDUAL", right_label="VANILLA TD3 (from scratch)",
+                left_color=_BLUE, right_color=_ORANGE,
+                prefix="residual-vs-vanilla", fail_word="misses",
+            )
+        elif args.compare == "clone-vanilla":
+            out_path = _render_seed_video(
+                seed, clone, vanilla, args.outdir, args.fps,
+                left_label="CLONE (DeePC surrogate)", right_label="VANILLA TD3 (from scratch)",
+                left_color=_GRAY, right_color=_ORANGE,
+                prefix="clone-vs-vanilla", fail_word="stalls",
+            )
+        else:
+            out_path = _render_seed_video(seed, clone, residual, args.outdir, args.fps)
         print(f"wrote {out_path}")
     return 0
 

@@ -43,6 +43,7 @@ class ResidualDeePCEnv(gym.Env):
         include_base_in_obs: bool = True,
         device: str = "cpu",
         render_mode: Optional[str] = None,
+        perturb=None,
     ):
         super().__init__()
         self.predictor = load_clone(clone_path, device=device)
@@ -62,6 +63,11 @@ class ResidualDeePCEnv(gym.Env):
         self.env = gym.make(
             "TwoWheelGoal-v0", action_bounds=self.action_bounds, render_mode=render_mode
         )
+        # `perturb` (optional): callable wrapping the inner env for robustness
+        # benchmarking (see env/perturbations.py). `base` stays the unwrapped env, so
+        # the clone and the past-buffer slide are unaffected by the wrapper chain.
+        if perturb is not None:
+            self.env = perturb(self.env)
         self.base = cast(UnicycleGoalEnv, self.env.unwrapped)
 
         # Residual action in [-1, 1]^2.

@@ -1,14 +1,13 @@
 """Collect DeePC data libraries.
 
-Defaults reproduce arXiv:2603.07395 Appendix D: 4 trajectories x 1500 steps
-starting from headings {pi/4, 3pi/4, 5pi/4, 7pi/4} at the origin, PE inputs
-sampled uniformly from v in [10, 20], w in [-pi/6, pi/6].
+Layout follows arXiv:2603.07395 Appendix D: 4 trajectories x 1500 steps starting
+from headings {pi/4, 3pi/4, 5pi/4, 7pi/4} at the origin. The default PE bounds
+are broader than the paper's (v in [0, 20], w in [-pi/2, pi/2] vs v in [10, 20],
+w in [-pi/6, pi/6]) so the data includes stopping and pivoting, which
+goal-reaching needs. To reproduce the paper's bounds exactly:
 
-For goal-reaching, broader bounds (v in [0, 20], w in [-pi/2, pi/2]) include
-stopping and pivoting behavior, which paper bounds exclude:
-
-    uv run python scripts/collect_data.py --v_min 0 --w_abs_max 1.5708 \\
-        --out data/libraries_broad.npz
+    uv run python scripts/collect_data.py --v_min 10 --w_abs_max 0.5236 \\
+        --out data/libraries_paper.npz
 
 The chosen bounds are saved inside the .npz under key `sample_bounds`, so
 `scripts/run_deepc.py` reconstructs the env with matching action bounds
