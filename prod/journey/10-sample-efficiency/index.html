@@ -10,13 +10,11 @@
       
       
       
-        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/06-stop-at-goal/">
+        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/10-sample-efficiency/">
       
       
-        <link rel="prev" href="../05-library-switching/">
+        <link rel="prev" href="../09-vanilla-rl/">
       
-      
-        <link rel="next" href="../07-imitation-learning/">
       
       
         
@@ -27,7 +25,7 @@
     
     
       
-        <title>06. Stopping at the goal - two-wheeled-experiment</title>
+        <title>10. Sample efficiency + SAC - two-wheeled-experiment</title>
       
     
     
@@ -80,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#07-stopping-at-the-goal-the-deceleration-overshoot-problem" class="md-skip">
+        <a href="#11-sample-efficiency-on-the-deployed-policy-and-sac" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              06. Stopping at the goal
+              10. Sample efficiency + SAC
             
           </span>
         </div>
@@ -1181,37 +1179,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    06. Stopping at the goal
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../06-stop-at-goal/" class="md-nav__link">
         
   
   
@@ -1227,125 +1198,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#problem-one-line" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Problem (one line)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#context" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Context
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-it-looks-like" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What it looks like
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#resolution-widen-the-data-envelope-to-v-0-20" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Resolution — widen the data envelope to v ∈ [0, 20]
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#new-problem-over-braking-pirouette-at-the-goal" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        New problem — over-braking / pirouette at the goal
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#larger-sample-reality-check-2026-06-01" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Larger-sample reality check (2026-06-01)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#root-cause-of-the-v-collapse-a-hallucinated-prediction-from-a-degenerate-past-not-missing-data-and-not-a-bug" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Root cause of the v-collapse — a hallucinated prediction from a degenerate past, not missing data (and not a bug)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#direction-combine-rl-with-deepc" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Direction — combine RL with DeePC
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#open-question-metrics-beyond-success-rate" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Open question — metrics beyond success rate
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1439,10 +1291,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../10-sample-efficiency/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Sample efficiency + SAC
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1458,6 +1337,125 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Motivation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reach-rate-vs-training-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reach rate vs training steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vanillas-instability-is-the-real-difference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vanilla's instability is the real difference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#final-performance-every-method-same-78-seeds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final performance — every method, same 78 seeds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#watching-it-learn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Watching it learn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conclusions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-not-yet-reported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open / not yet reported
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reproduce" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproduce
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1497,10 +1495,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#problem-one-line" class="md-nav__link">
+  <a href="#motivation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Problem (one line)
+        Motivation
       
     </span>
   </a>
@@ -1508,10 +1506,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#context" class="md-nav__link">
+  <a href="#method" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Context
+        Method
       
     </span>
   </a>
@@ -1519,10 +1517,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-it-looks-like" class="md-nav__link">
+  <a href="#reach-rate-vs-training-steps" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What it looks like
+        Reach rate vs training steps
       
     </span>
   </a>
@@ -1530,10 +1528,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#resolution-widen-the-data-envelope-to-v-0-20" class="md-nav__link">
+  <a href="#vanillas-instability-is-the-real-difference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Resolution — widen the data envelope to v ∈ [0, 20]
+        Vanilla's instability is the real difference
       
     </span>
   </a>
@@ -1541,10 +1539,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#new-problem-over-braking-pirouette-at-the-goal" class="md-nav__link">
+  <a href="#final-performance-every-method-same-78-seeds" class="md-nav__link">
     <span class="md-ellipsis">
       
-        New problem — over-braking / pirouette at the goal
+        Final performance — every method, same 78 seeds
       
     </span>
   </a>
@@ -1552,10 +1550,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#larger-sample-reality-check-2026-06-01" class="md-nav__link">
+  <a href="#watching-it-learn" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Larger-sample reality check (2026-06-01)
+        Watching it learn
       
     </span>
   </a>
@@ -1563,10 +1561,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#root-cause-of-the-v-collapse-a-hallucinated-prediction-from-a-degenerate-past-not-missing-data-and-not-a-bug" class="md-nav__link">
+  <a href="#conclusions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Root cause of the v-collapse — a hallucinated prediction from a degenerate past, not missing data (and not a bug)
+        Conclusions
       
     </span>
   </a>
@@ -1574,10 +1572,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#direction-combine-rl-with-deepc" class="md-nav__link">
+  <a href="#open-not-yet-reported" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Direction — combine RL with DeePC
+        Open / not yet reported
       
     </span>
   </a>
@@ -1585,10 +1583,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#open-question-metrics-beyond-success-rate" class="md-nav__link">
+  <a href="#reproduce" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Open question — metrics beyond success rate
+        Reproduce
       
     </span>
   </a>
@@ -1615,389 +1613,469 @@
   
 
 
-<h1 id="07-stopping-at-the-goal-the-deceleration-overshoot-problem">07. Stopping at the goal — the deceleration / overshoot problem<a class="headerlink" href="#07-stopping-at-the-goal-the-deceleration-overshoot-problem" title="Permanent link">&para;</a></h1>
-<p>Overshoot → fixed by widening the data envelope → two residual failures surface: a
-near-goal pirouette and, dominant, a far-field <code>v</code>-collapse. Reach rate over random
-seeds is <strong>~39%</strong>, and the collapse traces to a hallucinating predictor, not missing data.</p>
-<h2 id="problem-one-line">Problem (one line)<a class="headerlink" href="#problem-one-line" title="Permanent link">&para;</a></h2>
-<p>With forward-only speed bounds (<code>v_min &gt; 0</code>), the controller drives the robot to
-the goal's neighborhood but <strong>cannot decelerate to land inside the tolerance</strong> —
-it skims past the goal circle and misses by a small margin, then loops back.</p>
-<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p>After the action-bounds sweep, <code>data/libraries.npz</code>
-is collected with <strong>hybrid</strong> PE bounds <code>v ∈ [10, 20]</code>, <code>w ∈ [±π/2]</code> (paper-style
-forward-only <code>v</code>, but a fast turn rate). This removes the spin-in-place stall from
-<a href="../05-library-switching/">05</a>: forcing <code>v ≥ 10</code> makes "do nothing" infeasible.</p>
-<p>But the paper's task is continuous heart-curve <em>tracking</em> — the robot never stops.
-Ours is point-to-point <em>reaching</em>, which requires stopping within <code>goal_tolerance</code>
-(<code>0.5</code>). Forcing <code>v ≥ 10</code> means the robot moves a minimum of <code>v_min · Δt = 10 · 0.025
-= 0.25</code> units <strong>every</strong> step and can never slow down. On a tangential approach it
-steps <em>over</em> the 0.5-radius circle instead of landing in it.</p>
-<h2 id="what-it-looks-like">What it looks like<a class="headerlink" href="#what-it-looks-like" title="Permanent link">&para;</a></h2>
-<p>Closed-loop run on the hybrid data (6 seeds, <code>Q_heading=2</code>, bearing reference):</p>
-<table>
-<thead>
-<tr>
-<th>seeds</th>
-<th>result</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>reach the goal</td>
-<td>2 / 6</td>
-</tr>
-<tr>
-<td><strong>near-miss overshoot</strong> (reached <code>min_dist</code> 0.68 / 0.88, then sailed past)</td>
-<td>2 / 6</td>
-</tr>
-<tr>
-<td>never converge</td>
-<td>2 / 6</td>
-</tr>
-</tbody>
-</table>
-<p>Two observed symptoms, one root cause:</p>
-<ol>
-<li><strong><code>v</code> barely changes; only <code>w</code> does</strong> — with <code>v_min=10</code> and a tiny control weight
-   (<code>R = 1.3e-3</code>), cruising near minimum speed and steering with <code>w</code> is cost-optimal.
-   Not a bug; it's the <em>cause</em> of the next symptom.</li>
-<li><strong>Misses the goal by ~1 cm</strong> — the constant ~0.25 units/step stride can't be
-   shortened, so the robot overshoots the tolerance circle.</li>
-</ol>
-<figure>
-<video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
-    <source src="../videos/cannot-stop-overshoot.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-<figcaption>
-    Can't-stop overshoot (<code>libraries.npz</code>, `v ∈ [10, 20]`, seed 42).
-    `v` stays floored at 10 (never brakes), so the robot skims the goal and orbits
-    at the ~6.4-unit minimum turning radius without landing. Reproduce:
-    <code>uv run python scripts/run_deepc.py --libraries data/libraries.npz
-    --seed 42 --episodes 3 --record docs/journey/videos</code> (episode 1).
-  </figcaption>
-</figure>
-<h2 id="resolution-widen-the-data-envelope-to-v-0-20">Resolution — widen the data envelope to <code>v ∈ [0, 20]</code><a class="headerlink" href="#resolution-widen-the-data-envelope-to-v-0-20" title="Permanent link">&para;</a></h2>
-<p>The overshoot is a <strong>stabilizability</strong> fact, not a tuning issue. For the goal <code>p*</code>
-to be an equilibrium we need <code>p_{t+1} = p_t</code>, i.e. <code>Δt · v_t = 0 ⇒ v_t = 0</code>. With
-<code>v_min = 10 &gt; 0</code>, <strong>no admissible input makes the goal a fixed point</strong> — the robot
-is a Dubins vehicle with a forward-speed floor and physically cannot stop. Worse,
-its minimum turning radius is <code>r_min = v_min / w_max = 10 / (π/2) = 20/π ≈ 6.4</code>
-units — ~13× the <code>0.5</code> tolerance — so a near-miss can only be corrected by a wide
-loop, not a tight retry.</p>
-<p>Fix: recollect with the floor removed. <code>data/libraries_v0.npz</code> uses
-<code>v ∈ [0, 20]</code>, <code>w ∈ [±π/2]</code> (T=1500, 4 paper headings, seed 42), so the data span
-now contains stopping/slow motion and DeePC can represent deceleration.</p>
-<p>Closed-loop on the new data (<strong>seed 42, 3 episodes</strong>):</p>
-<table>
-<thead>
-<tr>
-<th>metric</th>
-<th>old <code>v ∈ [10, 20]</code></th>
-<th>new <code>v ∈ [0, 20]</code></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>success rate</td>
-<td>1 / 3</td>
-<td><strong>2 / 3</strong></td>
-</tr>
-<tr>
-<td><code>v</code> min observed</td>
-<td>+10.0 (floored)</td>
-<td><strong>+0.0 — it brakes</strong></td>
-</tr>
-<tr>
-<td><code>v</code> mean</td>
-<td>~11.5</td>
-<td>3.2 – 7.4</td>
-</tr>
-<tr>
-<td>worst <code>final_dist</code></td>
-<td>8 – 20 (spirals)</td>
-<td><strong>2.75 (lingers)</strong></td>
-</tr>
-</tbody>
-</table>
-<p>With <code>v_min = 0</code> the goal is a genuine equilibrium, the controller brakes, and a
-miss now <em>lingers near</em> the goal instead of spiraling across the box.</p>
-<figure>
-<video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
-    <source src="../videos/successful-landing.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-<figcaption>
-    Successful reach (<code>libraries_v0.npz</code>, seed 42). The robot now
-    decelerates on approach and lands inside the 0.5 tolerance (final_dist 0.42,
-    129 steps) — the deceleration the old <code>v ∈ [10, 20]</code> data could not
-    represent. Reproduce: <code>uv run python scripts/run_deepc.py --libraries
-    data/libraries_v0.npz --seed 42 --episodes 1 --record docs/journey/videos</code>.
-  </figcaption>
-</figure>
-<h2 id="new-problem-over-braking-pirouette-at-the-goal">New problem — over-braking / pirouette at the goal<a class="headerlink" href="#new-problem-over-braking-pirouette-at-the-goal" title="Permanent link">&para;</a></h2>
-<p>The remaining failure (seed 42, ep 1: truncated at <code>final_dist = 2.75</code>, <code>w</code>
-saturated near <code>+1.1</code>) is the <strong>opposite</strong> of overshoot: the robot now slows down
-<em>too much</em> near the goal and gets stuck in a near-stationary spin.</p>
-<figure>
-<video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
-    <source src="../videos/over-braking-pirouette.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-<figcaption>
-    Over-braking failure (<code>libraries_v0.npz</code>, seed 43). The robot
-    decelerates near the goal and locks into a stationary pirouette, never closing
-    the last ~2.8 units. Reproduce: <code>uv run python scripts/run_deepc.py
-    --libraries data/libraries_v0.npz --seed 43 --episodes 1
-    --record docs/journey/videos</code>.
-  </figcaption>
-</figure>
-<p>This is an <strong>objective mismatch</strong>, and <code>R</code> is not the cause — the position-vs-effort
-trade-off prefers speed <code>v* ≈ Q·d·Δt·N / R ≈ 230·d</code>, which saturates <code>v_max</code> at
-<code>d = 2.75</code>, i.e. it <em>wants</em> to push hard. The brake comes from the <strong>heading term</strong>:</p>
-<ol>
-<li><strong>Bearing reference is ill-conditioned as <code>d → 0</code>.</strong> With <code>y_ref</code> heading =
-   <code>atan2(g_y−y, g_x−x)</code>, its position-sensitivity is <code>‖∇ atan2‖ = 1/d</code> — the
-   heading target <em>spins</em> near the goal.</li>
-<li><strong>Heading is the heaviest-weighted coordinate</strong> (<code>Q = diag(1,1,2)</code>), so the QP
-   spends effort chasing that spinning target instead of translating in.</li>
-<li><strong>The position pull vanishes</strong> as <code>2Q·d → 0</code>. Heading screams (<code>∝ 1/d</code>) just as
-   drive-in goes quiet (<code>∝ d</code>) → optimum tips to <em>rotate, don't translate</em> → <code>v→0</code>.
-   Stationary robot ⇒ <code>d</code> fixed ⇒ bearing keeps demanding rotation ⇒ <strong>pirouette</strong>.</li>
-<li><strong>No terminal incentive in the QP.</strong> The env's <code>reach_bonus = 100</code> is <em>not</em> in
-   the controller's objective, and <code>N = 12</code> (~3–6 units lookahead) is too myopic to
-   value committing to land. A low-effort stop-and-turn is a valid QP solution.</li>
-</ol>
-<p>Note termination is <strong>position-only</strong> (heading is irrelevant to "reached"), yet
-the controller is penalized for heading error the task doesn't reward — so the
-heading tracking near the goal is actively counterproductive.</p>
-<p>A cheap, untested config fix exists: <code>--Q_heading 0</code> or <code>--no_bearing_ref</code> (or
-gate heading off inside a small radius). Try this <em>before</em> reaching for RL.</p>
-<h2 id="larger-sample-reality-check-2026-06-01">Larger-sample reality check (2026-06-01)<a class="headerlink" href="#larger-sample-reality-check-2026-06-01" title="Permanent link">&para;</a></h2>
-<p>The numbers above ("2 / 3", "a miss now lingers near the goal at 2.75") come from
-<strong>n = 3 on seed 42</strong> — optimistic. A broader random sweep (<code>scripts/run_deepc.py
---episodes 100 --random</code>, base seed <code>4104626029</code>, n = 78 before the slow run was
-stopped; <code>libraries_v0.npz</code>) reframes the picture:</p>
+<h1 id="11-sample-efficiency-on-the-deployed-policy-and-sac">11. Sample efficiency on the deployed policy — and SAC<a class="headerlink" href="#11-sample-efficiency-on-the-deployed-policy-and-sac" title="Permanent link">&para;</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Status: complete (2026-07-31)</p>
+</div>
+<p><a href="../09-vanilla-rl/">10</a> claimed the MPC prior buys <strong>2.3× fewer environment steps</strong>, measured on
+training <em>return</em>, and listed the cleaner version as an open item: reach rate at intermediate
+checkpoints. Measured that way, <strong>the 2.3× does not reproduce</strong> — the residual reaches ≥ 95 %
+in 44k ± 12k steps against vanilla's 60k ± 12k, a 1.33× ratio that does not clear significance
+(<span class="arithmatex">\(p = 0.22\)</span>). Two things do survive. First, <strong>vanilla's deployed reach rate never stops
+wandering</strong>: across every checkpoint past 100k its worst is <strong>0.641</strong>, against 0.987 for the
+residual. Second, swapping the residual's optimizer to <strong>SAC</strong> reaches ≥ 95 % in
+<strong>17k ± 2.4k steps</strong> — 2.6× faster than the TD3 residual (<span class="arithmatex">\(p = 0.0159\)</span>) and 3.5× faster than
+vanilla (<span class="arithmatex">\(p = 0.0079\)</span>) — while landing on the identical asymptote. On this task <strong>the
+algorithm choice buys more sample efficiency than the MPC prior does.</strong></p>
+<h2 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">&para;</a></h2>
+<p>The <a href="../09-vanilla-rl/">10</a> headline is a <em>behaviour-policy</em> number. A training-return curve
+includes exploration noise and scores whatever start states training happened to sample; it
+also depends on an arbitrary threshold (−6000) whose choice moves the ratio. None of that is
+what you deploy. The deployed quantity is the greedy policy on the canonical 78-seed sweep,
+and it can be measured at any checkpoint — so measure it.</p>
+<p>The second question came for free once checkpointing existed: entry <a href="../08-residual-rl/">09</a>
+picked TD3 for the residual by reasoning from properties, never by measurement. SAC was
+already implemented as the fallback path. Running it costs one training sweep.</p>
+<h2 id="method">Method<a class="headerlink" href="#method" title="Permanent link">&para;</a></h2>
+<p>Both existing arms retrained from scratch, 5 training seeds × 400k steps, snapshotting the
+policy every 25k (<code>--checkpoint-dir</code>), then every snapshot evaluated <strong>greedy</strong> on the same 78
+eval seeds every other entry uses. SAC added as a third arm on identical settings —
+<code>residual_frac 2.0</code>, <code>lr 1e-3</code>, 5 seeds, 400k. That learning rate is the repo's CLI default
+and matches the TD3 arms; it is <em>not</em> SB3's SAC default of 3e-4. Parity with the arm under
+comparison was worth more than SAC's tuned default, for the same reason <a href="../09-vanilla-rl/">10</a>
+forced TD3 on its control arm.</p>
+<p>Two checks before any of the numbers below mean anything:</p>
 <ul>
-<li><strong>Reach rate ≈ 39 %</strong> (30 / 78); seed 0's 3 / 4 is a lucky draw.</li>
-<li><strong>QP failures: 0 / 78</strong> — the controller is numerically healthy, so the solver is
-  <em>not</em> the bottleneck (the "compute" metric row below can be deprioritized).</li>
-<li>The 48 truncated episodes end a <strong>median of 5.38 units from the goal</strong> (max 15.77),
-  with median mean-<code>v</code> ≈ <strong>1.66</strong> (successes run <code>v̄</code> ≈ 4–7).</li>
+<li><strong>The retrain reproduces the published table exactly</strong> — at 400k, residual <code>78 78 77 78 78</code>
+  and vanilla <code>78 78 78 78 75</code>, the same per-seed counts entry <a href="../09-vanilla-rl/">10</a> reports.
+  Training is seed-deterministic on this machine, so the intermediate checkpoints sit on the
+  same runs as the already-published endpoints rather than on a parallel universe.</li>
+<li><strong>The first grid censored the answer.</strong> SAC was already ≥ 95 % at 25k, the earliest
+  checkpoint, on all 5 seeds — so its crossing point was unmeasurable. The early window was
+  re-trained at 5k resolution (25k steps is ~90 s per run) and those runs reproduce the
+  coarse ones exactly at their shared 25k point.</li>
 </ul>
-<p>That splits the residual failure into <strong>two populations</strong>, not the single near-goal
-mode the section above describes:</p>
+<p>The lesson generalizes: <strong>pick the checkpoint grid before claiming a crossing point.</strong> A
+25k-spaced grid cannot measure a 17k crossing.</p>
+<h2 id="reach-rate-vs-training-steps">Reach rate vs training steps<a class="headerlink" href="#reach-rate-vs-training-steps" title="Permanent link">&para;</a></h2>
+<p><img alt="Deterministic reach rate and return vs environment steps, three arms, 5 seeds each" src="../figures/checkpoint_sweep.png" /></p>
 <table>
 <thead>
 <tr>
-<th>population</th>
-<th>count (of 48 truncations)</th>
-<th>signature</th>
-<th>matches</th>
+<th>env steps</th>
+<th>clone + residual <strong>SAC</strong></th>
+<th>clone + residual TD3</th>
+<th>vanilla TD3</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>near-goal pirouette / over-brake</td>
-<td>15 (final_dist &lt; 3.0)</td>
-<td>reaches the neighborhood, then stalls / spins</td>
-<td>the "New problem" above</td>
+<td>5k</td>
+<td>0.277 ± 0.196</td>
+<td>0.123 ± 0.068</td>
+<td>0.072 ± 0.036</td>
 </tr>
 <tr>
-<td><strong>far-field <code>v</code>-collapse</strong></td>
-<td><strong>33 (final_dist ≥ 3.0)</strong></td>
-<td>never drives in; <code>v̄</code> stays ≈ 1.6 across the whole run</td>
-<td><strong>dominant; new</strong></td>
+<td>10k</td>
+<td>0.608 ± 0.227</td>
+<td>0.287 ± 0.208</td>
+<td>0.064 ± 0.038</td>
+</tr>
+<tr>
+<td>15k</td>
+<td><strong>0.918 ± 0.093</strong></td>
+<td>0.472 ± 0.164</td>
+<td>0.087 ± 0.017</td>
+</tr>
+<tr>
+<td>20k</td>
+<td><strong>0.990 ± 0.010</strong></td>
+<td>0.662 ± 0.243</td>
+<td>0.187 ± 0.108</td>
+</tr>
+<tr>
+<td>25k</td>
+<td>0.997 ± 0.005</td>
+<td>0.787 ± 0.133</td>
+<td>0.410 ± 0.302</td>
+</tr>
+<tr>
+<td>50k</td>
+<td>1.000 ± 0.000</td>
+<td>0.997 ± 0.005</td>
+<td>0.779 ± 0.260</td>
+</tr>
+<tr>
+<td>100k</td>
+<td>1.000 ± 0.000</td>
+<td>0.995 ± 0.006</td>
+<td>1.000 ± 0.000</td>
+</tr>
+<tr>
+<td>200k</td>
+<td>1.000 ± 0.000</td>
+<td>1.000 ± 0.000</td>
+<td>0.995 ± 0.006</td>
+</tr>
+<tr>
+<td>350k</td>
+<td>1.000 ± 0.000</td>
+<td>0.997 ± 0.005</td>
+<td><strong>0.928 ± 0.144</strong></td>
+</tr>
+<tr>
+<td>400k</td>
+<td>0.997 ± 0.005</td>
+<td>0.997 ± 0.005</td>
+<td>0.992 ± 0.015</td>
 </tr>
 </tbody>
 </table>
-<p>So the Resolution's "miss now lingers near the goal" claim holds only for a minority
-of seeds. On most failing seeds the robot <strong>never commits to forward motion</strong> and
-truncates far away — the same <code>v → 0</code> family as
-<a href="../05-library-switching/">05</a>, now seed-dependent rather than universal.</p>
-<figure>
-<video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
-    <source src="../videos/far-field-v-collapse-stall.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-<figcaption>
-    Far-field `v`-collapse — pure stall (`libraries_v0.npz`, seed 4104626047).
-    `v` never leaves ~0 (`v̄ = 0.00`), so the robot sits near the start while the
-    goal is 14.6 units away; it truncates at `final_dist 14.61` having made no net
-    progress. Nothing to do with stopping _at_ the goal — it never drives toward it.
-    Reproduce: <code>uv run python scripts/run_deepc.py --seed 4104626047
-    --episodes 1 --record docs/journey/videos</code>.
-  </figcaption>
-</figure>
-<figure>
-<video controls="controls" loop="loop" muted="muted" playsinline="playsinline" width="480">
-    <source src="../videos/far-field-v-collapse-worst.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-<figcaption>
-    Far-field `v`-collapse — worst case (`libraries_v0.npz`, seed 4104626064).
-    The robot drifts with only token forward speed (`v̄ = 0.71`) and never converges,
-    ending the farthest of the whole sweep at `final_dist 15.77`. Reproduce:
-    <code>uv run python scripts/run_deepc.py --seed 4104626064 --episodes 1
-    --record docs/journey/videos</code>.
-  </figcaption>
-</figure>
-<h2 id="root-cause-of-the-v-collapse-a-hallucinated-prediction-from-a-degenerate-past-not-missing-data-and-not-a-bug">Root cause of the <code>v</code>-collapse — a hallucinated prediction from a degenerate past, not missing data (and not a bug)<a class="headerlink" href="#root-cause-of-the-v-collapse-a-hallucinated-prediction-from-a-degenerate-past-not-missing-data-and-not-a-bug" title="Permanent link">&para;</a></h2>
-<p>A per-step trace settles the attribution — and it is <strong>not</strong> what "library quality"
-first suggests. <code>scripts/run_deepc.py --seed 4104626047 --episodes 1 --headless
---trace</code> logs, each step, the QP's own predicted distance-reduction and a
-<strong>forced-forward counterfactual</strong> (<code>DeePC.diagnose_forward</code>: re-solve with the first
-step's <code>v</code> pinned <code>≥ 12</code>). On the pure-stall seed every one of the 200 steps reads
-identically:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>step  0  d=14.61  lib=1  v=0.00  w=-1.57  σy=0.0 | plan Δd=+13.91 | forced(v≥) v=12.0 Δd=+13.92 σy=0.0 [optimal]
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>…
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>median applied v = 0.00 | median plan Δd = +13.87 | median forced Δd = +13.88 (200/200 forced probes optimal)
+<p>Environment steps to the first checkpoint clearing a reach threshold (exact two-sided
+Mann–Whitney on 5 vs 5, so <span class="arithmatex">\(p = 0.0079\)</span> is the floor):</p>
+<table>
+<thead>
+<tr>
+<th>threshold</th>
+<th>residual SAC</th>
+<th>residual TD3</th>
+<th>vanilla TD3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>≥ 0.95</td>
+<td><strong>17,000 ± 2,449</strong></td>
+<td>44,000 ± 12,000</td>
+<td>60,000 ± 12,247</td>
+</tr>
+<tr>
+<td>≥ 0.99</td>
+<td><strong>27,000 ± 12,083</strong></td>
+<td>55,000 ± 10,000</td>
+<td>75,000 ± 22,361</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>pair</th>
+<th><span class="arithmatex">\(p\)</span> at ≥ 0.95</th>
+<th><span class="arithmatex">\(p\)</span> at ≥ 0.99</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SAC residual vs vanilla</td>
+<td><strong>0.0079</strong></td>
+<td>0.0159</td>
+</tr>
+<tr>
+<td>SAC residual vs TD3 residual</td>
+<td><strong>0.0159</strong></td>
+<td>0.0317</td>
+</tr>
+<tr>
+<td>TD3 residual vs vanilla</td>
+<td>0.2222</td>
+<td>0.3095</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The prior's advantage does not survive the change of metric; the optimizer's does.</strong> The row
+that matters is the last one: on the metric entry <a href="../09-vanilla-rl/">10</a> built its headline
+from, TD3-residual-over-vanilla is 1.33× and not separable, while SAC-over-TD3-residual is
+2.6× and is.</p>
+<div class="admonition warning">
+<p class="admonition-title">Why the return metric gave a bigger number</p>
+<p>Reach rate saturates. Every arm is pinned at ~1.0 from 100k onward, so the metric stops
+discriminating early and compresses the ratio; return keeps separating long after. Neither
+is wrong — they answer different questions. Reach rate answers "when is it deployable",
+return answers "when is it good", and only the first has a natural threshold.</p>
+</div>
+<p>The training-return view, with SAC added, agrees on the ordering and reproduces
+<a href="../09-vanilla-rl/">10</a>'s two published numbers exactly:</p>
+<p><img alt="Training return vs environment steps, three arms" src="../figures/learning_curves_3arm.png" /></p>
+<table>
+<thead>
+<tr>
+<th>arm</th>
+<th>steps to 100-ep rolling return &gt; −6000</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>vanilla TD3</td>
+<td>69,547 ± 24,348</td>
+</tr>
+<tr>
+<td>clone + residual TD3 (frac 2.0)</td>
+<td>30,816 ± 5,214</td>
+</tr>
+<tr>
+<td><strong>clone + residual SAC (frac 2.0)</strong></td>
+<td><strong>20,340 ± 2,464</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="vanillas-instability-is-the-real-difference">Vanilla's instability is the real difference<a class="headerlink" href="#vanillas-instability-is-the-real-difference" title="Permanent link">&para;</a></h2>
+<p>Reporting one final checkpoint hides this. Over <strong>every</strong> checkpoint from 100k on
+(5 seeds × 13 checkpoints = 65 evaluations per arm):</p>
+<table>
+<thead>
+<tr>
+<th>arm</th>
+<th>mean</th>
+<th>worst single checkpoint</th>
+<th>std</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>clone + residual SAC</td>
+<td>0.9988</td>
+<td>0.974</td>
+<td>0.0043</td>
+</tr>
+<tr>
+<td>clone + residual TD3</td>
+<td>0.9974</td>
+<td>0.987</td>
+<td>0.0051</td>
+</tr>
+<tr>
+<td>vanilla TD3</td>
+<td>0.9895</td>
+<td><strong>0.641</strong> (seed 3 @ 350k)</td>
+<td>0.0501</td>
+</tr>
+</tbody>
+</table>
+<p>Both residuals stay inside a percentage point of solved for the entire back half of training.
+Vanilla drops to 50/78 at 350k and 63/78 at 125k, then recovers. <strong>So vanilla's published
+0.992 is partly a lucky draw of where training stopped</strong> — those same five runs, evaluated at
+350k instead, average 0.928. This is the reach-rate form of the ~10× return-spread result in
+<a href="../09-vanilla-rl/">10</a>, and it is the strongest argument in this project for putting a
+controller underneath the policy: not a better ceiling, a floor you can trust.</p>
+<p>The honest counter-reading: nobody deploys a random checkpoint. If your protocol is "train
+400k, ship the last one," vanilla is fine here. The instability matters when the budget is
+uncertain or early stopping is on the table.</p>
+<h2 id="final-performance-every-method-same-78-seeds">Final performance — every method, same 78 seeds<a class="headerlink" href="#final-performance-every-method-same-78-seeds" title="Permanent link">&para;</a></h2>
+<p>RL arms are 5 training seeds × 78 eval seeds = 390 episodes; the classical arms are
+deterministic, so they get one 78-episode pass.</p>
+<table>
+<thead>
+<tr>
+<th>method</th>
+<th>reach per training seed</th>
+<th>success rate</th>
+<th>Wilson 95%</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DeePC (QP)</td>
+<td>deterministic</td>
+<td>30/78 = 0.385</td>
+<td>0.284–0.496</td>
+</tr>
+<tr>
+<td>clone <code>f_θ</code></td>
+<td>deterministic</td>
+<td>30/78 = 0.385</td>
+<td>0.284–0.496</td>
+</tr>
+<tr>
+<td>clone + residual TD3, <code>frac=1.0</code></td>
+<td>74 73 70 76 69</td>
+<td>362/390 = 0.928</td>
+<td>0.898–0.950</td>
+</tr>
+<tr>
+<td>clone + residual TD3, <code>frac=2.0</code></td>
+<td>78 78 77 78 78</td>
+<td><strong>389/390 = 0.997</strong></td>
+<td>0.986–1.000</td>
+</tr>
+<tr>
+<td>clone + residual <strong>SAC</strong>, <code>frac=2.0</code></td>
+<td>78 78 78 77 78</td>
+<td><strong>389/390 = 0.997</strong></td>
+<td>0.986–1.000</td>
+</tr>
+<tr>
+<td>vanilla TD3</td>
+<td>78 78 78 78 75</td>
+<td>387/390 = 0.992</td>
+<td>0.978–0.997</td>
+</tr>
+</tbody>
+</table>
+<p>The clone and the <code>frac=1.0</code> arm were re-measured for this entry and reproduce their published
+counts exactly. DeePC's 30/78 is carried over from <a href="../09-vanilla-rl/">10</a> — it is deterministic
+and a re-run is ~1 h of QP solves.</p>
+<p><strong>No pair among the top three is separable on reach.</strong> McNemar on the 390 paired episodes:</p>
+<table>
+<thead>
+<tr>
+<th>pair</th>
+<th>discordant</th>
+<th><span class="arithmatex">\(p\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>residual TD3 vs residual SAC</td>
+<td>1 / 1</td>
+<td>1.0000</td>
+</tr>
+<tr>
+<td>residual TD3 vs vanilla</td>
+<td>3 / 1</td>
+<td>0.6171</td>
+</tr>
+<tr>
+<td>residual SAC vs vanilla</td>
+<td>3 / 1</td>
+<td>0.6171</td>
+</tr>
+</tbody>
+</table>
+<p>Per-step cost tells the story reach rate cannot. Costs below are per-episode means divided by
+mean episode length, because episode lengths differ across arms and per-episode sums hide it:</p>
+<table>
+<thead>
+<tr>
+<th>arm</th>
+<th>return (mean ± std over seeds)</th>
+<th>steps</th>
+<th>pos/step</th>
+<th>head/step</th>
+<th>ctrl/step</th>
+<th>traj dev vs clone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>clone + residual TD3</td>
+<td>−4778.3 ± 7.9</td>
+<td>72.6</td>
+<td>60.6</td>
+<td>6.42</td>
+<td>0.144</td>
+<td>3.77</td>
+</tr>
+<tr>
+<td>clone + residual SAC</td>
+<td><strong>−4773.2 ± 15.3</strong></td>
+<td>73.0</td>
+<td>60.3</td>
+<td><strong>6.37</strong></td>
+<td>0.134</td>
+<td>3.92</td>
+</tr>
+<tr>
+<td>vanilla TD3</td>
+<td>−4854.7 ± 76.0</td>
+<td>76.5</td>
+<td><strong>58.0</strong></td>
+<td>6.64</td>
+<td><strong>0.126</strong></td>
+<td>4.10</td>
+</tr>
+</tbody>
+</table>
+<p>Mann–Whitney on the per-seed returns: both residuals beat vanilla at <span class="arithmatex">\(p = 0.0079\)</span> (complete
+rank separation); <strong>SAC vs TD3 is indistinguishable</strong>, <span class="arithmatex">\(p = 0.6905\)</span>. SAC's seed spread (15.3)
+is double TD3's (7.9) but still 5× tighter than vanilla's (76.0).</p>
+<p>Conclusion 4 of <a href="../09-vanilla-rl/">10</a> holds with the third arm added: vanilla is worst on
+heading cost per step — the term its body-frame observation cannot see — while being best on
+position and control cost per step.</p>
+<h2 id="watching-it-learn">Watching it learn<a class="headerlink" href="#watching-it-learn" title="Permanent link">&para;</a></h2>
+<p>Side-by-side dashboards at each checkpoint, same two showcase seeds. Seed 4104626050 is the
+clean illustration: the residual solves it early, vanilla drives into the workspace wall and
+truncates until 100k.</p>
+<table>
+<tr><th>SAC residual vs vanilla TD3 — 15k steps, seed 4104626050</th></tr>
+<tr><td><video controls loop muted playsinline width="620"><source src="../videos/ckpt-sac-015k-4104626050.mp4" type="video/mp4">Your browser does not support the video tag.</video></td></tr>
+<tr><th>TD3 residual vs vanilla TD3 — 25k steps, seed 4104626050</th></tr>
+<tr><td><video controls loop muted playsinline width="620"><source src="../videos/ckpt-025k-4104626050.mp4" type="video/mp4">Your browser does not support the video tag.</video></td></tr>
+<tr><th>TD3 residual vs vanilla TD3 — 100k steps, seed 4104626050 (both converged)</th></tr>
+<tr><td><video controls loop muted playsinline width="620"><source src="../videos/ckpt-100k-4104626050.mp4" type="video/mp4">Your browser does not support the video tag.</video></td></tr>
+</table>
+
+<p><em>At 15k the SAC residual reaches in 35 steps while vanilla is still circling at step 200. By
+100k both reach and the two trajectories are nearly the same curve — 42 steps vs 33 — which is
+the asymptote result in visual form.</em></p>
+<p>The full set is <code>docs/journey/videos/ckpt-{025,050,100,200,400}k-&lt;seed&gt;.mp4</code> (TD3 residual vs
+vanilla) and <code>ckpt-sac-{015,025,050,100,200,400}k-&lt;seed&gt;.mp4</code> (SAC residual vs vanilla), for
+seeds 4104626034 and 4104626050.</p>
+<h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>The 2.3× sample-efficiency claim is metric-dependent.</strong> On deployed reach rate the same
+   comparison is 1.33× and not statistically separable. <a href="../09-vanilla-rl/">10</a>'s conclusion 3
+   should be read as "2.3× on training return", not as a property of the method.</li>
+<li><strong>SAC is the better optimizer for this residual, by a lot, on speed only.</strong> 2.6× fewer steps
+   to a deployable policy than TD3, with a 5× tighter spread across seeds — and an identical
+   asymptote on reach, return, and cost split. TD3's zero-init argument from
+   <a href="../08-residual-rl/">09</a> survives the switch: SAC's mean head zeroes the same way and its
+   deterministic evaluation returns <code>tanh(0) = 0</code>, so the no-regression-at-init guarantee is
+   intact.</li>
+<li><strong>The prior buys a floor, not a ceiling or (on this metric) speed.</strong> Its measurable benefit
+   is that reach rate never degrades mid-training and return spread across seeds stays ~10×
+   tighter. On a task this easy that is the whole of it.</li>
+<li><strong>Saturating metrics compress differences.</strong> Reach rate is at ~1.0 from 100k for every arm,
+   so it cannot rank them; per-step heading and control cost still can. Report both.</li>
+<li><strong>Grid resolution is a measurement decision, not a detail.</strong> The first sweep reported SAC's
+   crossing as "≤ 25k" because 25k was the first checkpoint. The real answer, 17k, needed a
+   grid five times finer.</li>
+</ol>
+<h2 id="open-not-yet-reported">Open / not yet reported<a class="headerlink" href="#open-not-yet-reported" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>SAC on the vanilla arm.</strong> Every claim here about SAC is about SAC <em>as a residual</em>. If SAC's
+  advantage is really about the optimizer rather than the composition, it should speed up the
+  from-scratch arm too — and if it closes vanilla's gap entirely, conclusion 3 weakens further.
+  This is the obvious next run and it is cheap.</li>
+<li><strong>SAC at its own default <code>lr</code>.</strong> 1e-3 was chosen for parity with TD3, not because it is good
+  for SAC. 3e-4 might be faster still, or more stable on the seed that lags.</li>
+<li><strong>Why vanilla degrades mid-training.</strong> The 350k collapse on seed 3 is diagnosed only as "it
+  happens". Whether it is critic divergence, a policy-noise interaction, or replay staleness is
+  unexamined.</li>
+<li><strong>Robustness to plant perturbation</strong> remains the open item <a href="../09-vanilla-rl/">10</a> lists.</li>
+</ul>
+<h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># checkpoints every 25k over the full budget, per arm, per seed</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span>--out<span class="w"> </span>data/ckptsweep/res_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/ckptsweep/res_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_vanilla.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span>--out<span class="w"> </span>data/ckptsweep/van_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/ckptsweep/van_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span>--out<span class="w"> </span>data/sacsweep/res_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/sacsweep/res_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span>--monitor-out<span class="w"> </span>data/sacsweep/res_s0_mon
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1"># the 5k-resolution early window (25k budget, same seeds) -- needed for SAC&#39;s crossing point</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">25000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span>--out<span class="w"> </span>data/earlysweep_sac/res_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/earlysweep_sac/res_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">5000</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c1"># greedy evaluation of every checkpoint on the canonical 78 eval seeds</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/sweep_checkpoints.py<span class="w"> </span>--ckpt-root<span class="w"> </span>data/ckptsweep<span class="w"> </span>--out<span class="w"> </span>data/checkpoint_sweep.csv
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/sweep_checkpoints.py<span class="w"> </span>--ckpt-root<span class="w"> </span>data/sacsweep<span class="w"> </span>--arms<span class="w"> </span>residual<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span>--algo<span class="w"> </span>sac<span class="w"> </span>--label<span class="w"> </span>residual_sac<span class="w"> </span>--out<span class="w"> </span>data/checkpoint_sweep_sac.csv
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="c1"># figures (the plot script merges comma-separated CSVs)</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_checkpoint_sweep.py<span class="w"> </span>--csv<span class="w"> </span>data/checkpoint_sweep_all.csv
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_learning_curves.py<span class="w"> </span>--glob-sac<span class="w"> </span><span class="s1">&#39;data/sacsweep/res_s*_mon.monitor.csv&#39;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span>--out<span class="w"> </span>docs/journey/figures/learning_curves_3arm.png
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="c1"># checkpoint videos (--algo and --vanilla-algo are independent, so the columns can differ)</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/render_dashboard_video.py<span class="w"> </span>--seeds<span class="w"> </span><span class="m">4104626050</span><span class="w"> </span>--compare<span class="w"> </span>residual-vanilla<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">    </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--vanilla-algo<span class="w"> </span>td3<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span>--residual-model<span class="w"> </span>data/earlysweep_sac/res_s0/ckpt_15000_steps.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span>--vanilla-model<span class="w"> </span>data/earlysweep/van_s0/ckpt_15000_steps.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">    </span>--figdir<span class="w"> </span>data/ckptvideo_sac/15000<span class="w"> </span>--video-prefix<span class="w"> </span>ckpt-sac-015k<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">    </span>--title-note<span class="w"> </span><span class="s2">&quot;  —  SAC residual, 15k training steps&quot;</span>
 </span></code></pre></div>
-<p>Read it carefully — it rules out the data hypothesis:</p>
-<ol>
-<li><strong>The data <em>can</em> drive in.</strong> The forced-<code>v≥12</code> probe solves cleanly every step
-   (<code>optimal</code>, <code>σy = 0</code>) and predicts approaching the goal (<code>Δd ≈ +13.9</code>). The
-   selected library is <em>not</em> missing the trajectories — pre-collection coverage is
-   <strong>not</strong> the cause.</li>
-<li><strong>The predictor hallucinates.</strong> The QP's <em>own chosen</em> plan — the one that applies
-   <code>v = 0</code> this step — <strong>also</strong> predicts reaching the goal (<code>plan Δd ≈ +13.9</code>). It
-   believes it can get ~14 units closer while doing nothing now.</li>
-<li><strong>So the QP takes the lazy plan.</strong> With <code>v = 0</code> and <code>v = 12</code> predicted to be
-   <em>equally good</em>, the effort term <code>R·v²</code> breaks the tie toward <code>v = 0</code>. Receding
-   horizon applies <code>v = 0</code>, the real robot doesn't move, the next solve faces the
-   identical state and re-hallucinates the identical "I'll reach it" plan → the robot
-   sits frozen at <code>d = 14.61</code> for all 200 steps.</li>
-</ol>
-<p><strong>Why the prediction lies — and why it is <em>not</em> a bug.</strong> For a nonlinear system,
-<code>Yf·g</code> and <code>Uf·g</code> from the same <code>g</code> need not be a <em>real</em> trajectory: the <code>g</code> that
-matches "reach the goal" in the predicted <strong>output</strong> can be paired with an <strong>input</strong>
-whose first action is <code>v = 0</code>. But nonlinearity alone is not the whole story — an
-in-distribution test pins it down. Feeding each library a <strong>real</strong> recent past plus
-the <strong>real</strong> future inputs from held-out data, the predictor reproduces the true
-future positions to <strong>~0.01–0.05 units one step ahead</strong> (3 of 4 libraries). So the
-Hankel construction and <code>u</code>/<code>y</code> alignment are <strong>correct</strong>, and the predictor is
-<em>accurate when the past is informative</em> — despite the same nonlinearity. The
-closed-loop hallucination (~8.6 units off at step 1) is ~200× larger than any error
-the predictor makes on real data, so it is <strong>not an implementation error</strong>.</p>
-<p>The hallucination is triggered by a <strong>degenerate past</strong>, not nonlinearity per se:</p>
-<ul>
-<li>At <code>reset()</code> the past buffer is primed with <code>T_ini</code> copies of one frozen pose — not
-  a real trajectory.</li>
-<li>Once the robot stalls, its <em>real</em> recent history is also near-constant (fixed
-  position, spinning heading).</li>
-</ul>
-<p>A (near-)constant past is matched by <strong>many</strong> <code>g</code>'s — the constraints <code>Up·g = u_ini</code>,
-<code>Yp·g = y_ini</code> no longer pin down the future — so the QP is free to pick a blend whose
-predicted future lands on the goal while its first control is <code>v = 0</code>. It is
-<strong>self-trapping</strong>: frozen init → stall → constant history → sustains the stall. The
-precise cause is the <em>conjunction</em>, the bilinear unfaithfulness of
-<a href="../05-library-switching/">05</a> <strong>gated on past-conditioning</strong>:</p>
-<blockquote>
-<p><strong>nonlinear dynamics</strong> (matching the past no longer guarantees a real future)
-<strong>+ an uninformative/constant past</strong> (so many blends satisfy the match)
-→ the QP picks a blend that predicts reaching the goal but whose first control is
-<code>v = 0</code>.</p>
-</blockquote>
-<p>Nonlinearity alone would not do it — on a real, varied past the predictor is accurate.</p>
-<p><strong>Consequences for the fixes:</strong></p>
-<ul>
-<li><strong>Reweighting <code>Q</code>/<code>R</code>/<code>λ</code> will not reliably fix it.</strong> Lowering <code>R</code> only removes the
-  tie-breaker; the QP is then <em>indifferent</em> between <code>v = 0</code> and <code>v = 12</code> (both falsely
-  predicted to reach) and can still stall. The rot is in the prediction, which no cost
-  reweighting repairs. (Consistent with <a href="../05-library-switching/">05</a>'s λ sweep.)</li>
-<li><strong><code>--Q_heading 0</code> / <code>--no_bearing_ref</code></strong> still targets only the <em>near-goal
-  pirouette</em> population (~15 episodes), not this dominant collapse.</li>
-<li><strong>Attack the trigger (cheap — now the leading lever).</strong> Because the predictor is
-  accurate on an <em>informative</em> past, keeping the past informative should help: anchor
-  the prediction to the current measurement (the buffer currently lags one step), seed
-  the past with a short real motion instead of a frozen pose, or force a few forward
-  steps at episode start before handing to DeePC. Untested.</li>
-<li><strong>Attack the root (model class).</strong> A <em>faithful</em> predictor — a Koopman lift putting
-  <code>sin δ</code>, <code>cos δ</code> into <code>y</code> — makes the linear span hold only physically realizable
-  trajectories, so it cannot pair "reach goal" with "do nothing now." A terminal
-  constraint / move-blocking is a cheaper partial guard.</li>
-<li><strong>RL on the true env reward is immune</strong> — it learns from <em>real</em> transitions and is
-  never fooled by the hallucinated predictor (next section).</li>
-</ul>
-<p><strong>Aside — library 1 is poorly conditioned.</strong> The failing seed selected <code>lib = 1</code>
-(heading band ≈ <code>3π/4</code>), and that library predicts notably worse even in-distribution
-(horizon position RMSE ≈ 3.5 vs ≈ 0.1–0.5 for the others) — a separate data-quality
-issue worth its own look.</p>
-<h2 id="direction-combine-rl-with-deepc">Direction — combine RL with DeePC<a class="headerlink" href="#direction-combine-rl-with-deepc" title="Permanent link">&para;</a></h2>
-<p>DeePC is <strong>model-free</strong>: its prediction <em>is</em> the data representation
-<code>[Up;Yp;Uf;Yf]·g = [uini;yini;u;y]</code> (DeeP-LCC, <a href="https://arxiv.org/abs/2203.10639">arXiv:2203.10639</a>
-Eq. 21 / Prop. 2), with <strong>no physics prior to flag a wrong one</strong>. Willems' fundamental
-lemma makes that representation exact for <em>linear</em> systems with informative data — but
-this robot is nonlinear, so on a degenerate past the representation fails silently and
-flows straight to the actuator. That is the limit of "truly based on data": <strong>garbage
-representation in → garbage control out, unchecked.</strong></p>
-<p>RL optimizes the <strong>true</strong> env reward from <strong>real transitions</strong>, so it cannot be fooled
-by a hallucinated representation — it is grounded exactly where DeePC's data-blend is
-not. That makes the hybrid a <em>backstop</em>, not polish: DeePC supplies the prior on the
-~39 % of seeds where its representation is valid; RL carries the ~42 % where it
-collapses.</p>
-<p>Followed up in <a href="../07-imitation-learning/">07</a> — clone DeePC into a fast MLP, which also
-takes the ~0.5 s/step QP out of the training loop — and <a href="../08-residual-rl/">08</a>, a TD3
-residual on top: <strong>39 % → 87–95 %</strong> reach rate.</p>
-<h2 id="open-question-metrics-beyond-success-rate">Open question — metrics beyond success rate<a class="headerlink" href="#open-question-metrics-beyond-success-rate" title="Permanent link">&para;</a></h2>
-<p>Success rate alone hides <em>how</em> a run fails (overshoot vs stall vs diverge) and how
-efficient the successes are. Candidates:</p>
-<table>
-<thead>
-<tr>
-<th>group</th>
-<th>metric</th>
-<th>catches</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>success</td>
-<td>success rate; success rate 95% CI</td>
-<td>headline + variance across seeds</td>
-</tr>
-<tr>
-<td>proximity</td>
-<td><strong>min distance</strong> ever reached; final dist</td>
-<td>near-miss (0.68/0.88) vs stall (2.75)</td>
-</tr>
-<tr>
-<td>efficiency</td>
-<td>steps-to-reach; <strong>path-length ratio</strong> (actual ÷ straight-line, optimal = 1)</td>
-<td>looping / pirouetting</td>
-</tr>
-<tr>
-<td>effort</td>
-<td>Σ‖u‖² (energy); Σ‖Δu‖ (smoothness/jerk)</td>
-<td>chattering, wasted control</td>
-</tr>
-<tr>
-<td>diagnostic</td>
-<td><code>w</code>-saturation fraction; mean <code>v</code> in final approach</td>
-<td>spin-stall vs overshoot</td>
-</tr>
-<tr>
-<td>settling</td>
-<td>dwell time inside tolerance</td>
-<td>can-it-stay (≈0 if <code>v_min&gt;0</code>)</td>
-</tr>
-<tr>
-<td>failure tax</td>
-<td>overshoot / stall / diverge / wall-pin %</td>
-<td><em>why</em> it failed, not just that</td>
-</tr>
-<tr>
-<td>compute</td>
-<td>QP failure rate; solve time; warm-start hit rate</td>
-<td>controller health</td>
-</tr>
-</tbody>
-</table>
-<p><code>path-length ratio</code> and <code>min distance</code> are the highest-value additions: together
-they distinguish all three observed failure modes that success rate collapses. Still
-open — the benchmarks in <a href="../07-imitation-learning/">07</a> / <a href="../08-residual-rl/">08</a>
-report reach rate only.</p>
 
 
 
@@ -2033,7 +2111,7 @@ report reach rate only.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../05-library-switching/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 05. Library switching">
+          <a href="../09-vanilla-rl/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 09. Vanilla RL">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2043,27 +2121,11 @@ report reach rate only.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                05. Library switching
+                09. Vanilla RL
               </div>
             </div>
           </a>
         
-        
-          
-          <a href="../07-imitation-learning/" class="md-footer__link md-footer__link--next" aria-label="Next: 07. Imitation learning">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                07. Imitation learning
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
         
       </nav>
     

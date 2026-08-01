@@ -16,6 +16,8 @@
         <link rel="prev" href="../08-residual-rl/">
       
       
+        <link rel="next" href="../10-sample-efficiency/">
+      
       
         
       
@@ -1004,6 +1006,8 @@
       
         
       
+        
+      
     
     
     
@@ -1454,6 +1458,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-sample-efficiency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Sample efficiency + SAC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1910,7 +1942,9 @@ four failures, <strong>gained 4 / lost 0</strong>. The feared wider dead zone ne
 <li><strong>What the prior does buy, measurably:</strong> 2.3× fewer steps to a given return (mostly a
    better initialization), a ~10× tighter return spread across seeds, a clean return
    advantage (<span class="arithmatex">\(p = 0.0079\)</span>), and an exact, unit-testable no-regression-at-init guarantee that
-   vanilla cannot offer at any price.</li>
+   vanilla cannot offer at any price. <strong>Read the 2.3× as a training-return number only</strong> — on
+   deployed reach rate it is 1.33× and not separable (<a href="../10-sample-efficiency/">11</a>); the
+   variance half of this conclusion is what holds up.</li>
 <li><strong>Reach rate hides real differences.</strong> Per step, vanilla is the <em>worst</em> arm on the two
    terms it isn't effectively supervised on — heading cost/step 6.64 vs <code>frac=2.0</code>'s 6.41 and
    <code>frac=1.0</code>'s 6.21, and control cost/step 0.127 vs 0.082 for <code>frac=1.0</code>. It wins per-episode
@@ -1937,8 +1971,14 @@ four failures, <strong>gained 4 / lost 0</strong>. The feared wider dead zone ne
   here</strong> — the metric isn't settled yet. Two blockers: the frozen clone is a poor stand-in for
   DeePC on exactly this axis (DeePC re-solves its QP every step; the clone cannot), and at 5
   training seeds the per-model scatter swamps the between-arm differences.</li>
-<li><strong>Reach rate at intermediate checkpoints.</strong> The sample-efficiency claim here is on training
-  <em>return</em>; reach rate at 25k/50k/100k/200k would be the cleaner version.</li>
+<li>~~<strong>Reach rate at intermediate checkpoints.</strong>~~ <strong>Answered in
+  <a href="../10-sample-efficiency/">11</a>, and it revises this entry.</strong> On deployed reach rate the
+  2.3× above is <strong>1.33× and not statistically separable</strong> (<span class="arithmatex">\(p = 0.22\)</span>) — the ratio here is a
+  property of the training-return metric, which keeps discriminating after reach rate has
+  saturated. What survives is variance: vanilla's reach rate degrades to <strong>0.641</strong> at some
+  mid-training checkpoints while the residual never leaves ~0.99. That entry also adds a
+  <strong>SAC</strong> residual, which reaches ≥ 95 % in 17k ± 2.4k steps — 2.6× faster than this TD3
+  residual — so on this task the optimizer buys more sample efficiency than the prior does.</li>
 </ul>
 <h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># train the from-scratch baseline (no DeePC, no clone; same reward and bounds)</span>
@@ -2019,6 +2059,22 @@ four failures, <strong>gained 4 / lost 0</strong>. The feared wider dead zone ne
             </div>
           </a>
         
+        
+          
+          <a href="../10-sample-efficiency/" class="md-footer__link md-footer__link--next" aria-label="Next: 10. Sample efficiency + SAC">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                10. Sample efficiency + SAC
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
         
       </nav>
     
