@@ -1357,17 +1357,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#which-algorithm-and-why" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Which algorithm, and why
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#learning-speed-the-headline-result" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1530,17 +1519,6 @@
     <span class="md-ellipsis">
       
         Environment setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#which-algorithm-and-why" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Which algorithm, and why
       
     </span>
   </a>
@@ -1774,40 +1752,6 @@ its value function cannot be exact. The residual arm is partly shielded from thi
 so it has indirect access to `δ`. **The vanilla-vs-residual gap therefore mixes two
 effects: learning from scratch, and an observability difference.**
 </code></pre></div>
-<h2 id="which-algorithm-and-why">Which algorithm, and why<a class="headerlink" href="#which-algorithm-and-why" title="Permanent link">&para;</a></h2>
-<p><strong>TD3</strong>, same as the residual arm — and for the vanilla arm that choice was <strong>forced rather
-than optimized</strong>. The control arm must differ from the residual in exactly one dimension (no
-DeePC). Switching the optimizer too would confound "no MPC prior" with "different algorithm."</p>
-<p>The residual's own reasons for TD3 over PPO and classic DDPG are in
-<a href="../08-residual-rl/">08</a>; the short version, plus what this entry adds:</p>
-<ul>
-<li><strong>Off-policy replay.</strong> The fix the residual needs lives in a <em>rare</em> region — the far-field
-  stalls. Replay revisits those transitions; PPO discards its rollouts after each update.</li>
-<li><strong>A deterministic actor makes zero-init exact.</strong> This is the sharpest reason and it is
-  specific to the residual. Zeroing TD3's final actor layer gives <code>tanh(0) = 0</code> for <em>every</em>
-  state, so the residual is exactly 0 and the policy is bit-for-bit the clone at step 0.
-  Zeroing PPO's <em>mean</em> head does not do this: SB3's default <code>log_std = 0</code> means <code>σ = 1</code>, and
-  61 % of sampled residuals exceed half of full authority — <strong>±7.2 units/s on <code>v</code></strong> at init.
-  TD3 separates the deployed policy from the exploration behaviour (external <code>action_noise</code>,
-  collection only); PPO fuses them, so "behaves like the prior" and "explores" cannot hold at
-  once.</li>
-<li><strong>A single non-vectorized env is PPO's worst case.</strong> Everything here runs <code>DummyVecEnv</code>
-  with one env; PPO's advantage needs thousands of parallel rollouts.</li>
-</ul>
-<p>Two honest corrections to the folklore around this choice:</p>
-<ol>
-<li><strong>TD3 is not the paper's algorithm.</strong> <a href="https://arxiv.org/abs/2510.03354">arXiv:2510.03354</a>
-   uses classic <strong>DDPG</strong>; PPO was this repo's own earlier default. TD3 is a deliberate
-   deviation <em>within</em> DDPG's family — DDPG plus twin critics, target-policy smoothing and
-   delayed updates.</li>
-<li><strong>"High-dimensional tasks favour TD3" is not a valid reason.</strong> If anything the reverse:
-   off-policy methods get harder as action dimension grows, and PPO is what scales to
-   high-DoF locomotion and RLHF. Here the point is moot — a 2-D action and 5-D observation
-   are nowhere near either method's limit.</li>
-</ol>
-<p><strong>None of this is measured.</strong> Everything above reasons from algorithm properties. PPO on the
-vanilla arm remains an open follow-up — and the POMDP box above gives it a principled shot,
-since a stochastic policy can be optimal in a POMDP where a deterministic one is not.</p>
 <h2 id="learning-speed-the-headline-result">Learning speed — the headline result<a class="headerlink" href="#learning-speed-the-headline-result" title="Permanent link">&para;</a></h2>
 <p><img alt="Training return vs environment steps, vanilla TD3 vs clone+residual, 5 seeds each" src="../figures/learning_curves.png" /></p>
 <p>Environment steps for the 100-episode rolling-mean return to first clear <strong>−6000</strong>:</p>
