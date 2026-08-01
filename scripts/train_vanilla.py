@@ -21,6 +21,10 @@ def main() -> int:
     p.add_argument("--monitor-out", default=None,
                    help="persist per-episode returns to <path>.monitor.csv "
                         "(feed to scripts/plot_training_return.py --monitor)")
+    p.add_argument("--checkpoint-dir", default=None,
+                   help="also snapshot the policy every --checkpoint-freq steps "
+                        "(feed to scripts/sweep_checkpoints.py)")
+    p.add_argument("--checkpoint-freq", type=int, default=25_000)
     args = p.parse_args()
 
     train_vanilla(
@@ -28,6 +32,7 @@ def main() -> int:
         total_timesteps=args.timesteps, action_noise_sigma=args.noise_sigma,
         learning_rate=args.lr, device=args.device, seed=args.seed, verbose=1,
         monitor_path=args.monitor_out,
+        checkpoint_dir=args.checkpoint_dir, checkpoint_freq=args.checkpoint_freq,
     )
     print(f"saved -> {args.out}")
     return 0

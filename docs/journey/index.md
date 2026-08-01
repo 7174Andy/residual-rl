@@ -14,6 +14,7 @@ Entries are roughly chronological, but each one stands alone — you can read th
 | [07](07-imitation-learning.md)   | Imitation learning — cloning DeePC into a fast neural policy      |
 | [08](08-residual-rl.md)          | Residual RL — TD3 correction lifts reach rate 38.5%→94.9%         |
 | [09](09-vanilla-rl.md)           | Vanilla RL — the control arm; what the MPC prior actually buys    |
+| [10](10-sample-efficiency.md)    | Sample efficiency on the deployed policy — and SAC beats TD3 2.6× |
 
 ## Conventions
 

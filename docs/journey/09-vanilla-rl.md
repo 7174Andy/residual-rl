@@ -212,7 +212,9 @@ four failures, **gained 4 / lost 0**. The feared wider dead zone never materiali
 3. **What the prior does buy, measurably:** 2.3× fewer steps to a given return (mostly a
    better initialization), a ~10× tighter return spread across seeds, a clean return
    advantage ($p = 0.0079$), and an exact, unit-testable no-regression-at-init guarantee that
-   vanilla cannot offer at any price.
+   vanilla cannot offer at any price. **Read the 2.3× as a training-return number only** — on
+   deployed reach rate it is 1.33× and not separable ([11](10-sample-efficiency.md)); the
+   variance half of this conclusion is what holds up.
 4. **Reach rate hides real differences.** Per step, vanilla is the _worst_ arm on the two
    terms it isn't effectively supervised on — heading cost/step 6.64 vs `frac=2.0`'s 6.41 and
    `frac=1.0`'s 6.21, and control cost/step 0.127 vs 0.082 for `frac=1.0`. It wins per-episode
@@ -239,8 +241,14 @@ four failures, **gained 4 / lost 0**. The feared wider dead zone never materiali
   here** — the metric isn't settled yet. Two blockers: the frozen clone is a poor stand-in for
   DeePC on exactly this axis (DeePC re-solves its QP every step; the clone cannot), and at 5
   training seeds the per-model scatter swamps the between-arm differences.
-- **Reach rate at intermediate checkpoints.** The sample-efficiency claim here is on training
-  _return_; reach rate at 25k/50k/100k/200k would be the cleaner version.
+- ~~**Reach rate at intermediate checkpoints.**~~ **Answered in
+  [11](10-sample-efficiency.md), and it revises this entry.** On deployed reach rate the
+  2.3× above is **1.33× and not statistically separable** ($p = 0.22$) — the ratio here is a
+  property of the training-return metric, which keeps discriminating after reach rate has
+  saturated. What survives is variance: vanilla's reach rate degrades to **0.641** at some
+  mid-training checkpoints while the residual never leaves ~0.99. That entry also adds a
+  **SAC** residual, which reaches ≥ 95 % in 17k ± 2.4k steps — 2.6× faster than this TD3
+  residual — so on this task the optimizer buys more sample efficiency than the prior does.
 
 ## Reproduce
 

@@ -12,6 +12,7 @@ from __future__ import annotations
 import numpy as np
 import torch
 from stable_baselines3 import SAC, TD3
+from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.noise import NormalActionNoise
 from stable_baselines3.common.vec_env import DummyVecEnv
@@ -81,6 +82,19 @@ def _build_model(algo: str, venv, learning_rate, device, seed, verbose, action_n
     return Algo(**kwargs)
 
 
+def _ckpt_cb(checkpoint_dir: str | None, checkpoint_freq: int):
+    """Periodic policy snapshots -> `<dir>/ckpt_<n>_steps.zip`, or None if unset.
+
+    Feeds `scripts/sweep_checkpoints.py`, which measures deterministic reach rate
+    part-way through training (the training-return curve is a behaviour-policy
+    metric; reach rate at a checkpoint is the deployed-policy one).
+    """
+    if checkpoint_dir is None:
+        return None
+    return CheckpointCallback(save_freq=checkpoint_freq, save_path=checkpoint_dir,
+                              name_prefix="ckpt")
+
+
 def _check_algo(algo: str) -> str:
     algo = algo.lower()
     if algo not in _ALGOS:
@@ -129,11 +143,15 @@ def train_residual(
     seed: int = 0,
     verbose: int = 1,
     monitor_path: str | None = None,
+    checkpoint_dir: str | None = None,
+    checkpoint_freq: int = 25_000,
 ):
     """Train and save the RL residual (algo='td3' default, 'sac' fallback). Returns the model.
 
     ``monitor_path`` (optional): persist per-episode returns to
     ``<monitor_path>.monitor.csv`` for the training-return plot.
+    ``checkpoint_dir`` (optional): also snapshot the policy every ``checkpoint_freq``
+    steps, for the reach-rate-vs-steps sweep.
     """
     algo = _check_algo(algo)
     venv = make_residual_env(clone_path, libraries_path, residual_frac, device=device,
@@ -142,7 +160,8 @@ def train_residual(
                          action_noise_sigma)
     _zero_init_actor(model)
     try:
-        model.learn(total_timesteps=total_timesteps, progress_bar=False)
+        model.learn(total_timesteps=total_timesteps, progress_bar=False,
+                    callback=_ckpt_cb(checkpoint_dir, checkpoint_freq))
         model.save(out_path)
     finally:
         venv.close()
@@ -160,6 +179,8 @@ def train_vanilla(
     seed: int = 0,
     verbose: int = 1,
     monitor_path: str | None = None,
+    checkpoint_dir: str | None = None,
+    checkpoint_freq: int = 25_000,
 ):
     """Train the from-scratch RL baseline (no DeePC, no clone). Returns the model.
 
@@ -173,7 +194,8 @@ def train_vanilla(
     model = _build_model(algo, venv, learning_rate, device, seed, verbose,
                          action_noise_sigma)
     try:
-        model.learn(total_timesteps=total_timesteps, progress_bar=False)
+        model.learn(total_timesteps=total_timesteps, progress_bar=False,
+                    callback=_ckpt_cb(checkpoint_dir, checkpoint_freq))
         model.save(out_path)
     finally:
         venv.close()

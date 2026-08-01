@@ -41,6 +41,9 @@ _RED = "#e34948"
 # lighter #d9822b failed. Same hex as scripts/plot_robustness.py, so the arm keeps
 # one identity across figures and videos.
 _ORANGE = "#c1701c"
+# SAC residual arm, same violet as scripts/plot_checkpoint_sweep.py so an arm keeps
+# one identity across figures and videos.
+_VIOLET = "#4a3aa7"
 _TOLERANCE = DEFAULT_GOAL_TOLERANCE  # two_wheel_robot/rl/trace_reward.py's copy of env.py's default
 
 
@@ -93,8 +96,10 @@ def _setup_panel(fig, gs, trace, reward_data, color, title, xlim, ylim, full_len
         fontsize=8.5, color=_INK, family="monospace",
         bbox=dict(boxstyle="round", fc="white", ec="#d8d6cd", alpha=0.85),
     )
+    # Bottom-right: the HUD occupies the top strip edge to edge on narrow panels,
+    # and the end-of-episode banner used to land on top of it.
     banner_text = ax_traj.text(
-        0.98, 0.98, "", transform=ax_traj.transAxes, ha="right", va="top",
+        0.98, 0.03, "", transform=ax_traj.transAxes, ha="right", va="bottom",
         fontsize=9.5, color="white", fontweight="bold", visible=False,
         bbox=dict(boxstyle="round", fc="#3a9d5d", ec="none"),
     )
@@ -172,7 +177,7 @@ def _render_seed_video(
     seed: int, clone: dict, residual: dict, outdir: str, fps: int,
     left_label: str = "CLONE", right_label: str = "CLONE + TD3 RESIDUAL",
     left_color: str = _GRAY, right_color: str = _BLUE, prefix: str = "dashboard",
-    fail_word: str = "stalls",
+    fail_word: str = "stalls", title_note: str = "",
 ) -> str:
     """Render a two-column dashboard. `clone`/`residual` are just the left/right traces;
     the labels/colors/prefix parameterize which arms they are (defaults reproduce the
@@ -206,7 +211,7 @@ def _render_seed_video(
     right = _setup_panel(
         fig, gs_right, residual, reward_r, right_color, residual_title, xlim, ylim, full_len
     )
-    fig.suptitle(f"seed {seed}", fontsize=11, color=_INK)
+    fig.suptitle(f"seed {seed}{title_note}", fontsize=11, color=_INK)
 
     frames = []
     try:
@@ -240,6 +245,18 @@ def main() -> int:
         help="which two arms to put side by side (default: clone vs clone+residual)",
     )
     parser.add_argument("--vanilla-model", default="data/vanilla_td3_400k.zip")
+    parser.add_argument("--vanilla-algo", default="td3", choices=["td3", "sac"],
+                        help="separate from --algo: the two columns can be different "
+                             "algorithms (SAC residual vs TD3 vanilla)")
+    parser.add_argument("--residual-frac", type=float, default=1.0,
+                        help="must match what --residual-model was trained with "
+                             "(the canonical 5-seed arm is 2.0)")
+    parser.add_argument("--title-note", default="",
+                        help="appended to the video's 'seed N' suptitle, e.g. "
+                             "' - 50k training steps'")
+    parser.add_argument("--video-prefix", default=None,
+                        help="override the output filename stem, which otherwise "
+                             "collides when rendering several checkpoints of one arm")
     args = parser.parse_args()
 
     seeds = [int(s) for s in args.seeds.split(",") if s.strip()]
@@ -249,11 +266,13 @@ def main() -> int:
                 seed, args.figdir,
                 clone_path=args.clone, residual_model_path=args.residual_model,
                 algo=args.algo, libraries_path=args.libraries, device=args.device,
+                residual_frac=args.residual_frac,
             )
             if args.compare in ("residual-vanilla", "clone-vanilla"):
                 vanilla = ensure_vanilla_trace(
                     seed, args.figdir, vanilla_model_path=args.vanilla_model,
-                    algo=args.algo, libraries_path=args.libraries, device=args.device,
+                    algo=args.vanilla_algo, libraries_path=args.libraries,
+                    device=args.device,
                 )
         except FileNotFoundError as e:
             print(
@@ -266,19 +285,25 @@ def main() -> int:
         if args.compare == "residual-vanilla":
             out_path = _render_seed_video(
                 seed, residual, vanilla, args.outdir, args.fps,
-                left_label="CLONE + TD3 RESIDUAL", right_label="VANILLA TD3 (from scratch)",
-                left_color=_BLUE, right_color=_ORANGE,
-                prefix="residual-vs-vanilla", fail_word="misses",
+                left_label=f"CLONE + {args.algo.upper()} RESIDUAL",
+                right_label=f"VANILLA {args.vanilla_algo.upper()} (from scratch)",
+                left_color=_VIOLET if args.algo == "sac" else _BLUE,
+                right_color=_ORANGE,
+                prefix=args.video_prefix or "residual-vs-vanilla", fail_word="misses",
+                title_note=args.title_note,
             )
         elif args.compare == "clone-vanilla":
             out_path = _render_seed_video(
                 seed, clone, vanilla, args.outdir, args.fps,
                 left_label="CLONE (DeePC surrogate)", right_label="VANILLA TD3 (from scratch)",
                 left_color=_GRAY, right_color=_ORANGE,
-                prefix="clone-vs-vanilla", fail_word="stalls",
+                prefix=args.video_prefix or "clone-vs-vanilla", fail_word="stalls",
+                title_note=args.title_note,
             )
         else:
-            out_path = _render_seed_video(seed, clone, residual, args.outdir, args.fps)
+            out_path = _render_seed_video(seed, clone, residual, args.outdir, args.fps,
+                                          prefix=args.video_prefix or "dashboard",
+                                          title_note=args.title_note)
         print(f"wrote {out_path}")
     return 0
 

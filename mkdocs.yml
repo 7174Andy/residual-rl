@@ -123,3 +123,4 @@ nav:
       - 07. Imitation learning: journey/07-imitation-learning.md
       - 08. Residual RL: journey/08-residual-rl.md
       - 09. Vanilla RL: journey/09-vanilla-rl.md
+      - 10. Sample efficiency + SAC: journey/10-sample-efficiency.md

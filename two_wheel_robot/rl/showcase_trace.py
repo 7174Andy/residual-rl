@@ -37,10 +37,15 @@ def generate_trace_pair(
     algo: str = "td3",
     libraries_path: str = "data/libraries_v0.npz",
     device: str = "cpu",
+    residual_frac: float = 1.0,
 ) -> tuple[dict, dict]:
     """Run both closed loops for `seed`, write their trace CSVs, and return the
     trace dicts. Always regenerates -- see `ensure_traces` for a
     cache-checking wrapper.
+
+    `residual_frac` MUST match the value the checkpoint was trained with: it scales
+    the residual's authority inside the composition, so replaying a `frac=2.0` model
+    through a `frac=1.0` env halves every correction it emits.
     """
     os.makedirs(figdir, exist_ok=True)
     clone_csv = clone_trace_path(figdir, seed)
@@ -61,6 +66,7 @@ def generate_trace_pair(
     model = load_residual(residual_model_path, algo=algo, device=device)
     res_env = ResidualDeePCEnv(
         clone_path=clone_path, libraries_path=libraries_path, device=device,
+        residual_frac=residual_frac,
     )
     try:
         _, traj_r, act_r = run_residual_closed_loop_with_actions(model, res_env, seed)
@@ -113,12 +119,14 @@ def ensure_traces(
     algo: str = "td3",
     libraries_path: str = "data/libraries_v0.npz",
     device: str = "cpu",
+    residual_frac: float = 1.0,
 ) -> tuple[dict, dict]:
     """Return `(clone_trace, residual_trace)`, generating + caching CSVs if missing.
 
     Cache hit (both CSVs already on disk) never touches `clone_path` /
     `residual_model_path` / `libraries_path` -- neither loaded nor validated
-    to exist.
+    to exist. The cache key is the seed alone, so two different checkpoints of the
+    same arm need two different `figdir`s or the first one's trace is served for both.
     """
     clone_csv = clone_trace_path(figdir, seed)
     residual_csv = residual_trace_path(figdir, seed)
@@ -126,4 +134,5 @@ def ensure_traces(
         return read_trace(clone_csv), read_trace(residual_csv)
     return generate_trace_pair(
         seed, figdir, clone_path, residual_model_path, algo, libraries_path, device,
+        residual_frac,
     )

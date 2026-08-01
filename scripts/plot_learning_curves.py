@@ -30,8 +30,11 @@ import numpy as np  # noqa: E402
 # dataviz-skill palette, validated:
 #   node scripts/validate_palette.js "#c1701c,#3987e5" --mode light -> ALL CHECKS PASS
 #   (normal-vision dE 29.5, protan 27.2, both >= 3:1 on surface)
+# Adding the SAC arm's violet keeps every check passing (worst adjacent CVD dE 15.9,
+# all >= 3:1); see scripts/plot_checkpoint_sweep.py for the full validator run.
 _VANILLA = "#c1701c"
 _RESIDUAL = "#3987e5"
+_RESIDUAL_SAC = "#4a3aa7"
 _INK = "#52514e"
 _MUTED = "#898781"
 _GRID = "#e1e0d9"
@@ -74,6 +77,8 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--glob-van", default="data/seedsweep/van_s*_mon.monitor.csv")
     p.add_argument("--glob-res", default="data/seedsweep/res_f2_s*_mon.monitor.csv")
+    p.add_argument("--glob-sac", default=None,
+                   help="optional third arm: SAC residual monitor CSVs")
     p.add_argument("--threshold", type=float, default=-6000.0)
     p.add_argument("--out", default="docs/journey/figures/learning_curves.png")
     args = p.parse_args()
@@ -82,7 +87,13 @@ def main() -> int:
     if not van or not res:
         raise SystemExit(f"no monitor CSVs matched ({len(van)} vanilla, {len(res)} residual)")
 
-    series = [("vanilla TD3", van, _VANILLA), ("clone + residual (frac 2.0)", res, _RESIDUAL)]
+    series = [("vanilla TD3", van, _VANILLA),
+              ("clone + residual TD3 (frac 2.0)", res, _RESIDUAL)]
+    if args.glob_sac:
+        sac = sorted(glob.glob(args.glob_sac))
+        if not sac:
+            raise SystemExit(f"no monitor CSVs matched {args.glob_sac}")
+        series.append(("clone + residual SAC (frac 2.0)", sac, _RESIDUAL_SAC))
     fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.3), dpi=140)
     for ax, xmax, title in ((axes[0], 400_000, "Full budget"),
                             (axes[1], 100_000, "First 100k steps (detail)")):
@@ -111,7 +122,7 @@ def main() -> int:
     axes[1].set_ylim(-20_000, -3_000)  # the full-range panel's tail hides this detail
 
     handles = [plt.Line2D([], [], color=c, lw=2.0, label=lab) for lab, _, c in series]
-    fig.legend(handles=handles, loc="lower center", ncol=2, frameon=False, fontsize=9,
+    fig.legend(handles=handles, loc="lower center", ncol=len(series), frameon=False, fontsize=9,
                labelcolor=_INK, bbox_to_anchor=(0.5, -0.02))
     fig.suptitle("Training return vs environment steps — bands = ±1 std over 5 training seeds",
                  fontsize=11, color=_INK, y=1.0)
