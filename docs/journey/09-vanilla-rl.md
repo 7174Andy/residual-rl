@@ -15,7 +15,7 @@ misleading — see "Why 5 seeds".
 ## Motivation (one line)
 
 [08](08-residual-rl.md) showed a residual lifts DeePC's 38.5 % to 94.9 %. Missing control:
-how much of that is the *residual*, and how much is just *RL on this task*?
+how much of that is the _residual_, and how much is just _RL on this task_?
 
 ## Context
 
@@ -40,27 +40,27 @@ Box(low=[0.0, -1.5707964], high=[20.0, 1.5707964], shape=(2,), float32)
 ```
 
 Read from `sample_bounds` in `data/libraries_v0.npz` via `canonical_action_bounds()` — the
-same array handed to `DeePC(u_bounds=...)`, so the reachable command set is *identical*, not
+same array handed to `DeePC(u_bounds=...)`, so the reachable command set is _identical_, not
 merely similar. `v ≥ 0` means the robot may stall but never reverses.
 
 There is deliberately **no `RescaleAction` wrapper**. SB3's off-policy algorithms already
 normalize a non-symmetric `Box` internally (`policy.scale_action` / `unscale_action`) for the
 actor head, the action noise and the replay buffer, so wrapping would add a second identical
 affine map and hide `(v, w)` behind `Box(-1, 1)`. Two consequences worth knowing: the
-exploration noise `σ = 0.1` lives in the *normalized* frame, so per axis it is
+exploration noise `σ = 0.1` lives in the _normalized_ frame, so per axis it is
 $0.1 \times \tfrac{1}{2}(u_{\max}-u_{\min})$ — **±1.0 units/s on `v`, ±0.157 rad/s on `w`** —
 and the replay buffer stores normalized actions, so a checkpoint is only meaningful in an env
 with matching bounds.
 
 **Observation space — the env's 5-D body-frame vector, min-max normalized.**
 
-| idx | channel | raw range | normalization |
-| --- | ------------------------- | ---------------- | -------------- |
-| 0 | `distance = ‖g − p‖` | `[0, 28.2843]` | `d/14.142 − 1` |
-| 1 | `sin(bearing_rel)` | `[-1, 1]` | identity |
-| 2 | `cos(bearing_rel)` | `[-1, 1]` | identity |
-| 3 | `v_prev` | `[0, 20]` | `v/10 − 1` |
-| 4 | `w_prev` | `[-π/2, π/2]` | `w/(π/2)` |
+| idx | channel              | raw range      | normalization  |
+| --- | -------------------- | -------------- | -------------- |
+| 0   | `distance = ‖g − p‖` | `[0, 28.2843]` | `d/14.142 − 1` |
+| 1   | `sin(bearing_rel)`   | `[-1, 1]`      | identity       |
+| 2   | `cos(bearing_rel)`   | `[-1, 1]`      | identity       |
+| 3   | `v_prev`             | `[0, 20]`      | `v/10 − 1`     |
+| 4   | `w_prev`             | `[-π/2, π/2]`  | `w/(π/2)`      |
 
 where `bearing_rel = wrap_to_pi(atan2(g_y − y, g_x − x) − δ)`. This is the same vector the
 residual actor consumes, **minus its 2-D `u_base` block** — a from-scratch agent has no clone
@@ -93,53 +93,16 @@ observations produce three different rewards:
     so it has indirect access to `δ`. **The vanilla-vs-residual gap therefore mixes two
     effects: learning from scratch, and an observability difference.**
 
-## Which algorithm, and why
-
-**TD3**, same as the residual arm — and for the vanilla arm that choice was **forced rather
-than optimized**. The control arm must differ from the residual in exactly one dimension (no
-DeePC). Switching the optimizer too would confound "no MPC prior" with "different algorithm."
-
-The residual's own reasons for TD3 over PPO and classic DDPG are in
-[08](08-residual-rl.md); the short version, plus what this entry adds:
-
-- **Off-policy replay.** The fix the residual needs lives in a *rare* region — the far-field
-  stalls. Replay revisits those transitions; PPO discards its rollouts after each update.
-- **A deterministic actor makes zero-init exact.** This is the sharpest reason and it is
-  specific to the residual. Zeroing TD3's final actor layer gives `tanh(0) = 0` for *every*
-  state, so the residual is exactly 0 and the policy is bit-for-bit the clone at step 0.
-  Zeroing PPO's *mean* head does not do this: SB3's default `log_std = 0` means `σ = 1`, and
-  61 % of sampled residuals exceed half of full authority — **±7.2 units/s on `v`** at init.
-  TD3 separates the deployed policy from the exploration behaviour (external `action_noise`,
-  collection only); PPO fuses them, so "behaves like the prior" and "explores" cannot hold at
-  once.
-- **A single non-vectorized env is PPO's worst case.** Everything here runs `DummyVecEnv`
-  with one env; PPO's advantage needs thousands of parallel rollouts.
-
-Two honest corrections to the folklore around this choice:
-
-1. **TD3 is not the paper's algorithm.** [arXiv:2510.03354](https://arxiv.org/abs/2510.03354)
-   uses classic **DDPG**; PPO was this repo's own earlier default. TD3 is a deliberate
-   deviation *within* DDPG's family — DDPG plus twin critics, target-policy smoothing and
-   delayed updates.
-2. **"High-dimensional tasks favour TD3" is not a valid reason.** If anything the reverse:
-   off-policy methods get harder as action dimension grows, and PPO is what scales to
-   high-DoF locomotion and RLHF. Here the point is moot — a 2-D action and 5-D observation
-   are nowhere near either method's limit.
-
-**None of this is measured.** Everything above reasons from algorithm properties. PPO on the
-vanilla arm remains an open follow-up — and the POMDP box above gives it a principled shot,
-since a stochastic policy can be optimal in a POMDP where a deterministic one is not.
-
 ## Learning speed — the headline result
 
 ![Training return vs environment steps, vanilla TD3 vs clone+residual, 5 seeds each](figures/learning_curves.png)
 
 Environment steps for the 100-episode rolling-mean return to first clear **−6000**:
 
-| arm | steps to −6000 | per training seed |
-| ------------------------------ | ------------------- | ------------------------------------------- |
-| vanilla TD3 | 69,547 ± 24,348 | 85,593 / 105,517 / 49,423 / 69,402 / 37,800 |
-| **clone + residual (frac 2.0)** | **30,816 ± 5,214** | 29,067 / 24,517 / 34,788 / 38,731 / 26,975 |
+| arm                             | steps to −6000     | per training seed                           |
+| ------------------------------- | ------------------ | ------------------------------------------- |
+| vanilla TD3                     | 69,547 ± 24,348    | 85,593 / 105,517 / 49,423 / 69,402 / 37,800 |
+| **clone + residual (frac 2.0)** | **30,816 ± 5,214** | 29,067 / 24,517 / 34,788 / 38,731 / 26,975  |
 
 **2.3× on the means**, with complete rank separation — the residual's slowest seed (38,731)
 still beats vanilla's fastest (37,800), so the exact two-sided Mann–Whitney test gives
@@ -147,15 +110,15 @@ $p = 0.0079$. The **variance ratio is 4.7×**: vanilla's time-to-threshold varie
 alone (37.8k → 105.5k), the residual's 1.6×.
 
 !!! warning "This is a better initialization, not a faster learner"
-Read where the curves *start*. The residual's first plotted point is already near
+Read where the curves _start_. The residual's first plotted point is already near
 **−12,000**; vanilla's is **−26,000** with its band reaching −35,000. That gap is
-zero-init: at step 0 the residual *is* the clone, a 38.5 %-reach policy, while vanilla is
-random. Once vanilla passes the residual's *starting* return around 30k steps, the two
+zero-init: at step 0 the residual _is_ the clone, a 38.5 %-reach policy, while vanilla is
+random. Once vanilla passes the residual's _starting_ return around 30k steps, the two
 curves rise at broadly similar rates and converge by ~90k. So the honest claim is "you
 skip the first ~40k steps because you already own a controller," which is worth something
 only when environment steps are expensive. In free simulation, 40k steps is ~2.5 minutes.
 
-Also note these are *training* returns, so they include exploration noise — the behaviour
+Also note these are _training_ returns, so they include exploration noise — the behaviour
 policy, not the deployed one — and the −6000 threshold is arbitrary; the ratio moves if you
 pick another level.
 
@@ -195,13 +158,13 @@ one of vanilla's three. The `frac=1.0` residual misses it by **0.022 units** (fi
 
 ## Final performance — 5 training seeds × 78 eval seeds
 
-| arm | reach per training seed | reach rate | pooled (390 ep) | return |
-| ------------------------------- | ------------------------ | ----------------- | ----------------------- | ------------------- |
-| DeePC (QP) | — (deterministic) | 30/78 = 0.385 | — | −13,799.6 |
-| clone `f_θ` | — (deterministic) | 30/78 = 0.385 | — | −14,355.6 |
-| clone + residual, `frac=1.0` | 74 73 70 76 69 | 0.928 ± 0.033 | 362/390 [0.898, 0.950] | −7,067.7 ± 102.7 |
-| **clone + residual, `frac=2.0`** | 78 78 77 78 78 | **0.997 ± 0.005** | 389/390 [0.986, 1.000] | **−4,777.3 ± 7.3** |
-| **vanilla TD3** | 78 78 78 78 **75** | **0.992 ± 0.015** | 387/390 [0.978, 0.997] | −4,853.5 ± 77.1 |
+| arm                              | reach per training seed | reach rate        | pooled (390 ep)        | return             |
+| -------------------------------- | ----------------------- | ----------------- | ---------------------- | ------------------ |
+| DeePC (QP)                       | — (deterministic)       | 30/78 = 0.385     | —                      | −13,799.6          |
+| clone `f_θ`                      | — (deterministic)       | 30/78 = 0.385     | —                      | −14,355.6          |
+| clone + residual, `frac=1.0`     | 74 73 70 76 69          | 0.928 ± 0.033     | 362/390 [0.898, 0.950] | −7,067.7 ± 102.7   |
+| **clone + residual, `frac=2.0`** | 78 78 77 78 78          | **0.997 ± 0.005** | 389/390 [0.986, 1.000] | **−4,777.3 ± 7.3** |
+| **vanilla TD3**                  | 78 78 78 78 **75**      | **0.992 ± 0.015** | 387/390 [0.978, 0.997] | −4,853.5 ± 77.1    |
 
 What is and is not statistically supported (exact two-sided Mann–Whitney on 5 vs 5, so
 $p = 0.0079$ is the floor for complete rank separation):
@@ -227,13 +190,13 @@ quote a single-seed reach rate for this project.
 
 ### `residual_frac` was the residual's real bottleneck
 
-The `frac=1.0` default is *underpowered*, and this is a parameterization artifact rather than
+The `frac=1.0` default is _underpowered_, and this is a parameterization artifact rather than
 a knowledge deficit. The composition centres authority on the base and then clips:
 
 $$u = \operatorname{clip}(u_{\text{base}} + \rho \cdot \tfrac{1}{2}(u_{\max}-u_{\min}) \cdot a_{\text{res}})$$
 
 On the seeds it fails, the clone's `u_base` for `v` sits near zero (29–48 % of steps at
-*exactly* 0), so the maximum `v` the residual can command averages **~11 of 20** and
+_exactly_ 0), so the maximum `v` the residual can command averages **~11 of 20** and
 **73–93 % of steps clip**. Worse, every `a_res ≤ 0` collapses to the same applied `v = 0` — a
 **dead zone** the trained policy drifts into (mean `a_res` for `v` = **−0.53** on seed
 4104626083). Setting `ρ = 2.0` restores the full range from a stalled base and recovers all
@@ -250,15 +213,15 @@ four failures, **gained 4 / lost 0**. The feared wider dead zone never materiali
    better initialization), a ~10× tighter return spread across seeds, a clean return
    advantage ($p = 0.0079$), and an exact, unit-testable no-regression-at-init guarantee that
    vanilla cannot offer at any price.
-4. **Reach rate hides real differences.** Per step, vanilla is the *worst* arm on the two
+4. **Reach rate hides real differences.** Per step, vanilla is the _worst_ arm on the two
    terms it isn't effectively supervised on — heading cost/step 6.64 vs `frac=2.0`'s 6.41 and
    `frac=1.0`'s 6.21, and control cost/step 0.127 vs 0.082 for `frac=1.0`. It wins per-episode
    totals by finishing in 68 steps instead of 163.
-5. **Don't over-generalize from this benchmark.** It is close to the *least* favourable test
+5. **Don't over-generalize from this benchmark.** It is close to the _least_ favourable test
    of RL + MPC: dense shaped reward, deterministic and fully observed plant, 2-D action, free
    unlimited simulation, no safety constraint binding during learning — precisely where
    end-to-end RL should win outright. And the prior being improved is a 38.5 % controller, so
-   there is little knowledge to inherit. The method's premise is a *decent* model-based
+   there is little knowledge to inherit. The method's premise is a _decent_ model-based
    controller you want to improve.
 
 ## Open / not yet reported
@@ -277,7 +240,7 @@ four failures, **gained 4 / lost 0**. The feared wider dead zone never materiali
   DeePC on exactly this axis (DeePC re-solves its QP every step; the clone cannot), and at 5
   training seeds the per-model scatter swamps the between-arm differences.
 - **Reach rate at intermediate checkpoints.** The sample-efficiency claim here is on training
-  *return*; reach rate at 25k/50k/100k/200k would be the cleaner version.
+  _return_; reach rate at 25k/50k/100k/200k would be the cleaner version.
 
 ## Reproduce
 
