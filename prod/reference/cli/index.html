@@ -16,7 +16,7 @@
         <link rel="prev" href="../../controllers/api/">
       
       
-        <link rel="next" href="../../journey/">
+        <link rel="next" href="../mujoco-primer/">
       
       
         
@@ -490,6 +490,8 @@
       
         
           
+        
+      
         
       
         
@@ -1172,6 +1174,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scriptsmujoco_hellopy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/mujoco_hello.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scriptsrecord_panda_videopy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/record_panda_video.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tests" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1186,6 +1210,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mujoco-primer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MuJoCo primer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1716,6 +1768,28 @@
     <span class="md-ellipsis">
       
         scripts/plot_training_return.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scriptsmujoco_hellopy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/mujoco_hello.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scriptsrecord_panda_videopy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/record_panda_video.py
       
     </span>
   </a>
@@ -2502,11 +2576,52 @@
 </tbody>
 </table>
 <p>Prints <code>wrote &lt;out&gt; (...)</code>.</p>
+<h2 id="scriptsmujoco_hellopy"><code>scripts/mujoco_hello.py</code><a class="headerlink" href="#scriptsmujoco_hellopy" title="Permanent link">&para;</a></h2>
+<p>Prints everything about the Panda MuJoCo model this project depends on: model path, <code>nq/nv/nu</code>, joint ranges, the safe box, actuator PD gains, sites/bodies/keyframes, a home-pose tip FK, a 4000-sample workspace survey, and the servo step-response sweep across <code>delta_max</code>. Run this first if you have never used MuJoCo — see the <a href="../mujoco-primer/">MuJoCo primer</a>.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/mujoco_hello.py
+</span></code></pre></div>
+<p>No flags.</p>
+<h2 id="scriptsrecord_panda_videopy"><code>scripts/record_panda_video.py</code><a class="headerlink" href="#scriptsrecord_panda_videopy" title="Permanent link">&para;</a></h2>
+<p>Records <code>PandaReach-v0</code> under random actions to MP4, plus the numeric validity report (<code>panda/validity.py</code>) that backs the video with hard guarantees and diagnostics rather than something you have to trust your eyes on.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/record_panda_video.py<span class="w"> </span>--episodes<span class="w"> </span><span class="m">3</span><span class="w"> </span>--out<span class="w"> </span>data/panda_random.mp4
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--episodes</code></td>
+<td>3</td>
+<td>Number of episodes</td>
+</tr>
+<tr>
+<td><code>--seed</code></td>
+<td>0</td>
+<td>Base seed (episode <code>i</code> uses <code>seed + i</code>)</td>
+</tr>
+<tr>
+<td><code>--max-steps</code></td>
+<td>150</td>
+<td>Episode step budget</td>
+</tr>
+<tr>
+<td><code>--out</code></td>
+<td><code>data/panda_random.mp4</code></td>
+<td>Output MP4 path</td>
+</tr>
+</tbody>
+</table>
+<p>fps equals the 50 Hz control rate, so playback is real time. Prints the validity report, then <code>wrote &lt;out&gt; (N frames)</code>.</p>
 <h2 id="tests"><code>tests/</code><a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
 <p>Pytest, no script wrapper:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_deepc.py<span class="w"> </span>-v
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/<span class="w"> </span>-k<span class="w"> </span>library_switch<span class="w">     </span><span class="c1"># just switcher tests</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_deepc.py<span class="w"> </span>-v
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/<span class="w"> </span>-k<span class="w"> </span>library_switch<span class="w">     </span><span class="c1"># just switcher tests</span>
 </span></code></pre></div>
 <p>Test count: 135 across env, controllers, dynamics, wrappers, imitation clone, and residual RL (<code>uv run pytest tests/ --collect-only -q</code> to recount as the suite grows). Tests marked <code>integration</code> need real checkpoints in <code>data/</code> (git-ignored) and are skipped otherwise.</p>
 
@@ -2561,13 +2676,13 @@
         
         
           
-          <a href="../../journey/" class="md-footer__link md-footer__link--next" aria-label="Next: Journey">
+          <a href="../mujoco-primer/" class="md-footer__link md-footer__link--next" aria-label="Next: MuJoCo primer">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Journey
+                MuJoCo primer
               </div>
             </div>
             <div class="md-footer__button md-icon">
