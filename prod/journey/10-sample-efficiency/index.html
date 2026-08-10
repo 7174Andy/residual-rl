@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#11-sample-efficiency-on-the-deployed-policy-and-sac" class="md-skip">
+        <a href="#11-sample-efficiency-on-the-deployed-policy-the-prior-and-the-optimizer-interact" class="md-skip">
           Skip to content
         </a>
       
@@ -1387,10 +1387,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#vanillas-instability-is-the-real-difference" class="md-nav__link">
+  <a href="#the-22-steps-to-a-deployable-policy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Vanilla's instability is the real difference
+        The 2×2 — steps to a deployable policy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The 2×2 — steps to a deployable policy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#most-of-it-is-exploration-breadth-not-stochasticity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Most of it is exploration breadth, not stochasticity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mid-training-instability-is-a-td3-without-prior-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mid-training instability is a TD3-without-prior problem
       
     </span>
   </a>
@@ -1528,10 +1556,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#vanillas-instability-is-the-real-difference" class="md-nav__link">
+  <a href="#the-22-steps-to-a-deployable-policy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Vanilla's instability is the real difference
+        The 2×2 — steps to a deployable policy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The 2×2 — steps to a deployable policy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#most-of-it-is-exploration-breadth-not-stochasticity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Most of it is exploration breadth, not stochasticity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mid-training-instability-is-a-td3-without-prior-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mid-training instability is a TD3-without-prior problem
       
     </span>
   </a>
@@ -1613,58 +1669,62 @@
   
 
 
-<h1 id="11-sample-efficiency-on-the-deployed-policy-and-sac">11. Sample efficiency on the deployed policy — and SAC<a class="headerlink" href="#11-sample-efficiency-on-the-deployed-policy-and-sac" title="Permanent link">&para;</a></h1>
+<h1 id="11-sample-efficiency-on-the-deployed-policy-the-prior-and-the-optimizer-interact">11. Sample efficiency on the deployed policy — the prior and the optimizer interact<a class="headerlink" href="#11-sample-efficiency-on-the-deployed-policy-the-prior-and-the-optimizer-interact" title="Permanent link">&para;</a></h1>
 <div class="admonition note">
 <p class="admonition-title">Status: complete (2026-07-31)</p>
 </div>
-<p><a href="../09-vanilla-rl/">10</a> claimed the MPC prior buys <strong>2.3× fewer environment steps</strong>, measured on
+<p><a href="../09-vanilla-rl/">09</a> claimed the MPC prior buys <strong>2.3× fewer environment steps</strong>, measured on
 training <em>return</em>, and listed the cleaner version as an open item: reach rate at intermediate
-checkpoints. Measured that way, <strong>the 2.3× does not reproduce</strong> — the residual reaches ≥ 95 %
-in 44k ± 12k steps against vanilla's 60k ± 12k, a 1.33× ratio that does not clear significance
-(<span class="arithmatex">\(p = 0.22\)</span>). Two things do survive. First, <strong>vanilla's deployed reach rate never stops
-wandering</strong>: across every checkpoint past 100k its worst is <strong>0.641</strong>, against 0.987 for the
-residual. Second, swapping the residual's optimizer to <strong>SAC</strong> reaches ≥ 95 % in
-<strong>17k ± 2.4k steps</strong> — 2.6× faster than the TD3 residual (<span class="arithmatex">\(p = 0.0159\)</span>) and 3.5× faster than
-vanilla (<span class="arithmatex">\(p = 0.0079\)</span>) — while landing on the identical asymptote. On this task <strong>the
-algorithm choice buys more sample efficiency than the MPC prior does.</strong></p>
+checkpoints. Measured that way the ratio is <strong>1.33× and not significant</strong> (<span class="arithmatex">\(p = 0.22\)</span>). But
+that is not the interesting result. Running the full 2×2 — prior or no prior, TD3 or SAC —
+shows the two factors are <strong>not additive</strong>. SAC on its own is worth nothing here (70k steps vs
+TD3's 60k, <span class="arithmatex">\(p = 0.55\)</span>, if anything slower). The prior on its own is worth 1.33× and does not
+clear significance. <strong>Together they are worth 4.1×</strong> (70k → 17k, <span class="arithmatex">\(p = 0.0079\)</span>). All four arms
+land on the same asymptote. The honest headline is not "the prior helps" or "SAC helps" but
+<strong>"a stochastic-policy learner exploring around a decent base action learns fast, and neither
+half does it alone."</strong></p>
 <h2 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">&para;</a></h2>
-<p>The <a href="../09-vanilla-rl/">10</a> headline is a <em>behaviour-policy</em> number. A training-return curve
+<p>The <a href="../09-vanilla-rl/">09</a> headline is a <em>behaviour-policy</em> number. A training-return curve
 includes exploration noise and scores whatever start states training happened to sample; it
 also depends on an arbitrary threshold (−6000) whose choice moves the ratio. None of that is
 what you deploy. The deployed quantity is the greedy policy on the canonical 78-seed sweep,
 and it can be measured at any checkpoint — so measure it.</p>
-<p>The second question came for free once checkpointing existed: entry <a href="../08-residual-rl/">09</a>
-picked TD3 for the residual by reasoning from properties, never by measurement. SAC was
-already implemented as the fallback path. Running it costs one training sweep.</p>
+<p>Two more questions came for free once checkpointing existed. Entry <a href="../08-residual-rl/">08</a>
+picked TD3 for the residual by reasoning from properties, never by measurement, and SAC was
+already implemented as the fallback path. And once SAC turned out to be dramatically faster
+<em>as a residual</em>, the obvious confound had to be closed: is that SAC being a better optimizer,
+or SAC being a better optimizer <strong>for this composition</strong>? That needs the fourth cell.</p>
 <h2 id="method">Method<a class="headerlink" href="#method" title="Permanent link">&para;</a></h2>
-<p>Both existing arms retrained from scratch, 5 training seeds × 400k steps, snapshotting the
-policy every 25k (<code>--checkpoint-dir</code>), then every snapshot evaluated <strong>greedy</strong> on the same 78
-eval seeds every other entry uses. SAC added as a third arm on identical settings —
-<code>residual_frac 2.0</code>, <code>lr 1e-3</code>, 5 seeds, 400k. That learning rate is the repo's CLI default
-and matches the TD3 arms; it is <em>not</em> SB3's SAC default of 3e-4. Parity with the arm under
-comparison was worth more than SAC's tuned default, for the same reason <a href="../09-vanilla-rl/">10</a>
-forced TD3 on its control arm.</p>
+<p>All four arms: 5 training seeds × 400k steps, snapshotting the policy every 25k
+(<code>--checkpoint-dir</code>), then every snapshot evaluated <strong>greedy</strong> on the same 78 eval seeds every
+other entry uses. Residual arms use <code>residual_frac 2.0</code>. Every arm uses <code>lr 1e-3</code> — the repo's
+CLI default and the value the published TD3 arms used. It is <em>not</em> SB3's SAC default of 3e-4;
+parity across the cells of a 2×2 was worth more than each cell's own tuned default, for the
+same reason <a href="../09-vanilla-rl/">09</a> forced TD3 on its control arm.</p>
 <p>Two checks before any of the numbers below mean anything:</p>
 <ul>
 <li><strong>The retrain reproduces the published table exactly</strong> — at 400k, residual <code>78 78 77 78 78</code>
-  and vanilla <code>78 78 78 78 75</code>, the same per-seed counts entry <a href="../09-vanilla-rl/">10</a> reports.
+  and vanilla <code>78 78 78 78 75</code>, the same per-seed counts entry <a href="../09-vanilla-rl/">09</a> reports.
   Training is seed-deterministic on this machine, so the intermediate checkpoints sit on the
   same runs as the already-published endpoints rather than on a parallel universe.</li>
-<li><strong>The first grid censored the answer.</strong> SAC was already ≥ 95 % at 25k, the earliest
+<li><strong>The first grid censored the answer.</strong> SAC-residual was already ≥ 95 % at 25k, the earliest
   checkpoint, on all 5 seeds — so its crossing point was unmeasurable. The early window was
-  re-trained at 5k resolution (25k steps is ~90 s per run) and those runs reproduce the
-  coarse ones exactly at their shared 25k point.</li>
+  re-trained at 5k resolution (25k steps is ~90 s per run) and those runs reproduce the coarse
+  ones exactly at their shared 25k point.</li>
 </ul>
 <p>The lesson generalizes: <strong>pick the checkpoint grid before claiming a crossing point.</strong> A
 25k-spaced grid cannot measure a 17k crossing.</p>
 <h2 id="reach-rate-vs-training-steps">Reach rate vs training steps<a class="headerlink" href="#reach-rate-vs-training-steps" title="Permanent link">&para;</a></h2>
-<p><img alt="Deterministic reach rate and return vs environment steps, three arms, 5 seeds each" src="../figures/checkpoint_sweep.png" /></p>
+<p><img alt="Deterministic reach rate and return vs environment steps, four arms, 5 seeds each" src="../figures/checkpoint_sweep.png" /></p>
+<p>The two residual curves sit far to the left; the two vanilla curves lie almost on top of each
+other. That picture is the result.</p>
 <table>
 <thead>
 <tr>
 <th>env steps</th>
-<th>clone + residual <strong>SAC</strong></th>
-<th>clone + residual TD3</th>
+<th>residual <strong>SAC</strong></th>
+<th>residual TD3</th>
+<th>vanilla <strong>SAC</strong></th>
 <th>vanilla TD3</th>
 </tr>
 </thead>
@@ -1673,130 +1733,167 @@ forced TD3 on its control arm.</p>
 <td>5k</td>
 <td>0.277 ± 0.196</td>
 <td>0.123 ± 0.068</td>
+<td>0.079 ± 0.052</td>
 <td>0.072 ± 0.036</td>
 </tr>
 <tr>
 <td>10k</td>
 <td>0.608 ± 0.227</td>
 <td>0.287 ± 0.208</td>
+<td>0.110 ± 0.074</td>
 <td>0.064 ± 0.038</td>
 </tr>
 <tr>
 <td>15k</td>
 <td><strong>0.918 ± 0.093</strong></td>
 <td>0.472 ± 0.164</td>
+<td>0.256 ± 0.223</td>
 <td>0.087 ± 0.017</td>
 </tr>
 <tr>
 <td>20k</td>
 <td><strong>0.990 ± 0.010</strong></td>
 <td>0.662 ± 0.243</td>
+<td>0.331 ± 0.287</td>
 <td>0.187 ± 0.108</td>
 </tr>
 <tr>
 <td>25k</td>
 <td>0.997 ± 0.005</td>
 <td>0.787 ± 0.133</td>
+<td>0.400 ± 0.355</td>
 <td>0.410 ± 0.302</td>
 </tr>
 <tr>
 <td>50k</td>
 <td>1.000 ± 0.000</td>
 <td>0.997 ± 0.005</td>
+<td>0.736 ± 0.341</td>
 <td>0.779 ± 0.260</td>
+</tr>
+<tr>
+<td>75k</td>
+<td>0.997 ± 0.005</td>
+<td>1.000 ± 0.000</td>
+<td>0.946 ± 0.090</td>
+<td>0.992 ± 0.010</td>
 </tr>
 <tr>
 <td>100k</td>
 <td>1.000 ± 0.000</td>
 <td>0.995 ± 0.006</td>
 <td>1.000 ± 0.000</td>
+<td>1.000 ± 0.000</td>
 </tr>
 <tr>
 <td>200k</td>
 <td>1.000 ± 0.000</td>
 <td>1.000 ± 0.000</td>
+<td>0.997 ± 0.005</td>
 <td>0.995 ± 0.006</td>
 </tr>
 <tr>
 <td>350k</td>
 <td>1.000 ± 0.000</td>
 <td>0.997 ± 0.005</td>
+<td>1.000 ± 0.000</td>
 <td><strong>0.928 ± 0.144</strong></td>
 </tr>
 <tr>
 <td>400k</td>
 <td>0.997 ± 0.005</td>
 <td>0.997 ± 0.005</td>
+<td>1.000 ± 0.000</td>
 <td>0.992 ± 0.015</td>
 </tr>
 </tbody>
 </table>
-<p>Environment steps to the first checkpoint clearing a reach threshold (exact two-sided
-Mann–Whitney on 5 vs 5, so <span class="arithmatex">\(p = 0.0079\)</span> is the floor):</p>
+<h2 id="the-22-steps-to-a-deployable-policy">The 2×2 — steps to a deployable policy<a class="headerlink" href="#the-22-steps-to-a-deployable-policy" title="Permanent link">&para;</a></h2>
+<p>Environment steps to the first checkpoint clearing reach ≥ 0.95, 5k resolution:</p>
 <table>
 <thead>
 <tr>
-<th>threshold</th>
-<th>residual SAC</th>
-<th>residual TD3</th>
-<th>vanilla TD3</th>
+<th></th>
+<th><strong>with the DeePC prior</strong> (residual)</th>
+<th><strong>from scratch</strong> (vanilla)</th>
+<th>prior's effect</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>≥ 0.95</td>
+<td><strong>SAC</strong></td>
 <td><strong>17,000 ± 2,449</strong></td>
+<td>70,000 ± 18,708</td>
+<td><strong>4.1×</strong>, <span class="arithmatex">\(p = 0.0079\)</span></td>
+</tr>
+<tr>
+<td><strong>TD3</strong></td>
 <td>44,000 ± 12,000</td>
 <td>60,000 ± 12,247</td>
+<td>1.36×, <span class="arithmatex">\(p = 0.2222\)</span></td>
 </tr>
 <tr>
-<td>≥ 0.99</td>
-<td><strong>27,000 ± 12,083</strong></td>
-<td>55,000 ± 10,000</td>
-<td>75,000 ± 22,361</td>
+<td><strong>optimizer's effect</strong></td>
+<td><strong>2.6×</strong>, <span class="arithmatex">\(p = 0.0159\)</span></td>
+<td>0.86× (SAC slower), <span class="arithmatex">\(p = 0.5476\)</span></td>
+<td></td>
 </tr>
 </tbody>
 </table>
+<p>Exact two-sided Mann–Whitney on 5 vs 5, so <span class="arithmatex">\(p = 0.0079\)</span> is the floor. Per-seed crossings:
+SAC-residual <code>20 15 15 20 15</code> (k), TD3-residual <code>50 20 50 50 50</code>, TD3-vanilla <code>75 75 50 50 50</code>,
+SAC-vanilla <code>100 75 50 75 50</code>.</p>
+<p>Read the table by its off-diagonal. <strong>Neither factor alone is significant</strong>: SAC without the
+prior is nominally <em>worse</em> than TD3, and the prior under TD3 does not separate. Only the
+combination moves — and it moves by 4×, with the tightest seed spread of any arm (±2.4k
+against ±12k–19k everywhere else).</p>
+<h3 id="most-of-it-is-exploration-breadth-not-stochasticity">Most of it is exploration breadth, not stochasticity<a class="headerlink" href="#most-of-it-is-exploration-breadth-not-stochasticity" title="Permanent link">&para;</a></h3>
+<p>Measured at initialization on the residual's <code>a_res ∈ [-1,1]²</code>, SAC explores <strong>6.5× wider</strong>
+than TD3: std 0.64 against 0.098, which with <code>frac=2.0</code> is ±13.2 vs ±2.0 units/s on <code>v</code>. TD3's
+<code>σ = 0.1</code> was inherited from the vanilla arm and never re-tuned for the residual's action
+space. Raising it to match SAC's measured breadth (<code>--noise-sigma 0.6</code>, 5 seeds, 5k grid):</p>
 <table>
 <thead>
 <tr>
-<th>pair</th>
-<th><span class="arithmatex">\(p\)</span> at ≥ 0.95</th>
-<th><span class="arithmatex">\(p\)</span> at ≥ 0.99</th>
+<th>arm</th>
+<th>steps to reach ≥ 0.95</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>SAC residual vs vanilla</td>
-<td><strong>0.0079</strong></td>
-<td>0.0159</td>
+<td>clone + residual SAC</td>
+<td><strong>17,000 ± 2,449</strong></td>
 </tr>
 <tr>
-<td>SAC residual vs TD3 residual</td>
-<td><strong>0.0159</strong></td>
-<td>0.0317</td>
+<td>clone + residual TD3, <code>σ = 0.6</code></td>
+<td>25,000 ± 3,162</td>
 </tr>
 <tr>
-<td>TD3 residual vs vanilla</td>
-<td>0.2222</td>
-<td>0.3095</td>
+<td>clone + residual TD3, <code>σ = 0.1</code> (the published arm)</td>
+<td>44,000 ± 12,000</td>
 </tr>
 </tbody>
 </table>
-<p><strong>The prior's advantage does not survive the change of metric; the optimizer's does.</strong> The row
-that matters is the last one: on the metric entry <a href="../09-vanilla-rl/">10</a> built its headline
-from, TD3-residual-over-vanilla is 1.33× and not separable, while SAC-over-TD3-residual is
-2.6× and is.</p>
+<p><strong>Breadth alone recovers about two-thirds of the gap</strong>, and collapses the seed spread from
+±12k to ±3.2k. So a large part of what looks like "SAC is a better optimizer here" is really
+"TD3's exploration noise was miscalibrated for exploiting a good base action" — when you start
+from a 38.5 %-reach controller you can afford bold probes, because you are never far from
+something sensible.</p>
+<p>SAC still beats breadth-matched TD3, though: 17k vs 25k, <span class="arithmatex">\(p = 0.0159\)</span>. Three candidates for
+that remainder, none separated here — SAC's entropy target <em>adapts</em> the breadth downward as the
+critic sharpens (the fixed <code>σ = 0.6</code> run is still at 0.987 at 50k where the <code>σ = 0.1</code> baseline
+has reached 0.997); the soft entropy-augmented value target differs from TD3's target-policy
+smoothing; and <code>policy_delay = 2</code> gives TD3 half as many actor updates per environment step,
+which has nothing to do with entropy at all.</p>
 <div class="admonition warning">
-<p class="admonition-title">Why the return metric gave a bigger number</p>
-<p>Reach rate saturates. Every arm is pinned at ~1.0 from 100k onward, so the metric stops
-discriminating early and compresses the ratio; return keeps separating long after. Neither
-is wrong — they answer different questions. Reach rate answers "when is it deployable",
-return answers "when is it good", and only the first has a natural threshold.</p>
+<p class="admonition-title">Read the σ comparison carefully</p>
+<p><code>σ = 0.6</code> vs <code>σ = 0.1</code> is a 1.76× effect at <strong><span class="arithmatex">\(p = 0.15\)</span></strong>. The baseline's per-seed
+crossings are <code>[50k, 20k, 50k, 50k, 50k]</code> — one lucky seed and four ties leave a 5-vs-5
+rank test almost no power. The direction is clear; the significance is not there at <span class="arithmatex">\(n=5\)</span>.</p>
 </div>
-<p>The training-return view, with SAC added, agrees on the ordering and reproduces
-<a href="../09-vanilla-rl/">10</a>'s two published numbers exactly:</p>
-<p><img alt="Training return vs environment steps, three arms" src="../figures/learning_curves_3arm.png" /></p>
+<p>The training-return view agrees, and reproduces <a href="../09-vanilla-rl/">09</a>'s two published numbers
+exactly:</p>
+<p><img alt="Training return vs environment steps, four arms" src="../figures/learning_curves_3arm.png" /></p>
 <table>
 <thead>
 <tr>
@@ -1806,20 +1903,31 @@ return answers "when is it good", and only the first has a natural threshold.</p
 </thead>
 <tbody>
 <tr>
-<td>vanilla TD3</td>
-<td>69,547 ± 24,348</td>
+<td><strong>clone + residual SAC (frac 2.0)</strong></td>
+<td><strong>20,340 ± 2,464</strong></td>
 </tr>
 <tr>
 <td>clone + residual TD3 (frac 2.0)</td>
 <td>30,816 ± 5,214</td>
 </tr>
 <tr>
-<td><strong>clone + residual SAC (frac 2.0)</strong></td>
-<td><strong>20,340 ± 2,464</strong></td>
+<td>vanilla TD3</td>
+<td>69,547 ± 24,348</td>
+</tr>
+<tr>
+<td>vanilla SAC</td>
+<td>82,229 ± 29,709</td>
 </tr>
 </tbody>
 </table>
-<h2 id="vanillas-instability-is-the-real-difference">Vanilla's instability is the real difference<a class="headerlink" href="#vanillas-instability-is-the-real-difference" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Why the return metric gave a bigger number for the prior</p>
+<p>Reach rate saturates. Every arm is pinned at ~1.0 from 100k onward, so the metric stops
+discriminating early and compresses the ratio; return keeps separating long after. Neither
+is wrong — they answer different questions. Reach rate answers "when is it deployable",
+return answers "when is it good", and only the first has a natural threshold.</p>
+</div>
+<h2 id="mid-training-instability-is-a-td3-without-prior-problem">Mid-training instability is a TD3-without-prior problem<a class="headerlink" href="#mid-training-instability-is-a-td3-without-prior-problem" title="Permanent link">&para;</a></h2>
 <p>Reporting one final checkpoint hides this. Over <strong>every</strong> checkpoint from 100k on
 (5 seeds × 13 checkpoints = 65 evaluations per arm):</p>
 <table>
@@ -1832,6 +1940,12 @@ return answers "when is it good", and only the first has a natural threshold.</p
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>vanilla SAC</td>
+<td>0.9994</td>
+<td>0.987</td>
+<td>0.0027</td>
+</tr>
 <tr>
 <td>clone + residual SAC</td>
 <td>0.9988</td>
@@ -1852,15 +1966,17 @@ return answers "when is it good", and only the first has a natural threshold.</p
 </tr>
 </tbody>
 </table>
-<p>Both residuals stay inside a percentage point of solved for the entire back half of training.
-Vanilla drops to 50/78 at 350k and 63/78 at 125k, then recovers. <strong>So vanilla's published
-0.992 is partly a lucky draw of where training stopped</strong> — those same five runs, evaluated at
-350k instead, average 0.928. This is the reach-rate form of the ~10× return-spread result in
-<a href="../09-vanilla-rl/">10</a>, and it is the strongest argument in this project for putting a
-controller underneath the policy: not a better ceiling, a floor you can trust.</p>
-<p>The honest counter-reading: nobody deploys a random checkpoint. If your protocol is "train
-400k, ship the last one," vanilla is fine here. The instability matters when the budget is
-uncertain or early stopping is on the table.</p>
+<p>Vanilla TD3 drops to 50/78 at 350k and 63/78 at 125k, then recovers; <strong>its published 0.992 is
+partly a lucky draw of where training stopped</strong> — those same five runs, evaluated at 350k
+instead, average 0.928. Every other arm stays inside 1.3 percentage points of solved for the
+entire back half of training.</p>
+<p>An earlier version of this entry read that as "the prior buys a floor." <strong>The fourth arm
+falsifies it</strong>: vanilla SAC has no prior and the steadiest curve of all four. The unstable cell
+is specifically TD3-from-scratch, so the fix is <em>either</em> the prior <em>or</em> the stochastic policy —
+and the honest statement is that we do not know which mechanism is doing the stabilizing.</p>
+<p>The counter-reading still applies: nobody deploys a random checkpoint. If your protocol is
+"train 400k, ship the last one," vanilla TD3 is fine here. The instability matters when the
+budget is uncertain or early stopping is on the table.</p>
 <h2 id="final-performance-every-method-same-78-seeds">Final performance — every method, same 78 seeds<a class="headerlink" href="#final-performance-every-method-same-78-seeds" title="Permanent link">&para;</a></h2>
 <p>RL arms are 5 training seeds × 78 eval seeds = 390 episodes; the classical arms are
 deterministic, so they get one 78-episode pass.</p>
@@ -1895,13 +2011,13 @@ deterministic, so they get one 78-episode pass.</p>
 <tr>
 <td>clone + residual TD3, <code>frac=2.0</code></td>
 <td>78 78 77 78 78</td>
-<td><strong>389/390 = 0.997</strong></td>
+<td>389/390 = 0.997</td>
 <td>0.986–1.000</td>
 </tr>
 <tr>
-<td>clone + residual <strong>SAC</strong>, <code>frac=2.0</code></td>
+<td>clone + residual SAC, <code>frac=2.0</code></td>
 <td>78 78 78 77 78</td>
-<td><strong>389/390 = 0.997</strong></td>
+<td>389/390 = 0.997</td>
 <td>0.986–1.000</td>
 </tr>
 <tr>
@@ -1910,12 +2026,19 @@ deterministic, so they get one 78-episode pass.</p>
 <td>387/390 = 0.992</td>
 <td>0.978–0.997</td>
 </tr>
+<tr>
+<td><strong>vanilla SAC</strong></td>
+<td>78 78 78 78 78</td>
+<td><strong>390/390 = 1.000</strong></td>
+<td>0.990–1.000</td>
+</tr>
 </tbody>
 </table>
 <p>The clone and the <code>frac=1.0</code> arm were re-measured for this entry and reproduce their published
-counts exactly. DeePC's 30/78 is carried over from <a href="../09-vanilla-rl/">10</a> — it is deterministic
+counts exactly. DeePC's 30/78 is carried over from <a href="../09-vanilla-rl/">09</a> — it is deterministic
 and a re-run is ~1 h of QP solves.</p>
-<p><strong>No pair among the top three is separable on reach.</strong> McNemar on the 390 paired episodes:</p>
+<p><strong>No pair among the four RL arms is separable on reach.</strong> McNemar on the 390 paired episodes,
+worst case 3 discordant pairs out of 390:</p>
 <table>
 <thead>
 <tr>
@@ -1931,26 +2054,40 @@ and a re-run is ~1 h of QP solves.</p>
 <td>1.0000</td>
 </tr>
 <tr>
-<td>residual TD3 vs vanilla</td>
+<td>residual TD3 vs vanilla SAC</td>
+<td>0 / 1</td>
+<td>1.0000</td>
+</tr>
+<tr>
+<td>residual SAC vs vanilla SAC</td>
+<td>0 / 1</td>
+<td>1.0000</td>
+</tr>
+<tr>
+<td>vanilla TD3 vs vanilla SAC</td>
+<td>0 / 3</td>
+<td>0.2482</td>
+</tr>
+<tr>
+<td>residual TD3 vs vanilla TD3</td>
 <td>3 / 1</td>
 <td>0.6171</td>
 </tr>
 <tr>
-<td>residual SAC vs vanilla</td>
+<td>residual SAC vs vanilla TD3</td>
 <td>3 / 1</td>
 <td>0.6171</td>
 </tr>
 </tbody>
 </table>
-<p>Per-step cost tells the story reach rate cannot. Costs below are per-episode means divided by
-mean episode length, because episode lengths differ across arms and per-episode sums hide it:</p>
+<p>Return and per-step cost still separate them. Costs are per-episode means divided by mean
+episode length, because episode lengths differ across arms and per-episode sums hide it:</p>
 <table>
 <thead>
 <tr>
 <th>arm</th>
 <th>return (mean ± std over seeds)</th>
 <th>steps</th>
-<th>pos/step</th>
 <th>head/step</th>
 <th>ctrl/step</th>
 <th>traj dev vs clone</th>
@@ -1958,40 +2095,47 @@ mean episode length, because episode lengths differ across arms and per-episode 
 </thead>
 <tbody>
 <tr>
-<td>clone + residual TD3</td>
-<td>−4778.3 ± 7.9</td>
-<td>72.6</td>
-<td>60.6</td>
-<td>6.42</td>
-<td>0.144</td>
-<td>3.77</td>
-</tr>
-<tr>
 <td>clone + residual SAC</td>
 <td><strong>−4773.2 ± 15.3</strong></td>
 <td>73.0</td>
-<td>60.3</td>
 <td><strong>6.37</strong></td>
 <td>0.134</td>
 <td>3.92</td>
 </tr>
 <tr>
+<td>clone + residual TD3</td>
+<td>−4778.3 ± 7.9</td>
+<td>72.6</td>
+<td>6.42</td>
+<td>0.144</td>
+<td>3.77</td>
+</tr>
+<tr>
 <td>vanilla TD3</td>
 <td>−4854.7 ± 76.0</td>
 <td>76.5</td>
-<td><strong>58.0</strong></td>
 <td>6.64</td>
-<td><strong>0.126</strong></td>
+<td>0.126</td>
 <td>4.10</td>
+</tr>
+<tr>
+<td>vanilla SAC</td>
+<td>−5020.6 ± 43.9</td>
+<td><strong>66.1</strong></td>
+<td><strong>6.90</strong></td>
+<td><strong>0.115</strong></td>
+<td>3.58</td>
 </tr>
 </tbody>
 </table>
-<p>Mann–Whitney on the per-seed returns: both residuals beat vanilla at <span class="arithmatex">\(p = 0.0079\)</span> (complete
-rank separation); <strong>SAC vs TD3 is indistinguishable</strong>, <span class="arithmatex">\(p = 0.6905\)</span>. SAC's seed spread (15.3)
-is double TD3's (7.9) but still 5× tighter than vanilla's (76.0).</p>
-<p>Conclusion 4 of <a href="../09-vanilla-rl/">10</a> holds with the third arm added: vanilla is worst on
-heading cost per step — the term its body-frame observation cannot see — while being best on
-position and control cost per step.</p>
+<p>Mann–Whitney on the per-seed returns: <strong>both residuals beat both vanilla arms at
+<span class="arithmatex">\(p = 0.0079\)</span></strong> (complete rank separation, all four pairings). SAC vs TD3 within the residual is
+indistinguishable (<span class="arithmatex">\(p = 0.6905\)</span>); within vanilla, SAC is nominally worse (<span class="arithmatex">\(p = 0.0556\)</span>).</p>
+<p><strong>Vanilla SAC is the sharpest illustration of conclusion 4 in <a href="../09-vanilla-rl/">09</a>.</strong> It is
+the only arm to reach on all 390 episodes and simultaneously the <em>worst</em> arm on return. It gets
+there by driving hardest — 66 steps, the fewest of any arm, and the lowest control cost per
+step — and pays for it with the highest heading cost per step (6.90) of anything measured. A
+reach-rate leaderboard would rank it first; the cost it is actually optimizing ranks it last.</p>
 <h2 id="watching-it-learn">Watching it learn<a class="headerlink" href="#watching-it-learn" title="Permanent link">&para;</a></h2>
 <p>Side-by-side dashboards at each checkpoint, same two showcase seeds. Seed 4104626050 is the
 clean illustration: the residual solves it early, vanilla drives into the workspace wall and
@@ -2010,71 +2154,93 @@ truncates until 100k.</p>
 the asymptote result in visual form.</em></p>
 <p>The full set is <code>docs/journey/videos/ckpt-{025,050,100,200,400}k-&lt;seed&gt;.mp4</code> (TD3 residual vs
 vanilla) and <code>ckpt-sac-{015,025,050,100,200,400}k-&lt;seed&gt;.mp4</code> (SAC residual vs vanilla), for
-seeds 4104626034 and 4104626050.</p>
+seeds 4104626034 and 4104626050. The vanilla-SAC arm has no videos yet.</p>
 <h2 id="conclusions">Conclusions<a class="headerlink" href="#conclusions" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>The 2.3× sample-efficiency claim is metric-dependent.</strong> On deployed reach rate the same
-   comparison is 1.33× and not statistically separable. <a href="../09-vanilla-rl/">10</a>'s conclusion 3
-   should be read as "2.3× on training return", not as a property of the method.</li>
-<li><strong>SAC is the better optimizer for this residual, by a lot, on speed only.</strong> 2.6× fewer steps
-   to a deployable policy than TD3, with a 5× tighter spread across seeds — and an identical
-   asymptote on reach, return, and cost split. TD3's zero-init argument from
-   <a href="../08-residual-rl/">09</a> survives the switch: SAC's mean head zeroes the same way and its
-   deterministic evaluation returns <code>tanh(0) = 0</code>, so the no-regression-at-init guarantee is
-   intact.</li>
-<li><strong>The prior buys a floor, not a ceiling or (on this metric) speed.</strong> Its measurable benefit
-   is that reach rate never degrades mid-training and return spread across seeds stays ~10×
-   tighter. On a task this easy that is the whole of it.</li>
-<li><strong>Saturating metrics compress differences.</strong> Reach rate is at ~1.0 from 100k for every arm,
-   so it cannot rank them; per-step heading and control cost still can. Report both.</li>
+<li><strong>The prior and the optimizer interact; neither is worth much alone.</strong> 4.1× together
+   (<span class="arithmatex">\(p = 0.0079\)</span>), 1.36× for the prior under TD3 (<span class="arithmatex">\(p = 0.22\)</span>), 0.86× for SAC without the prior
+   (<span class="arithmatex">\(p = 0.55\)</span>). Any claim of the form "RL+MPC saves X% of samples" that does not name the
+   optimizer is under-specified — on this task the same prior is worth either nothing or 4×
+   depending on what is learning on top of it.</li>
+<li><strong>Use SAC for the residual, and don't bother switching the from-scratch baseline.</strong> SAC as a
+   residual is 2.6× faster than TD3 with a 5× tighter spread, at no cost to the asymptote, and
+   TD3's zero-init argument from <a href="../08-residual-rl/">08</a> survives the switch — SAC's mean head
+   zeroes the same way and its deterministic evaluation returns <code>tanh(0) = 0</code>, so
+   no-regression-at-init is intact. SAC as a from-scratch learner is slightly worse than TD3.</li>
+<li><strong>The prior does not raise the ceiling, and it is not what buys stability either.</strong> All four
+   arms are statistically indistinguishable on reach at 400k. Mid-training instability turned
+   out to be specific to TD3-from-scratch, not to "no prior" — vanilla SAC is the steadiest arm
+   of the four. What the prior reliably buys is a better return (both residuals beat both
+   vanillas, <span class="arithmatex">\(p = 0.0079\)</span> each) and, with the right optimizer, speed.</li>
+<li><strong>Reach rate is the wrong leaderboard.</strong> Vanilla SAC reaches 390/390 — the only perfect arm —
+   while having the worst return and the worst heading cost per step of anything measured. Six
+   arms sit inside 3 discordant episodes of each other on reach and are cleanly ordered on
+   return. Report the cost split.</li>
 <li><strong>Grid resolution is a measurement decision, not a detail.</strong> The first sweep reported SAC's
-   crossing as "≤ 25k" because 25k was the first checkpoint. The real answer, 17k, needed a
-   grid five times finer.</li>
+   crossing as "≤ 25k" because 25k was the first checkpoint. The real answer, 17k, needed a grid
+   five times finer.</li>
+<li><strong>Don't over-generalize from one hyperparameter point.</strong> Every arm ran at <code>lr = 1e-3</code> for
+   parity. This is one slice through a 2×2 × learning-rate space on a task
+   (<a href="../09-vanilla-rl/">09</a>, conclusion 5) chosen to be <em>unfavourable</em> to RL+MPC.</li>
 </ol>
 <h2 id="open-not-yet-reported">Open / not yet reported<a class="headerlink" href="#open-not-yet-reported" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>SAC on the vanilla arm.</strong> Every claim here about SAC is about SAC <em>as a residual</em>. If SAC's
-  advantage is really about the optimizer rather than the composition, it should speed up the
-  from-scratch arm too — and if it closes vanilla's gap entirely, conclusion 3 weakens further.
-  This is the obvious next run and it is cheap.</li>
-<li><strong>SAC at its own default <code>lr</code>.</strong> 1e-3 was chosen for parity with TD3, not because it is good
-  for SAC. 3e-4 might be faster still, or more stable on the seed that lags.</li>
-<li><strong>Why vanilla degrades mid-training.</strong> The 350k collapse on seed 3 is diagnosed only as "it
-  happens". Whether it is critic divergence, a policy-noise interaction, or replay staleness is
-  unexamined.</li>
-<li><strong>Robustness to plant perturbation</strong> remains the open item <a href="../09-vanilla-rl/">10</a> lists.</li>
+<li><strong>What is left after breadth.</strong> The <code>σ = 0.6</code> run attributes ~2/3 of SAC's edge to
+  exploration magnitude, but the remaining 25k → 17k is unexplained. Three separable causes,
+  each one run: SAC with <code>ent_coef</code> fixed rather than auto-tuned (isolates adaptivity), TD3
+  with <code>policy_delay=1</code> (isolates actor-update frequency), and an <code>σ</code> sweep to check 0.6 is
+  near the optimum rather than merely better than 0.1.</li>
+<li><strong>A σ sweep on the vanilla arm.</strong> If the interaction is really about exploration breadth
+  paying off only when anchored, then widening vanilla TD3's noise should <em>not</em> help — and
+  that is the cleaner version of the 2×2 above.</li>
+<li><strong>Each cell at its own tuned <code>lr</code>.</strong> 1e-3 was chosen for parity, not because it suits SAC.
+  3e-4 might change the SAC column in either direction — and if it rescues vanilla SAC, the
+  interaction in conclusion 1 weakens.</li>
+<li><strong>PPO anywhere.</strong> Still the untested third optimizer, and the POMDP result in
+  <a href="../09-vanilla-rl/">09</a> gives it a principled shot on the vanilla arm.</li>
+<li><strong>Why vanilla TD3 degrades mid-training.</strong> The 350k collapse on seed 3 is diagnosed only as
+  "it happens". Critic divergence, policy-noise interaction, and replay staleness are all
+  unexamined — and the fact that vanilla SAC does <em>not</em> do it is the best available clue.</li>
+<li><strong>Robustness to plant perturbation</strong> remains the open item <a href="../09-vanilla-rl/">09</a> lists.</li>
 </ul>
 <h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># checkpoints every 25k over the full budget, per arm, per seed</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># the 2x2: {residual, vanilla} x {td3, sac}, 5 seeds each, checkpoints every 25k</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span>--out<span class="w"> </span>data/ckptsweep/res_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/ckptsweep/res_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_vanilla.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span>--out<span class="w"> </span>data/ckptsweep/van_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/ckptsweep/van_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span>--out<span class="w"> </span>data/sacsweep/res_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/sacsweep/res_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span>--monitor-out<span class="w"> </span>data/sacsweep/res_s0_mon
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1"># the 5k-resolution early window (25k budget, same seeds) -- needed for SAC&#39;s crossing point</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">25000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span>--out<span class="w"> </span>data/earlysweep_sac/res_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/earlysweep_sac/res_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">5000</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c1"># greedy evaluation of every checkpoint on the canonical 78 eval seeds</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/sweep_checkpoints.py<span class="w"> </span>--ckpt-root<span class="w"> </span>data/ckptsweep<span class="w"> </span>--out<span class="w"> </span>data/checkpoint_sweep.csv
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/sweep_checkpoints.py<span class="w"> </span>--ckpt-root<span class="w"> </span>data/sacsweep<span class="w"> </span>--arms<span class="w"> </span>residual<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span>--algo<span class="w"> </span>sac<span class="w"> </span>--label<span class="w"> </span>residual_sac<span class="w"> </span>--out<span class="w"> </span>data/checkpoint_sweep_sac.csv
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="c1"># figures (the plot script merges comma-separated CSVs)</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_checkpoint_sweep.py<span class="w"> </span>--csv<span class="w"> </span>data/checkpoint_sweep_all.csv
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_learning_curves.py<span class="w"> </span>--glob-sac<span class="w"> </span><span class="s1">&#39;data/sacsweep/res_s*_mon.monitor.csv&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span>--out<span class="w"> </span>docs/journey/figures/learning_curves_3arm.png
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span>--out<span class="w"> </span>data/sacsweep/res_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/sacsweep/res_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span>--monitor-out<span class="w"> </span>data/sacsweep/res_s0_mon
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_vanilla.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span>--out<span class="w"> </span>data/ckptsweep/van_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/ckptsweep/van_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_vanilla.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span>--out<span class="w"> </span>data/sacsweep_van/van_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/sacsweep_van/van_s0<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span><span class="w"> </span>--monitor-out<span class="w"> </span>data/sacsweep_van/van_s0_mon
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># the 5k-resolution early window (25k budget, same seeds) -- needed for SAC&#39;s crossing point</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">25000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span>--out<span class="w"> </span>data/earlysweep_sac/res_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/earlysweep_sac/res_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">5000</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1"># greedy evaluation of every checkpoint on the canonical 78 eval seeds, one call per arm</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/sweep_checkpoints.py<span class="w"> </span>--ckpt-root<span class="w"> </span>data/ckptsweep<span class="w"> </span>--out<span class="w"> </span>data/checkpoint_sweep.csv
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/sweep_checkpoints.py<span class="w"> </span>--ckpt-root<span class="w"> </span>data/sacsweep<span class="w"> </span>--arms<span class="w"> </span>residual<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span>--algo<span class="w"> </span>sac<span class="w"> </span>--label<span class="w"> </span>residual_sac<span class="w"> </span>--out<span class="w"> </span>data/checkpoint_sweep_sac.csv
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/sweep_checkpoints.py<span class="w"> </span>--ckpt-root<span class="w"> </span>data/sacsweep_van<span class="w"> </span>--arms<span class="w"> </span>vanilla<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span>--algo<span class="w"> </span>sac<span class="w"> </span>--label<span class="w"> </span>vanilla_sac<span class="w"> </span>--out<span class="w"> </span>data/checkpoint_sweep_sacvan.csv
 </span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="c1"># checkpoint videos (--algo and --vanilla-algo are independent, so the columns can differ)</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/render_dashboard_video.py<span class="w"> </span>--seeds<span class="w"> </span><span class="m">4104626050</span><span class="w"> </span>--compare<span class="w"> </span>residual-vanilla<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">    </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--vanilla-algo<span class="w"> </span>td3<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span>--residual-model<span class="w"> </span>data/earlysweep_sac/res_s0/ckpt_15000_steps.zip<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span>--vanilla-model<span class="w"> </span>data/earlysweep/van_s0/ckpt_15000_steps.zip<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">    </span>--figdir<span class="w"> </span>data/ckptvideo_sac/15000<span class="w"> </span>--video-prefix<span class="w"> </span>ckpt-sac-015k<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">    </span>--title-note<span class="w"> </span><span class="s2">&quot;  —  SAC residual, 15k training steps&quot;</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="c1"># figures (the plot script merges comma-separated CSVs)</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_checkpoint_sweep.py<span class="w"> </span>--csv<span class="w"> </span>data/checkpoint_sweep_all.csv
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_learning_curves.py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span>--glob-sac<span class="w"> </span><span class="s1">&#39;data/sacsweep/res_s*_mon.monitor.csv&#39;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span>--glob-sac-van<span class="w"> </span><span class="s1">&#39;data/sacsweep_van/van_s*_mon.monitor.csv&#39;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">    </span>--out<span class="w"> </span>docs/journey/figures/learning_curves_3arm.png
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="c1"># checkpoint videos (--algo and --vanilla-algo are independent, so the columns can differ)</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/render_dashboard_video.py<span class="w"> </span>--seeds<span class="w"> </span><span class="m">4104626050</span><span class="w"> </span>--compare<span class="w"> </span>residual-vanilla<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">    </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--vanilla-algo<span class="w"> </span>td3<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">    </span>--residual-model<span class="w"> </span>data/earlysweep_sac/res_s0/ckpt_15000_steps.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">    </span>--vanilla-model<span class="w"> </span>data/earlysweep/van_s0/ckpt_15000_steps.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">    </span>--figdir<span class="w"> </span>data/ckptvideo_sac/15000<span class="w"> </span>--video-prefix<span class="w"> </span>ckpt-sac-015k<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">    </span>--title-note<span class="w"> </span><span class="s2">&quot;  —  SAC residual, 15k training steps&quot;</span>
 </span></code></pre></div>
 
 

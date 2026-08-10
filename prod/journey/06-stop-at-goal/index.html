@@ -1995,9 +1995,13 @@ efficient the successes are. Candidates:</p>
 </tbody>
 </table>
 <p><code>path-length ratio</code> and <code>min distance</code> are the highest-value additions: together
-they distinguish all three observed failure modes that success rate collapses. Still
-open — the benchmarks in <a href="../07-imitation-learning/">07</a> / <a href="../08-residual-rl/">08</a>
-report reach rate only.</p>
+they distinguish all three observed failure modes that success rate collapses.</p>
+<p>Partly closed since: <a href="../09-vanilla-rl/">09</a> and <a href="../10-sample-efficiency/">10</a> report
+success-rate CIs, episode return split into position / heading / control cost, steps-to-reach,
+and trajectory deviation — enough to show that arms with identical reach rates differ on
+per-step heading and control effort. <strong>Still unreported: <code>path-length ratio</code>, <code>min distance</code>,
+dwell time, and the overshoot / stall / diverge failure taxonomy</strong> — so <em>why</em> a run failed is
+still not a number anywhere.</p>
 
 
 
