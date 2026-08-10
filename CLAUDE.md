@@ -13,8 +13,9 @@ Repo status:
 1. Gymnasium env for goal-reaching (`TwoWheelGoal-v0`) — done.
 2. Classical controller baseline — **DeePC** (data-EnablEd predictive control, Coulson/Lygeros/Dörfler 2019; same family as the paper's DDPC) with orientation-keyed library switching — done.
 3. Imitation-learned clone of DeePC (fast MLP surrogate) plus **TD3/SAC residual RL** correction on top, via stable-baselines3 — done; the residual lifts reach rate from ~39% (DeePC/clone) to 87–95% depending on training length (see `docs/journey/07-imitation-learning.md`, `docs/journey/08-residual-rl.md`).
+4. A second, structurally different env — **`PandaReach-v0`**, a 7-DoF Franka Panda end-effector reaching env built on MuJoCo (`panda/`) — done, to test whether the DeePC → clone → residual pipeline generalizes past the unicycle. A DeePC-on-Panda spec is next; see [the MuJoCo primer](docs/reference/mujoco-primer.md).
 
-The env is the product; controllers/policies are baselines that consume it.
+The env is the product; controllers/policies are baselines that consume it. That statement now covers two, structurally different envs — don't assume the whole repo is 2-D, heading-based, or numpy-only-dynamics; `PandaReach-v0` is none of those.
 
 ## Domain facts (do not re-derive these)
 
@@ -42,6 +43,18 @@ r_t = -(y_t - y_ref)ᵀ Q (y_t - y_ref) - u_tᵀ R u_t + reach_bonus · [reached
 where `y = (x, y, δ)` is the 3-D output and `y_ref = (g_x, g_y, 0)`. Defaults: `Q = diag(1, 1, 2)` (heading weighted, matching the paper's `Q_z` in arXiv:2603.07395 Appendix D; the full 3-D `y` also keeps heading visible to behavioral predictors), `R = 1.3e-3 · I₂` (paper value), `reach_bonus = 100`.
 
 Termination uses position-only error (`‖p − g‖ < goal_tolerance`); heading is irrelevant to "reached".
+
+## PandaReach-v0 domain facts (do not re-derive these either)
+
+7-DoF Franka Panda (`panda_nohand.xml`, no floor geom), driven by MuJoCo, 50 Hz control:
+
+- Action `u = Δq ∈ [−0.2, 0.2]⁷` — a **delta** joint target, applied as `ctrl = clip(q_current + u, safe_box)` (`panda/model.py::apply_delta`). The PD-servo actuators treat `ctrl` as an absolute joint-angle target, not a torque. **The plant's true input is `ctrl`, not `u`** — the two differ whenever the box clip fires, which happens on a large fraction of steps under random or far-goal excitation (measured 24–48% depending on policy). A system-identification or DeePC stage on this env should collect and identify `ctrl → y`, not `delta → y`; `info["ctrl"]` from `env.step()` is what to record.
+- `frame_skip = 10` physics steps (`opt.timestep = 0.002 s`) per control step — `dt_ctrl = 0.02 s`, i.e. 50 Hz.
+- `y` = end-effector position `(x, y, z)`, 3-D, read from MuJoCo site `attachment_site`. `y_ref` = the goal position directly — no heading/bearing component, unlike the unicycle.
+- `Q = I₃`, `R = 1.0e-2 · I₇` — ratio-matched to the unicycle's control/state cost balance, not copied (`|u|` here is ~30× smaller, so copying the unicycle's `R` would make control effectively free).
+- `goal_tolerance = 0.05` m, `max_steps = 150`, `reach_bonus = 100`.
+- Goals are sampled by forward kinematics from a random valid (collision-free, above-floor) configuration, so every goal is guaranteed reachable — a Cartesian box sample would not guarantee this.
+- Solvability bounds, with provenance — only the lower one is live: random actions reach **0/20** seeds (still reproducible via `scripts/record_panda_video.py`). A DLS-IK oracle once measured **0.90** over 60 seeds during design on 2026-08-10, establishing the task was achievable, before being removed as out-of-scope (not part of the QP → NN → residual pipeline under study); that number is not reproducible from this tree — it's preserved verbatim in `docs/superpowers/specs/2026-08-10-panda-reach-env-design.md`'s appendix if it ever needs re-measuring.
 
 ## Repo layout (flat by role)
 
@@ -71,7 +84,14 @@ two_wheel_robot/
         train_sb3.py                     # TD3/SAC residual training entrypoint
         video_encoding.py                 # shared MP4 encoder (imageio)
         wrappers.py                        # rescale_action_symmetric() for SB3 compatibility
-scripts/                   # 14 CLI entrypoints: data collection, DeePC/clone/residual run+train+eval, plotting, video
+panda/
+    __init__.py         # registers Gym ID "PandaReach-v0"
+    model.py             # MuJoCo layer: load, safe box, FK, apply_delta, sample_config
+    env.py                # PandaReachEnv(gym.Env)
+    rendering.py           # MujocoRenderer, rgb_array only (no interactive viewer)
+    validity.py             # random rollout -> frames + numeric validity report
+scripts/                   # 21 CLI entrypoints: unicycle data collection/DeePC/clone/residual
+                           # run+train+eval, Panda model probe/video, plotting, video
 tests/                     # pytest
 docs/superpowers/specs/    # local dev-scratch design notes (gitignored, not part of the published repo)
 ```
@@ -83,9 +103,12 @@ Boundary rules:
 - `env/dynamics.py` imports only `numpy` — usable from controllers and tests without Gym.
 - `controllers/` is RL-library-agnostic and has no `gym` import. There's no formal `Controller` base class yet — `DeePC` (`controllers/deepc.py`) exposes `reset(y_initial, u_initial=None)` / `act(y_current, y_ref)` as its de facto contract.
 - `rl/` is the only place that imports `stable_baselines3` (and the only place that imports `torch`, via the clone MLP).
+- `panda/model.py` imports `mujoco` and `numpy` only, no `gymnasium` — mirrors the `env/dynamics.py` rule above.
 - `scripts/*.py` is the CLI surface — each script is a standalone `argparse` entrypoint over some combination of the env, a controller, and/or a trained checkpoint. See `docs/reference/cli.md` for the full flag reference.
 
 ## Public env attributes (consumed by classical controllers)
+
+This section is `TwoWheelGoal-v0`-specific (2-D action, 3-D `y` with a heading component). `PandaReach-v0` exposes the analogous `state`/`y`/`y_ref`/`tip_site_id`/`safe_box` accessors with different shapes — see `panda/env.py`'s own docstrings, not this section.
 
 `env.unwrapped` exposes:
 
@@ -106,6 +129,7 @@ Predictive controllers should read these directly rather than reverse-engineerin
 - Package manager: **uv** (lockfile committed: `uv.lock`). Python `>=3.12`.
 - Add deps with `uv add <pkg>`; sync with `uv sync`.
 - Run anything via `uv run <cmd>` so the project venv is used.
+- `mujoco` and `robot-descriptions` are deps added for `panda/` only. `robot_descriptions` lazily shallow-clones `mujoco_menagerie` into `~/.cache/robot_descriptions/` the first time anything resolves the Panda model path, so the first run after a fresh clone needs network access; every call after reads from the cache.
 
 ## Conventions
 

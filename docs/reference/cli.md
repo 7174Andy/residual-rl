@@ -313,6 +313,33 @@ uv run python scripts/plot_training_return.py \
 
 Prints `wrote <out> (...)`.
 
+## `scripts/mujoco_hello.py`
+
+Prints everything about the Panda MuJoCo model this project depends on: model path, `nq/nv/nu`, joint ranges, the safe box, actuator PD gains, sites/bodies/keyframes, a home-pose tip FK, a 4000-sample workspace survey, and the servo step-response sweep across `delta_max`. Run this first if you have never used MuJoCo — see the [MuJoCo primer](mujoco-primer.md).
+
+```bash
+uv run python scripts/mujoco_hello.py
+```
+
+No flags.
+
+## `scripts/record_panda_video.py`
+
+Records `PandaReach-v0` under random actions to MP4, plus the numeric validity report (`panda/validity.py`) that backs the video with hard guarantees and diagnostics rather than something you have to trust your eyes on.
+
+```bash
+uv run python scripts/record_panda_video.py --episodes 3 --out data/panda_random.mp4
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--episodes` | 3 | Number of episodes |
+| `--seed` | 0 | Base seed (episode `i` uses `seed + i`) |
+| `--max-steps` | 150 | Episode step budget |
+| `--out` | `data/panda_random.mp4` | Output MP4 path |
+
+fps equals the 50 Hz control rate, so playback is real time. Prints the validity report, then `wrote <out> (N frames)`.
+
 ## `tests/`
 
 Pytest, no script wrapper:

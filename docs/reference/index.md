@@ -24,9 +24,17 @@ Pure reference for the env, controllers, and CLI scripts. No "why" — that live
 
     ---
 
-    All 14 scripts under `scripts/` — DeePC data collection/run, clone training/eval, TD3/SAC residual training/eval, and the plotting/video tools. Flags, defaults, expected output.
+    All 21 scripts under `scripts/` — DeePC data collection/run, clone training/eval, TD3/SAC residual training/eval, the Panda model probe/video tools, and the plotting/video tools. Flags, defaults, expected output.
 
     [:octicons-arrow-right-24: CLI](cli.md)
+
+-   :material-robot-industrial:{ .lg .middle } &nbsp; __MuJoCo primer__
+
+    ---
+
+    From-scratch walkthrough of the MuJoCo Python bindings against `PandaReach-v0`'s exact model — `MjModel`/`MjData`, the `mj_step`/`mj_forward` stale-kinematics trap, `qpos`/`qvel`/`ctrl`, actuators, and the `delta_max`/`max_steps` measurements behind `panda/env.py`.
+
+    [:octicons-arrow-right-24: MuJoCo primer](mujoco-primer.md)
 
 </div>
 
@@ -50,4 +58,5 @@ Pure reference for the env, controllers, and CLI scripts. No "why" — that live
 
 ### CLI
 
-- [CLI scripts](cli.md) — full flag reference for all 14 runnable scripts.
+- [CLI scripts](cli.md) — full flag reference for all 21 runnable scripts.
+- [MuJoCo primer](mujoco-primer.md) — from-scratch walkthrough of the MuJoCo bindings used by `PandaReach-v0`.

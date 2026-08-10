@@ -113,6 +113,7 @@ nav:
           - Data collection: controllers/data-collection.md
           - API: controllers/api.md
       - CLI: reference/cli.md
+      - MuJoCo primer: reference/mujoco-primer.md
   - Journey:
       - journey/index.md
       - 01. Task framing: journey/01-task-framing.md
