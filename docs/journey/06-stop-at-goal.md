@@ -318,6 +318,11 @@ efficient the successes are. Candidates:
 | compute     | QP failure rate; solve time; warm-start hit rate                            | controller health                     |
 
 `path-length ratio` and `min distance` are the highest-value additions: together
-they distinguish all three observed failure modes that success rate collapses. Still
-open — the benchmarks in [07](07-imitation-learning.md) / [08](08-residual-rl.md)
-report reach rate only.
+they distinguish all three observed failure modes that success rate collapses.
+
+Partly closed since: [09](09-vanilla-rl.md) and [10](10-sample-efficiency.md) report
+success-rate CIs, episode return split into position / heading / control cost, steps-to-reach,
+and trajectory deviation — enough to show that arms with identical reach rates differ on
+per-step heading and control effort. **Still unreported: `path-length ratio`, `min distance`,
+dwell time, and the overshoot / stall / diverge failure taxonomy** — so _why_ a run failed is
+still not a number anywhere.
