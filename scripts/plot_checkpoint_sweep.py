@@ -29,9 +29,15 @@ import numpy as np  # noqa: E402
 #   -> every check PASSes (worst adjacent CVD dE 15.9, all >= 3:1 contrast) except
 #      the gray's chroma floor, the same deliberate baseline exception as elsewhere.
 #      Aqua and magenta failed contrast; green collides with orange under protanopia.
+#      Adding the vanilla-SAC arm keeps that verdict -- validated as
+#      "#898781,#3987e5,#4a3aa7,#c1701c,#e87ba4": worst adjacent CVD dE 14.7, normal-vision
+#      17.0, same lone gray-chroma FAIL. Magenta carries a sub-3:1 contrast WARN, which the
+#      direct labels below discharge (the relief rule). Yellow was rejected: dE 14.9 against
+#      the orange, under the 15 normal-vision floor.
 _RESIDUAL = "#3987e5"
 _VANILLA = "#c1701c"
 _RESIDUAL_SAC = "#4a3aa7"
+_VANILLA_SAC = "#e87ba4"
 _BASELINE = "#898781"
 _INK = "#52514e"
 _GRID = "#e1e0d9"
@@ -40,7 +46,8 @@ _GRID = "#e1e0d9"
 # whether or not the other arms are present in the CSV.
 ARMS = [("residual", _RESIDUAL, "clone + residual TD3 (frac 2.0)"),
         ("residual_sac", _RESIDUAL_SAC, "clone + residual SAC (frac 2.0)"),
-        ("vanilla", _VANILLA, "vanilla TD3")]
+        ("vanilla", _VANILLA, "vanilla TD3"),
+        ("vanilla_sac", _VANILLA_SAC, "vanilla SAC")]
 DEEPC_REACH = 30 / 78  # docs/journey/figures/reach_rates.csv -- DeePC and clone both
 
 
@@ -121,11 +128,21 @@ def main() -> int:
             ax.spines[side].set_color(_GRID)
         ax.tick_params(labelsize=8, colors=_INK)
 
-    # Direct labels on the left panel, so arm identity is never colour-alone.
-    for arm, _color, label in arms:
-        xs, mean, _ = _series(rows, arm, "reach_rate")
-        axes[0].annotate(label.split(" (")[0], xy=(xs[0], mean[0]), xytext=(6, -10),
-                         textcoords="offset points", fontsize=7.5, color=_INK)
+    # Direct labels on the left panel, so arm identity is never colour-alone (and the
+    # relief the magenta's contrast WARN requires). Ordered by where each curve starts
+    # and stacked downward, because at the first checkpoint all four arms are bunched
+    # inside a few percent and a fixed offset would overlap them.
+    starts = sorted(((_series(rows, a, "reach_rate")[1][0], a, lab) for a, _c, lab in arms),
+                    reverse=True)
+    x0 = _series(rows, arms[0][0], "reach_rate")[0][0]
+    # One ladder anchored at the highest-starting curve, not each curve's own y: at the
+    # first checkpoint the arms are bunched into a few percent, so per-curve offsets push
+    # the lowest label off the bottom of the axes.
+    y_anchor = starts[0][0]
+    for rank, (_y0, _arm, label) in enumerate(starts):
+        axes[0].annotate(label.split(" (")[0], xy=(x0, y_anchor),
+                         xytext=(7, 6 - 11 * rank), textcoords="offset points",
+                         fontsize=7.5, color=_INK)
     handles = [plt.Line2D([], [], color=c, lw=2.0, marker="o", ms=5.5, mec="white",
                           mew=1.0, label=lab) for _, c, lab in arms]
     fig.legend(handles=handles, loc="lower center", ncol=len(arms), frameon=False, fontsize=9,

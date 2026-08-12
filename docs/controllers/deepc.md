@@ -100,7 +100,7 @@ like any other QP failure rather than crashing the caller.
 
 ## Public API
 
-::: two_wheel_robot.controllers.deepc.DeePC
+::: core.deepc.DeePC
     options:
       show_root_heading: false
       heading_level: 3

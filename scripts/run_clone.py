@@ -34,7 +34,7 @@ from two_wheel_robot.env.env import UnicycleGoalEnv
 from two_wheel_robot.rl.clone import load_clone
 from two_wheel_robot.rl.deepc_setup import bearing_y_ref, build_canonical_deepc
 from two_wheel_robot.rl.features import featurize
-from two_wheel_robot.rl.video_encoding import encode_video
+from core.video_encoding import encode_video
 
 
 def main() -> int:

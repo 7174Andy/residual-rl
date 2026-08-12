@@ -69,7 +69,7 @@ Pick based on the task.
 Once `(u, y)` is in hand, build the past/future block-Hankels:
 
 ```python
-from two_wheel_robot.controllers.hankel import build_hankel
+from core.hankel import build_hankel
 
 Up, Uf, Yp, Yf = build_hankel(u_traj, y_traj, T_ini=5, N=12)
 # Up: (T_ini · m_u, n_cols)
@@ -85,4 +85,4 @@ Up, Uf, Yp, Yf = build_hankel(u_traj, y_traj, T_ini=5, N=12)
 
 ::: two_wheel_robot.controllers.data_collection
 
-::: two_wheel_robot.controllers.hankel
+::: core.hankel

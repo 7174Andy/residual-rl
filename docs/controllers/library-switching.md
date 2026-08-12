@@ -43,8 +43,8 @@ These come from `controllers/data_collection.PAPER_INIT_HEADINGS` after the env'
 
 ```python
 import numpy as np
-from two_wheel_robot.controllers.deepc import DeePC
-from two_wheel_robot.controllers.hankel import build_hankel
+from core.deepc import DeePC
+from core.hankel import build_hankel
 
 # One Hankel tuple per library
 libraries = [

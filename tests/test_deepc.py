@@ -23,8 +23,8 @@ import pytest
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import deepc_scenarios as S  # noqa: E402
 
-from two_wheel_robot.controllers.deepc import DeePC  # noqa: E402
-from two_wheel_robot.controllers.hankel import build_hankel  # noqa: E402
+from core.deepc import DeePC  # noqa: E402
+from core.hankel import build_hankel  # noqa: E402
 
 _FIXTURE = np.load(pathlib.Path(__file__).resolve().parent / "fixtures" / "deepc_golden.npz")
 

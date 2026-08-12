@@ -15,7 +15,7 @@ import numpy as np
 
 from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
 from two_wheel_robot.rl.train_sb3 import load_residual
-from two_wheel_robot.rl.video_encoding import encode_video
+from core.video_encoding import encode_video
 
 
 def main() -> int:

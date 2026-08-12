@@ -18,7 +18,7 @@ The env exposes a fixed set of accessors that DeePC (and any other data-driven p
 ## What's *not* in this interface
 
 - No past-trajectory buffer. DeePC manages its own.
-- No Hankel matrices. Those are built once at controller construction (`controllers/hankel.py`) from offline data.
+- No Hankel matrices. Those are built once at controller construction (`core/hankel.py`) from offline data.
 - No disturbance signal `e`. The unicycle goal-reaching task has no exogenous input; this is one of the differences from mixed-traffic Deep-LCC. See the [DeePC formulation journey entry](../journey/04-deepc-formulation.md).
 
 ## Reading and writing from a controller

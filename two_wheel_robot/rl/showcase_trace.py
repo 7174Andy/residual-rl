@@ -2,7 +2,7 @@
 
 Used by scripts/render_dashboard_video.py so a new seed needs one command,
 not a separate scripts/eval_seed_showcase.py pass first. Kept separate from
-two_wheel_robot.rl.trace_io (pure CSV I/O, no gym/torch/sb3) so
+core.trace_io (pure CSV I/O, no gym/torch/sb3) so
 scripts/plot_seed_traces.py can read traces without paying for those imports.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ from two_wheel_robot.rl.deepc_setup import build_canonical_deepc
 from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
 from two_wheel_robot.rl.residual_eval import run_residual_closed_loop_with_actions
 from two_wheel_robot.rl.train_sb3 import load_residual
-from two_wheel_robot.rl.trace_io import (
+from core.trace_io import (
     clone_trace_path,
     read_trace,
     residual_trace_path,

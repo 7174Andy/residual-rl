@@ -81,7 +81,12 @@ class PandaReachEnv(gym.Env):
         render_mode: Optional[str] = None,
     ):
         super().__init__()
-        self.model, self.data = load_model()
+        # The scene backdrop is compiled in only when something will actually
+        # look at a frame. It is visual-only and provably does not alter physics
+        # (see panda.model._SCENE_XML), so a rendered run and a headless run of
+        # the same scenario produce identical numbers -- but a headless sweep has
+        # no reason to pay for a skybox and 60th geom.
+        self.model, self.data = load_model(scene=render_mode == "rgb_array")
         self.nq = int(self.model.nq)
         self.frame_skip = frame_skip(self.model, dt_ctrl)
         # The true control period, not merely the requested one: frame_skip()
@@ -149,13 +154,70 @@ class PandaReachEnv(gym.Env):
 
     @property
     def y(self) -> np.ndarray:
-        """DeePC output: end-effector position `(3,)`. Returns a copy."""
+        """Task output: end-effector position `(3,)`. Returns a copy.
+
+        This is what the REWARD is computed against, and it stays 3-D. For the
+        richer output a predictive controller should identify on, see `y_ext`.
+        """
         return tip_position(self.data, self._tip_id)
 
     @property
     def y_ref(self) -> np.ndarray:
-        """DeePC reference: the goal position `(3,)`. Returns a copy."""
+        """Task reference: the goal position `(3,)`. Returns a copy."""
         return self.goal.copy()
+
+    @property
+    def q_normalized(self) -> np.ndarray:
+        """Joint configuration mapped to `[-1, 1]` over the safe box, `(7,)`.
+
+        Raw `q` is in radians with per-joint offsets and spans that differ a lot
+        (joint4 spans [-2.772, -0.370], joint6 [0.359, 3.375], neither centred on
+        zero, while five others are symmetric). Concatenating raw radians with
+        metres would make `lambda_y * ||sigma_y||^2` sum two incommensurable units
+        and silently reweight the slack per joint. Normalizing first makes one
+        scalar `lambda_y` meaningful again.
+        """
+        mid = 0.5 * (self._lo + self._hi)
+        half = 0.5 * (self._hi - self._lo)
+        return (np.asarray(self.data.qpos, dtype=np.float64) - mid) / half
+
+    @property
+    def y_ext(self) -> np.ndarray:
+        """Extended output for system identification: `(tip, q_normalized)`, `(10,)`.
+
+        Exists because `y = tip` alone does NOT observe the state, which is the
+        precondition Willems' lemma (and therefore DeePC) needs from the past
+        window. A 7-DoF arm has a 4-D self-motion manifold: configurations up to
+        6.9 rad apart in `q` can share a tip position to under 1 mm, and because
+        their Jacobians differ they respond differently to the same delta --
+        measured median tip divergence 63 mm at a 12-step horizon under identical
+        inputs, past the 50 mm goal tolerance in 57% of such pairs. So
+        `(u_ini, y_ini)` maps one-to-many onto futures and no amount of data or
+        finer library keying can repair it.
+
+        Appending `q` closes that gap by construction: `(q, qdot)` is the full
+        state and `qdot` is recoverable from consecutive `q` samples, so a
+        `T_ini`-step window of this output determines the state.
+
+        The first three components are deliberately the tip, so `azimuth_key`
+        (`atan2(y[1], y[0])`) works on `y_ext` unchanged.
+
+        This is ADDITIVE. `y`, `y_ref`, `Q`, and the reward are untouched, so
+        adopting this cannot silently redefine the task -- a controller opts in by
+        reading `y_ext` instead of `y`.
+        """
+        return np.concatenate([self.y, self.q_normalized])
+
+    @property
+    def y_ref_ext(self) -> np.ndarray:
+        """Reference matching `y_ext`: `(goal, zeros(7))`, `(10,)`.
+
+        The `q` block is zero because the paired `Q = diag(I_3, 0_7)` gives it zero
+        weight -- any value there is equivalent. Zeros, not the current `q`, so the
+        reference is a function of the goal alone and cannot smuggle state into
+        what is supposed to be a fixed target.
+        """
+        return np.concatenate([self.goal, np.zeros(self.nq)])
 
     @property
     def tip_site_id(self) -> int:

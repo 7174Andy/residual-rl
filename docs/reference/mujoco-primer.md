@@ -7,6 +7,26 @@ Every number below is copied from a real run of `scripts/mujoco_hello.py` or `sc
 !!! note "First run downloads the model"
     `panda/model.py`'s `model_path()` resolves through `robot_descriptions`, which shallow-clones `mujoco_menagerie` into `~/.cache/robot_descriptions/` the first time anything imports the Panda. That first call needs network access and takes a while; every call after is instant, reading from the cache. The model itself is never the reason a Panda test carries `@pytest.mark.integration` — this repo's `integration` marker means "loads real data files from `data/`" (declared-dependency assets like the Panda model don't count). As of this tree there are zero Panda tests marked `integration` (`uv run pytest --collect-only -m integration -q` collects 11, all pre-existing unicycle tests) — the two that used to carry it, pinning aggregate reach-rate statistics for the DLS-IK oracle, were removed with that oracle.
 
+!!! info "Where the robot model comes from"
+
+    Franka Emika Panda, MJCF from
+    [`google-deepmind/mujoco_menagerie`](https://github.com/google-deepmind/mujoco_menagerie)
+    — `franka_emika_panda/panda_nohand.xml`, the no-gripper variant, which is why
+    `nq = nv = nu = 7` with no extra finger joints to reason about.
+
+    | | |
+    |---|---|
+    | license | **Apache-2.0** (`franka_emika_panda/LICENSE` in menagerie) |
+    | derived from | Franka Emika's [`franka_description`](https://github.com/frankaemika/franka_ros/tree/develop/franka_description) URDF |
+    | revision | menagerie [`feadf76`](https://github.com/google-deepmind/mujoco_menagerie/commit/feadf76d42f8a2162426f7d226a3b539556b3bf5) (2026-03-18) |
+    | vendored? | no — `robot_descriptions` caches it under `~/.cache/` |
+
+    The revision is worth pinning because **every number on this page is a property of
+    that model revision**, not of MuJoCo or of Panda arms in general. If a menagerie
+    update changes a joint range or a servo gain, `scripts/mujoco_hello.py` reprints
+    everything and the difference shows up immediately — which is the whole reason that
+    script is in the repo rather than having been a throwaway.
+
 ## 1. `MjModel` vs `MjData`
 
 The one distinction that unlocks everything else: **`MjModel` is the robot, `MjData` is the moment.**

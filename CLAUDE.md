@@ -46,62 +46,29 @@ Termination uses position-only error (`‖p − g‖ < goal_tolerance`); heading
 
 ## PandaReach-v0 domain facts (do not re-derive these either)
 
-7-DoF Franka Panda (`panda_nohand.xml`, no floor geom), driven by MuJoCo, 50 Hz control:
+7-DoF Franka Panda (`panda_nohand.xml`, no floor geom), driven by MuJoCo, 50 Hz control.
+Model source: `franka_emika_panda/panda_nohand.xml` from google-deepmind/mujoco_menagerie, Apache-2.0, derived from Franka Emika's `franka_description` URDF; fetched by `robot_descriptions` into `~/.cache/` (not vendored). All constants below were measured against menagerie revision `feadf76` (2026-03-18) — see `panda/model.py`'s docstring.
+
 
 - Action `u = Δq ∈ [−0.2, 0.2]⁷` — a **delta** joint target, applied as `ctrl = clip(q_current + u, safe_box)` (`panda/model.py::apply_delta`). The PD-servo actuators treat `ctrl` as an absolute joint-angle target, not a torque. **The plant's true input is `ctrl`, not `u`** — the two differ whenever the box clip fires, which happens on a large fraction of steps under random or far-goal excitation (measured 24–48% depending on policy). A system-identification or DeePC stage on this env should collect and identify `ctrl → y`, not `delta → y`; `info["ctrl"]` from `env.step()` is what to record.
 - `frame_skip = 10` physics steps (`opt.timestep = 0.002 s`) per control step — `dt_ctrl = 0.02 s`, i.e. 50 Hz.
-- `y` = end-effector position `(x, y, z)`, 3-D, read from MuJoCo site `attachment_site`. `y_ref` = the goal position directly — no heading/bearing component, unlike the unicycle.
+- `y` = end-effector position `(x, y, z)`, 3-D, read from MuJoCo site `attachment_site`. `y_ref` = the goal position directly — no heading/bearing component, unlike the unicycle. **`y` is the reward's output and stays 3-D.**
+- **`y` does not observe the state, and this is measured, not suspected.** A 7-DoF arm has a 4-D self-motion manifold: 132 sampled configuration pairs agree on tip position to <1 mm while sitting a median 3.59 rad apart in `q`, and because their Jacobians differ, driving both with an *identical* delta sequence separates their tips by a median 63 mm at a 12-step horizon — past the 50 mm `goal_tolerance` in 57% of pairs. So `(u_ini, y_ini)` maps **one-to-many** onto futures, violating the precondition Willems' lemma (hence DeePC) needs from the past window. This is *not* fixable by more data or finer library keying. Contrast the unicycle, where `y = (x, y, δ)` **is** the full state `z` — zero hidden dimensions. That asymmetry, not nonlinearity, is the main structural difference between the two systems.
+- `y_ext` = `(tip, q_normalized)`, 10-D, is the additive remedy: `q` normalized to `[-1, 1]` over the safe box (raw radians against metres would make `λ_y‖σ_y‖²` sum incommensurable units). Tip occupies the first 3 components so `azimuth_key` works on it unchanged. `y_ref_ext` = `(goal, zeros(7))`. Paired with `Q = diag(I₃, 0₇)` in `deepc_setup(output="ext")`, so the tracking cost is **numerically identical** to tip-only — the extra outputs inform prediction through the `Yp`/`Yf` constraints without changing what is optimized. `y`/`y_ref`/`Q`/the reward are untouched; a controller opts in by reading `y_ext`.
 - `Q = I₃`, `R = 1.0e-2 · I₇` — ratio-matched to the unicycle's control/state cost balance, not copied (`|u|` here is ~30× smaller, so copying the unicycle's `R` would make control effectively free).
 - `goal_tolerance = 0.05` m, `max_steps = 150`, `reach_bonus = 100`.
 - Goals are sampled by forward kinematics from a random valid (collision-free, above-floor) configuration, so every goal is guaranteed reachable — a Cartesian box sample would not guarantee this.
 - Solvability bounds, with provenance — only the lower one is live: random actions reach **0/20** seeds (still reproducible via `scripts/record_panda_video.py`). A DLS-IK oracle once measured **0.90** over 60 seeds during design on 2026-08-10, establishing the task was achievable, before being removed as out-of-scope (not part of the QP → NN → residual pipeline under study); that number is not reproducible from this tree — it's preserved verbatim in `docs/superpowers/specs/2026-08-10-panda-reach-env-design.md`'s appendix if it ever needs re-measuring.
 
-## Repo layout (flat by role)
-
-```
-two_wheel_robot/
-    env/
-        __init__.py        # registers Gym ID "TwoWheelGoal-v0"
-        dynamics.py         # pure unicycle step, no Gym deps
-        env.py              # UnicycleGoalEnv(gym.Env)
-        rendering.py        # PygameRenderer (handles "human" and "rgb_array")
-    controllers/
-        data_collection.py  # offline PE rollouts to build Hankel data libraries
-        hankel.py           # build_hankel() past/future block-Hankel matrices
-        deepc.py            # DeePC: orientation-keyed library-switching QP controller
-    rl/
-        clone.py             # imitation-learning clone MLP (train/save/load)
-        clone_data.py         # hybrid synthetic + on-policy dataset generation
-        clone_eval.py          # fidelity-gate stats (regression, McNemar, paired outcomes)
-        deepc_setup.py          # canonical DeePC config shared by clone/residual code
-        device.py                # cuda -> mps -> cpu device selection
-        features.py               # featurize() for the clone
-        residual_env.py            # ResidualDeePCEnv: clone + TD3/SAC residual correction
-        residual_eval.py            # 3-way benchmark: DeePC vs clone vs clone+residual
-        showcase_trace.py            # per-seed closed-loop trace cache generation
-        trace_io.py                   # CSV read/write for traces (no gym/torch deps)
-        trace_reward.py                 # recompute_reward() from a CSV trace
-        train_sb3.py                     # TD3/SAC residual training entrypoint
-        video_encoding.py                 # shared MP4 encoder (imageio)
-        wrappers.py                        # rescale_action_symmetric() for SB3 compatibility
-panda/
-    __init__.py         # registers Gym ID "PandaReach-v0"
-    model.py             # MuJoCo layer: load, safe box, FK, apply_delta, sample_config
-    env.py                # PandaReachEnv(gym.Env)
-    rendering.py           # MujocoRenderer, rgb_array only (no interactive viewer)
-    validity.py             # random rollout -> frames + numeric validity report
-scripts/                   # 21 CLI entrypoints: unicycle data collection/DeePC/clone/residual
-                           # run+train+eval, Panda model probe/video, plotting, video
-tests/                     # pytest
-docs/superpowers/specs/    # local dev-scratch design notes (gitignored, not part of the published repo)
-```
+## Layout rules
 
 There is no `two_wheel_robot/eval/` package and no `configs/` directory. Evaluation/metrics logic lives in `rl/clone_eval.py`, `rl/residual_eval.py`, and `rl/trace_reward.py`; every script takes CLI flags (argparse, hardcoded defaults) instead of YAML configs.
 
 Boundary rules:
 
+- `core/` imports nothing from `two_wheel_robot/` or `panda/` (or `gymnasium`) — it's the dependency sink shared by both systems' controllers.
 - `env/dynamics.py` imports only `numpy` — usable from controllers and tests without Gym.
-- `controllers/` is RL-library-agnostic and has no `gym` import. There's no formal `Controller` base class yet — `DeePC` (`controllers/deepc.py`) exposes `reset(y_initial, u_initial=None)` / `act(y_current, y_ref)` as its de facto contract.
+- `controllers/` is RL-library-agnostic and has no `gym` import. There's no formal `Controller` base class yet — `DeePC` (`core/deepc.py`) exposes `reset(y_initial, u_initial=None)` / `act(y_current, y_ref)` as its de facto contract.
 - `rl/` is the only place that imports `stable_baselines3` (and the only place that imports `torch`, via the clone MLP).
 - `panda/model.py` imports `mujoco` and `numpy` only, no `gymnasium` — mirrors the `env/dynamics.py` rule above.
 - `scripts/*.py` is the CLI surface — each script is a standalone `argparse` entrypoint over some combination of the env, a controller, and/or a trained checkpoint. See `docs/reference/cli.md` for the full flag reference.
@@ -110,25 +77,12 @@ Boundary rules:
 
 This section is `TwoWheelGoal-v0`-specific (2-D action, 3-D `y` with a heading component). `PandaReach-v0` exposes the analogous `state`/`y`/`y_ref`/`tip_site_id`/`safe_box` accessors with different shapes — see `panda/env.py`'s own docstrings, not this section.
 
-`env.unwrapped` exposes:
-
-- `state` — `(z_x, z_y, z_δ)` ndarray, current pose.
-- `goal` — `(g_x, g_y)` ndarray.
-- `step_idx` — int step counter.
-- `last_action` — clipped action from the previous step (zeros after `reset`).
-- `y` — DeePC output measurement, `(x, y, δ)`, dim 3. For this fully-observed unicycle, `y == state`.
-- `y_ref` — DeePC reference, `(g_x, g_y, 0)`, dim 3.
-- `Q`, `R` — cost matrices (3×3 and 2×2).
-
 DeePC contract: `u = action_space` (dim 2), `y` (dim 3), no disturbance `e`. The controller maintains its own past-trajectory buffer `(u_ini, y_ini)` of length `T_ini` and Hankel matrices built from offline data; the env stays stateless from the controller's perspective beyond exposing `y` each step.
 
-Predictive controllers should read these directly rather than reverse-engineering from the body-frame observation.
+Predictive controllers should read `env.unwrapped` directly rather than reverse-engineering from the body-frame observation.
 
 ## Tooling
 
-- Package manager: **uv** (lockfile committed: `uv.lock`). Python `>=3.12`.
-- Add deps with `uv add <pkg>`; sync with `uv sync`.
-- Run anything via `uv run <cmd>` so the project venv is used.
 - `mujoco` and `robot-descriptions` are deps added for `panda/` only. `robot_descriptions` lazily shallow-clones `mujoco_menagerie` into `~/.cache/robot_descriptions/` the first time anything resolves the Panda model path, so the first run after a fresh clone needs network access; every call after reads from the cache.
 
 ## Conventions

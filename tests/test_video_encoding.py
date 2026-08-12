@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from two_wheel_robot.rl.video_encoding import encode_video
+from core.video_encoding import encode_video
 
 
 def test_encode_video_writes_playable_mp4(tmp_path):

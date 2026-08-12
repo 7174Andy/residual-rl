@@ -8,9 +8,15 @@ The controllers package provides a data-driven predictive controller (DeePC) and
 two_wheel_robot/controllers/
     __init__.py
     data_collection.py    # offline (u, y) trajectory generation
-    hankel.py             # block-Hankel matrix construction
-    deepc.py              # DeePC (orientation-keyed library switching built in)
+
+core/
+    hankel.py              # block-Hankel matrix construction
+    deepc.py               # DeePC (orientation-keyed library switching built in)
 ```
+
+`hankel.py` and `deepc.py` live in the top-level `core/` package, not
+`controllers/`, because both are system-agnostic — they know nothing about
+the unicycle specifically and are shared with other envs' controllers.
 
 A controller is anything implementing the `Controller` protocol:
 
@@ -38,13 +44,14 @@ graph LR
 Each box maps to a module:
 
 - [Data collection](data-collection.md) — `controllers/data_collection.py`
-- Block Hankel construction — `controllers/hankel.py`
-- [DeePC controller](deepc.md) — `controllers/deepc.py`
-- [Library switching](library-switching.md) — orientation-keyed switching built into `controllers/deepc.py::DeePC`
+- Block Hankel construction — `core/hankel.py`
+- [DeePC controller](deepc.md) — `core/deepc.py`
+- [Library switching](library-switching.md) — orientation-keyed switching built into `core/deepc.py::DeePC`
 
 ## Why this layered design
 
 - **`dynamics.py`** is pure numpy with no Gym dep → controllers and tests can use it directly.
+- **`core/`** imports nothing from `two_wheel_robot/` (or any other system package) → `DeePC` and `build_hankel` are usable by any env's controllers, not just the unicycle's.
 - **`controllers/`** is RL-library-agnostic → no torch/sb3 here. A controller object talks numpy in and out.
 - **`rl/`** is the only place that imports `stable_baselines3`.
 

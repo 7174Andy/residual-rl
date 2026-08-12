@@ -33,8 +33,8 @@ from two_wheel_robot.controllers.data_collection import (
     PAPER_INIT_HEADINGS,
     DEFAULT_SAMPLE_BOUNDS,
 )
-from two_wheel_robot.controllers.deepc import DeePC
-from two_wheel_robot.controllers.hankel import build_hankel
+from core.deepc import DeePC
+from core.hankel import build_hankel
 from two_wheel_robot.env.dynamics import wrap_to_pi
 from two_wheel_robot.env.env import UnicycleGoalEnv
 

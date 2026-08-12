@@ -43,13 +43,13 @@ predicts the future.
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Callable, Optional
 
 import cvxpy as cp
 import numpy as np
 
 # A library is a tuple of block-Hankel matrices (Up, Uf, Yp, Yf), e.g. as
-# produced by `two_wheel_robot.controllers.hankel.build_hankel`.
+# produced by `core.hankel.build_hankel`.
 Library = tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
 
 
@@ -75,6 +75,7 @@ class DeePC:
         lambda_y: float = 3e6,
         u_bounds: Optional[tuple[np.ndarray, np.ndarray]] = None,
         heading_index: int = 2,
+        key_fn: Optional[Callable[[np.ndarray], float]] = None,
         solver: Optional[str] = "SCS",
         solver_opts: Optional[dict] = None,
     ):
@@ -133,8 +134,10 @@ class DeePC:
                 f"anchor_headings shape {anchor_headings.shape}; "
                 f"expected ({len(stored)},)"
             )
-        # heading_index is only consulted when switching between libraries.
-        if len(stored) > 1 and not 0 <= heading_index < p_y:
+        # heading_index is only consulted when switching between libraries AND no
+        # key_fn was supplied -- under key_fn the keying quantity need not be a
+        # component of y at all (the Panda keys on tip azimuth, atan2(y[1], y[0])).
+        if key_fn is None and len(stored) > 1 and not 0 <= heading_index < p_y:
             raise ValueError(
                 f"heading_index {heading_index} out of range for p_y={p_y}"
             )
@@ -153,6 +156,7 @@ class DeePC:
         self.lambda_y = float(lambda_y)
         self.u_bounds = u_bounds
         self.heading_index = int(heading_index)
+        self.key_fn = key_fn
         self.solver = solver
         # The Reg-DDPC QP is ill-conditioned at the paper's lambda_y (~3e6) over
         # a large Hankel. cvxpy's incidental QP default (OSQP) hits its iteration
@@ -294,12 +298,28 @@ class DeePC:
             raise RuntimeError("Call reset() or prime_buffer() first.")
         return self._u_buf.copy(), self._y_buf.copy()
 
-    def _select_index(self, heading: float) -> int:
-        """Index of the library whose anchor is closest to `heading` on the circle."""
+    def _select_index(self, key: float) -> int:
+        """Index of the library whose anchor is closest to `key` on the circle."""
         # Wrap-aware shortest signed angular difference; pick smallest |diff|.
-        # With one library this is trivially 0 regardless of `heading`.
-        diffs = (heading - self.anchor_headings + np.pi) % (2 * np.pi) - np.pi
+        diffs = (key - self.anchor_headings + np.pi) % (2 * np.pi) - np.pi
         return int(np.argmin(np.abs(diffs)))
+
+    def _select_index_for(self, y_current: np.ndarray) -> int:
+        """Library index for a measurement. Trivially 0 with one library.
+
+        With `key_fn` unset the key is `y_current[heading_index]`, which is the
+        original heading-keyed rule. With `key_fn` set the key is `key_fn(y)`,
+        which lets a system key on a quantity that is a *function* of `y` rather
+        than a component of it.
+        """
+        if self._n_lib == 1:
+            return 0
+        key = (
+            float(y_current[self.heading_index])
+            if self.key_fn is None
+            else float(self.key_fn(y_current))
+        )
+        return self._select_index(key)
 
     def act(self, y_current: np.ndarray, y_ref: np.ndarray) -> np.ndarray:
         """Solve the QP for the current step and return `u_t` (shape `(m_u,)`).
@@ -338,9 +358,7 @@ class DeePC:
             raise ValueError(f"y_ref must be 1-D or 2-D; got ndim={y_ref.ndim}")
 
         # Select the active library by heading (trivially 0 for a single library).
-        idx = 0 if self._n_lib == 1 else self._select_index(
-            float(y_current[self.heading_index])
-        )
+        idx = self._select_index_for(y_current)
 
         # A warm-start `g` indexes the *previous* library's columns; clear it on
         # a switch so the solve doesn't start from a meaningless point.
@@ -425,9 +443,7 @@ class DeePC:
             raise RuntimeError("Call reset() before diagnose_forward().")
 
         y_current = np.asarray(y_current, dtype=np.float64).reshape(self.p_y)
-        idx = 0 if self._n_lib == 1 else self._select_index(
-            float(y_current[self.heading_index])
-        )
+        idx = self._select_index_for(y_current)
         Up, Uf, Yp, Yf = self._libraries[idx]
 
         y_ref = np.asarray(y_ref, dtype=np.float64)

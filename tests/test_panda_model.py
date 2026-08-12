@@ -120,3 +120,76 @@ def test_sample_config_raises_with_diagnosis_when_impossible(md):
     hi = lo.copy()
     with pytest.raises(RuntimeError, match="tip below"):
         pm.sample_config(m, data, np.random.default_rng(0), lo, hi, tid, max_attempts=5)
+
+
+def test_scene_is_visual_only(md):
+    """`load_model(scene=True)` must not perturb a single dynamics quantity.
+
+    The scene exists so rendered frames show the arm against a backdrop instead
+    of the void. Everything measured in this repo -- the safe box, the servo
+    constants, `data/panda_libraries_v0.npz` -- was measured on the bare model, so
+    a scene that changed contacts or actuator gains would silently invalidate all
+    of it. Hence a direct comparison rather than trust in `contype=0`.
+    """
+    bare, bare_d = md
+    scene, scene_d = pm.load_model(scene=True)
+
+    assert (scene.nq, scene.nv, scene.nu, scene.na) == (bare.nq, bare.nv, bare.nu, bare.na)
+    assert np.array_equal(scene.jnt_range, bare.jnt_range)
+    assert np.array_equal(scene.actuator_gainprm, bare.actuator_gainprm)
+    assert np.array_equal(scene.actuator_biasprm, bare.actuator_biasprm)
+    assert np.array_equal(scene.actuator_ctrlrange, bare.actuator_ctrlrange)
+    assert scene.opt.timestep == bare.opt.timestep
+    assert np.array_equal(scene.key_qpos, bare.key_qpos)
+
+    # The floor is present, and invisible to the collision system.
+    floor = scene.geom(pm.SCENE_FLOOR_GEOM)
+    assert floor.contype[0] == 0 and floor.conaffinity[0] == 0
+    assert scene.ngeom == bare.ngeom + 1
+
+    # Same pose in, same contacts and same FK out.
+    for q in (bare.key_qpos[0], np.zeros(7)):
+        for m, d in ((bare, bare_d), (scene, scene_d)):
+            d.qpos[:] = q
+            d.qvel[:] = 0.0
+            mujoco.mj_forward(m, d)
+        assert scene_d.ncon == bare_d.ncon
+        assert np.array_equal(
+            scene_d.site_xpos[pm.tip_id(scene)], bare_d.site_xpos[pm.tip_id(bare)]
+        )
+
+
+def test_scene_model_steps_identically(md):
+    """A rollout must be bit-identical with and without the scene.
+
+    Complements the static check rather than subsuming it -- this trajectory never
+    descends to z=0, so it would NOT catch a colliding floor (verified: making the
+    floor collide fails only the test above). What it does catch is the scene
+    perturbing integration itself, since `scene=True` reaches the compiler through
+    `from_xml_string` with in-memory assets instead of `from_xml_path`.
+
+    Worth checking because `PandaReachEnv` picks `scene=` from `render_mode`: a
+    rendered run and a headless run load different models, and if they diverged at
+    all, a recorded video would not be footage of the episode the CSV scored.
+    """
+    bare, _ = md
+    scene, _ = pm.load_model(scene=True)
+    rng = np.random.default_rng(0)
+    lo, hi = pm.safe_box(bare)
+    ctrls = rng.uniform(lo, hi, size=(20, 7))
+
+    traj = []
+    for m in (bare, scene):
+        d = mujoco.MjData(m)
+        d.qpos[:] = m.key_qpos[0]
+        mujoco.mj_forward(m, d)
+        qs = []
+        for c in ctrls:
+            d.ctrl[:] = c
+            for _ in range(10):
+                mujoco.mj_step(m, d)
+            mujoco.mj_forward(m, d)
+            qs.append(np.concatenate([d.qpos, d.qvel, d.site_xpos[pm.tip_id(m)]]))
+        traj.append(np.asarray(qs))
+
+    assert np.array_equal(traj[0], traj[1])

@@ -340,6 +340,78 @@ uv run python scripts/record_panda_video.py --episodes 3 --out data/panda_random
 
 fps equals the 50 Hz control rate, so playback is real time. Prints the validity report, then `wrote <out> (N frames)`.
 
+## `scripts/make_panda_scenarios.py`
+
+Generates and freezes the `PandaReach-v0` evaluation scenario set, then prints its checksum. **Run this once.** The file is frozen the moment any result is recorded against it; regenerating means bumping to v2 and accepting that cross-version numbers are not comparable.
+
+```bash
+uv run python scripts/make_panda_scenarios.py
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--out` | `data/panda_scenarios_v1.npz` | Output path |
+| `--n` | 78 | Number of scenarios |
+| `--force` | off | Overwrite an existing file (invalidates recorded results) |
+
+## `scripts/collect_panda_data.py`
+
+Collects the DeePC data libraries (one per azimuth anchor) and gates on coverage, failing loudly rather than writing a bad library file. Two gates: clip fraction < 1% (above that, the recorded `u` differs from what the plant received often enough to corrupt the Hankel), and rank ≥ 133 per library (`m_u(T_ini+N) + n_state`).
+
+```bash
+uv run python scripts/collect_panda_data.py --out data/panda_libraries_v1.npz
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--out` | `data/panda_libraries_v0.npz` | Output path |
+| `--T` | 3000 | Steps per library (was 400; raised for `n_cols` margin parity with the unicycle's 17.5×) |
+| `--seed` | 0 | RNG seed |
+
+Records both output definitions from the same trajectories: `y_i` (tip, 3-D) and `yext_i` (tip + normalized `q`, 10-D), so a tip-vs-extended comparison varies only the output map and never the data. `deepc_setup(output="ext")` needs the `yext_i` arrays and errors on files that predate them.
+
+## `scripts/run_panda_deepc.py`
+
+Closed-loop DeePC on `PandaReach-v0`: the λ sweep, then the full evaluation. Go/no-go gate is a reach rate ≥ 20% over the 78 frozen scenarios.
+
+```bash
+# phase 3a — 3x3 grid over the 20-scenario SWEEP subset (~56 min)
+uv run python scripts/run_panda_deepc.py --mode sweep
+
+# phase 3b — the winner over all 78 frozen scenarios (~25 min)
+uv run python scripts/run_panda_deepc.py --mode eval --lambda-g 5e-2 --lambda-y 7.5e4
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--mode` | *required* | `sweep` (20 scenarios, 3×3 λ grid) or `eval` (all 78 at one λ) |
+| `--lambda-g` | `5e-3` | DeePC L1 weight on `g` |
+| `--lambda-y` | `7.5e3` | DeePC slack penalty |
+| `--no-record` | off | Do not append to `data/panda_results.csv` |
+
+`eval` appends to the shared results CSV keyed by `(method, scenario_id)`, which is what makes paired tests across methods available with no further bookkeeping. Per-scenario rows are only comparable across runs of the **same** scenario sequence — see the warm-start note in the DeePC section of the decision log.
+
+## `scripts/record_panda_deepc_video.py`
+
+Records *closed-loop DeePC* on `PandaReach-v0` to MP4, plus a per-scenario cost breakdown splitting the return into its tracking and control halves.
+
+```bash
+# the frozen showcase scenarios at the swept-winning lambdas
+uv run python scripts/record_panda_deepc_video.py --lambda-g 5e-2 --lambda-y 7.5e4
+
+# specific scenarios, in the order given
+uv run python scripts/record_panda_deepc_video.py --scenario-ids 4 3 1
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--scenario-ids` | the showcase set | Frozen scenario ids, in playback order |
+| `--lambda-g` | `5e-3` | DeePC L1 weight on `g` |
+| `--lambda-y` | `7.5e3` | DeePC slack penalty |
+| `--out` | `data/panda_deepc.mp4` | Output MP4 path |
+
+Episodes come from the frozen scenario set and the rollout goes through `eval.run_scenarios` itself, so the footage is of the same episodes `run_panda_deepc.py --mode eval` scores. Nothing is appended to `data/panda_results.csv` — this is a rendering entrypoint, not an extra measurement.
+
 ## `tests/`
 
 Pytest, no script wrapper:
@@ -350,4 +422,4 @@ uv run pytest tests/test_deepc.py -v
 uv run pytest tests/ -k library_switch     # just switcher tests
 ```
 
-Test count: 135 across env, controllers, dynamics, wrappers, imitation clone, and residual RL (`uv run pytest tests/ --collect-only -q` to recount as the suite grows). Tests marked `integration` need real checkpoints in `data/` (git-ignored) and are skipped otherwise.
+Test count: 273 across both systems — unicycle env/controllers/dynamics/wrappers/clone/residual, plus the shared `core/` and the Panda model, env, scenarios, data collection, DeePC setup and eval (`uv run pytest tests/ --collect-only -q` to recount as the suite grows). Tests marked `integration` load real data files or checkpoints from `data/` (git-ignored) and are skipped otherwise.

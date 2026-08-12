@@ -1,11 +1,11 @@
-"""Tests for two_wheel_robot.controllers.hankel."""
+"""Tests for core.hankel."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from two_wheel_robot.controllers.hankel import build_hankel
+from core.hankel import build_hankel
 
 
 # ---- Shapes ------------------------------------------------------------------

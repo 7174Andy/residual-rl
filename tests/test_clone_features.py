@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from two_wheel_robot.controllers.deepc import DeePC
-from two_wheel_robot.controllers.hankel import build_hankel
+from core.deepc import DeePC
+from core.hankel import build_hankel
 from two_wheel_robot.rl.features import featurize, select_library_index
 from tests.deepc_scenarios import ANCHORS, N, Q, R, T_INI, multi_libraries
 

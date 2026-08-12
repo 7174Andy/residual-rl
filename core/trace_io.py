@@ -57,3 +57,35 @@ def read_trace(path: str) -> dict:
         "w": np.array([float(r["w"]) for r in rows]),
         "goal": np.array([float(rows[0]["goal_x"]), float(rows[0]["goal_y"])]),
     }
+
+
+def write_columns(path: str, **columns: np.ndarray) -> None:
+    """Write a CSV whose header is the keyword names, in the order given.
+
+    The existing `write_trace` above is fixed to the unicycle's
+    (traj, actions, goal) schema. This is the schema-free form: any set of
+    equal-length 1-D columns. `panda/eval.py` uses it for a ~40-column trace.
+    """
+    if not columns:
+        raise ValueError("write_columns needs at least one column")
+    arrays = {k: np.asarray(v).reshape(-1) for k, v in columns.items()}
+    lengths = {k: a.shape[0] for k, a in arrays.items()}
+    if len(set(lengths.values())) != 1:
+        raise ValueError(f"all columns must have the same length; got {lengths}")
+    names = list(arrays)
+    n = lengths[names[0]]
+    with open(path, "w", newline="") as fh:
+        writer = csv.writer(fh)
+        writer.writerow(names)
+        for i in range(n):
+            writer.writerow([float(arrays[k][i]) for k in names])
+
+
+def read_columns(path: str) -> dict[str, np.ndarray]:
+    """Inverse of `write_columns`. Preserves header order."""
+    with open(path) as fh:
+        reader = csv.reader(fh)
+        header = next(reader)
+        rows = list(reader)
+    data = np.asarray(rows, dtype=np.float64).reshape(len(rows), len(header))
+    return {name: data[:, j] for j, name in enumerate(header)}

@@ -14,7 +14,7 @@ from __future__ import annotations
 import argparse
 
 from two_wheel_robot.rl.showcase_trace import generate_trace_pair
-from two_wheel_robot.rl.trace_io import clone_trace_path, residual_trace_path
+from core.trace_io import clone_trace_path, residual_trace_path
 
 
 def main() -> int:

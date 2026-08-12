@@ -24,7 +24,7 @@ matplotlib.use("Agg")  # headless: write a PNG, never open a window
 import matplotlib.patches as mpatches  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 
-from two_wheel_robot.rl.trace_io import read_trace  # noqa: E402
+from core.trace_io import read_trace  # noqa: E402
 from two_wheel_robot.rl.trace_reward import DEFAULT_GOAL_TOLERANCE  # noqa: E402
 
 _GRAY = "#898781"

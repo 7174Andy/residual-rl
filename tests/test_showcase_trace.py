@@ -8,7 +8,7 @@ import pytest
 
 from tests.trace_csv_helpers import write_synthetic_trace
 from two_wheel_robot.rl.showcase_trace import ensure_traces
-from two_wheel_robot.rl.trace_io import clone_trace_path, residual_trace_path
+from core.trace_io import clone_trace_path, residual_trace_path
 
 CLONE = "data/clone.pt"
 RESIDUAL_MODEL = "data/residual_td3.zip"

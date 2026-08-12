@@ -35,6 +35,7 @@ import numpy as np  # noqa: E402
 _VANILLA = "#c1701c"
 _RESIDUAL = "#3987e5"
 _RESIDUAL_SAC = "#4a3aa7"
+_VANILLA_SAC = "#e87ba4"
 _INK = "#52514e"
 _MUTED = "#898781"
 _GRID = "#e1e0d9"
@@ -79,6 +80,8 @@ def main() -> int:
     p.add_argument("--glob-res", default="data/seedsweep/res_f2_s*_mon.monitor.csv")
     p.add_argument("--glob-sac", default=None,
                    help="optional third arm: SAC residual monitor CSVs")
+    p.add_argument("--glob-sac-van", default=None,
+                   help="optional fourth arm: SAC vanilla monitor CSVs")
     p.add_argument("--threshold", type=float, default=-6000.0)
     p.add_argument("--out", default="docs/journey/figures/learning_curves.png")
     args = p.parse_args()
@@ -94,6 +97,11 @@ def main() -> int:
         if not sac:
             raise SystemExit(f"no monitor CSVs matched {args.glob_sac}")
         series.append(("clone + residual SAC (frac 2.0)", sac, _RESIDUAL_SAC))
+    if args.glob_sac_van:
+        sac_van = sorted(glob.glob(args.glob_sac_van))
+        if not sac_van:
+            raise SystemExit(f"no monitor CSVs matched {args.glob_sac_van}")
+        series.append(("vanilla SAC", sac_van, _VANILLA_SAC))
     fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.3), dpi=140)
     for ax, xmax, title in ((axes[0], 400_000, "Full budget"),
                             (axes[1], 100_000, "First 100k steps (detail)")):

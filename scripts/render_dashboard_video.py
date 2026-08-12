@@ -30,7 +30,7 @@ import numpy as np  # noqa: E402
 
 from two_wheel_robot.rl.showcase_trace import ensure_traces, ensure_vanilla_trace  # noqa: E402
 from two_wheel_robot.rl.trace_reward import DEFAULT_GOAL_TOLERANCE, recompute_reward  # noqa: E402
-from two_wheel_robot.rl.video_encoding import encode_video  # noqa: E402
+from core.video_encoding import encode_video  # noqa: E402
 
 _GRAY = "#898781"
 _BLUE = "#3987e5"

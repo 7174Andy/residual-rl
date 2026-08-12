@@ -1,5 +1,23 @@
 """MuJoCo layer for the Panda reaching env: load, safe joint box, FK, sampling.
 
+Robot model source
+------------------
+Franka Emika Panda, MJCF from google-deepmind/mujoco_menagerie, file
+`franka_emika_panda/panda_nohand.xml` (the no-gripper variant: nq = nv = nu = 7).
+
+    upstream : https://github.com/google-deepmind/mujoco_menagerie
+    license  : Apache-2.0 (franka_emika_panda/LICENSE in that repo)
+    derived  : from Franka Emika's franka_description URDF,
+               https://github.com/frankaemika/franka_ros
+    revision : menagerie feadf76d42f8a2162426f7d226a3b539556b3bf5 (2026-03-18)
+    fetched  : by the `robot_descriptions` package into
+               ~/.cache/robot_descriptions/ on first use -- NOT vendored here,
+               so the first run needs network access
+
+The revision matters: every measured constant below is a property of that model
+revision, not a law of nature. `scripts/mujoco_hello.py` reprints all of them, so a
+menagerie update can be checked against these values rather than assumed compatible.
+
 Imports `mujoco` and `numpy` only -- no `gymnasium`. This mirrors the role of
 `two_wheel_robot/env/dynamics.py`: the physics is usable from controllers and
 tests without pulling in Gym. The one exception is `model_path()`, which
@@ -31,9 +49,10 @@ SAFE_MARGIN = 0.10
 # `panda_nohand.xml` has no ground plane, so nothing stops the arm reaching below
 # z=0. Start and goal configurations are rejected below this height so episodes
 # begin and end above ground, even though the arm may pass under it mid-episode.
-# ponytail: no floor geom -- add `<geom type="plane">` plus contact exclusions if
-# obstacle-aware reaching is ever wanted. Contacts would break the local
-# linearity the DeePC stage depends on, which is why it is absent now.
+# ponytail: no *colliding* floor geom -- `load_model(scene=True)` adds a
+# visual-only one (contype=0 conaffinity=0). Add a colliding plane plus contact
+# exclusions if obstacle-aware reaching is ever wanted. Contacts would break the
+# local linearity the DeePC stage depends on, which is why none exists now.
 MIN_TIP_Z = 0.05
 
 CTRL_HZ = 50.0
@@ -62,13 +81,98 @@ def model_path() -> str:
     return path
 
 
-def load_model() -> tuple[mujoco.MjModel, mujoco.MjData]:
-    """Compile the model and return `(MjModel, MjData)`."""
-    model = mujoco.MjModel.from_xml_path(model_path())
+# Skybox, ground texture and a directional light, so rendered frames show the arm
+# against a scene instead of the void `panda_nohand.xml` renders into on its own.
+#
+# EVERY element here is visual. The floor carries `contype=0 conaffinity=0`, so it
+# is invisible to the collision system: `mj_forward` reports the same `ncon`, and
+# `nq`/`nu`/`jnt_range`/`actuator_gainprm` are untouched. That is what makes it
+# safe to render an episode whose numbers were measured on the bare model -- a
+# *colliding* floor would invalidate `data/panda_libraries_v0.npz` and the
+# measured constants above. `tests/test_panda_model.py` asserts the equivalence.
+#
+# The floor is a finite `box` slab, NOT the `plane` a MuJoCo scene would normally
+# use, and that is a hard requirement rather than a style choice: MuJoCo sizes an
+# infinite plane's render geometry from the current view, so two `render()` calls
+# on identical state disagree on ~131k pixels (max 129/255). A finite plane still
+# disagrees on ~6. A box is bit-identical, which is what
+# `tests/test_panda_env.py::test_render_is_repeatable_and_marker_follows_goal`
+# requires and what makes recorded video reproducible.
+#
+# Its top face is at z=-0.01, just under the arm's base, to avoid z-fighting with
+# link0's own geometry at z=0. The tip legitimately dips below z=0 mid-episode
+# (see `panda.validity`), so it can visually pass through the floor; nothing
+# physical happens when it does.
+_SCENE_XML = """
+  <statistic center="0.3 0 0.4" extent="1.1"/>
+  <visual>
+    <rgba haze="0.60 0.68 0.75 1"/>
+  </visual>
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.30 0.44 0.60"
+             rgb2="0.62 0.72 0.82" width="512" height="3072"/>
+    <texture type="2d" name="grid" builtin="checker" mark="edge"
+             rgb1="0.30 0.34 0.39" rgb2="0.22 0.26 0.31"
+             markrgb="0.75 0.78 0.80" width="300" height="300"/>
+    <!-- reflectance MUST stay 0. A reflective floor renders the goal marker
+         (injected as a scene geom in panda/rendering.py, not a model body)
+         nondeterministically: repeated render() calls on identical state
+         disagreed on up to 33 pixels at reflectance 0.15, all inside the
+         marker's reflection. Model geoms reflect fine; the injected one does
+         not. Turning the reflection pass off is the cheap half of that
+         trade -- the sheen is worth less than reproducible video. -->
+    <material name="grid" texture="grid" texuniform="true" texrepeat="6 6"
+              reflectance="0"/>
+  </asset>
+  <worldbody>
+    <light pos="0.5 0.6 2.0" dir="-0.2 -0.25 -1" directional="true"
+           diffuse="0.45 0.45 0.45"/>
+    <geom name="backdrop_floor" type="box" pos="0 0 -0.06" size="3 3 0.05"
+          material="grid" contype="0" conaffinity="0"/>
+  </worldbody>
+"""
+
+SCENE_FLOOR_GEOM = "backdrop_floor"
+
+
+def load_model(
+    scene: bool = False, extra_xml: str = ""
+) -> tuple[mujoco.MjModel, mujoco.MjData]:
+    """Compile the model and return `(MjModel, MjData)`.
+
+    `scene=True` splices `_SCENE_XML` in for a renderable backdrop. Physics is
+    unchanged either way (see `_SCENE_XML`); pass it only when rendering.
+
+    `extra_xml` splices caller-supplied top-level MJCF in the same place, so a
+    caller can add bodies/cameras without duplicating the asset plumbing below.
+    Unlike `_SCENE_XML` this is NOT guaranteed physics-neutral -- that is on the
+    caller (mocap bodies with `contype=0 conaffinity=0` are; anything with a
+    joint or a colliding geom is not, and would invalidate the constants above).
+    """
+    path = model_path()
+    if scene or extra_xml:
+        # Splicing XML text and supplying the meshes in memory, rather than the
+        # obvious `<include file="panda_nohand.xml"/>` from a wrapper scene file:
+        # MuJoCo resolves `meshdir` against the *including* file's directory, so
+        # an include from anywhere outside menagerie's own directory cannot find
+        # `assets/*.stl` -- and writing a wrapper into that directory means
+        # writing into ~/.cache, which `robot_descriptions` owns and may wipe.
+        assets_dir = os.path.join(os.path.dirname(path), "assets")
+        with open(path) as fh:
+            splice = (_SCENE_XML if scene else "") + extra_xml
+            xml = fh.read().replace("</mujoco>", splice + "</mujoco>")
+        assets = {}
+        for name in os.listdir(assets_dir):
+            with open(os.path.join(assets_dir, name), "rb") as fh:
+                assets[f"assets/{name}"] = fh.read()
+        model = mujoco.MjModel.from_xml_string(xml, assets)
+    else:
+        model = mujoco.MjModel.from_xml_path(path)
     # `panda_nohand.xml` ships no lights -- menagerie puts them in `scene.xml`,
     # which includes the *with-hand* model and so is unusable here. Bump the
-    # built-in headlight so `rgb_array` frames are lit. Visual only: `vis` does
-    # not participate in dynamics, so this cannot affect any rollout.
+    # built-in headlight so `rgb_array` frames are lit even without `scene`.
+    # Visual only: `vis` does not participate in dynamics, so this cannot
+    # affect any rollout.
     model.vis.headlight.ambient[:] = 0.4
     model.vis.headlight.diffuse[:] = 0.8
     return model, mujoco.MjData(model)

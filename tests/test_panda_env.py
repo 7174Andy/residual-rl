@@ -322,3 +322,62 @@ def test_render_is_repeatable_and_marker_follows_goal():
     e.goal = e.goal + np.array([0.0, 0.25, 0.0])
     assert not np.array_equal(a, e.render())
     e.close()
+
+
+def test_q_normalized_maps_the_safe_box_to_pm_one(env):
+    """The normalization must be exactly the safe box, not the hardware range.
+
+    Excitation lives inside the safe box, so normalizing by the hardware range
+    would leave the q block permanently short of +-1 and quietly reweight it
+    against the metre-scale tip block in `lambda_y * ||sigma_y||^2`.
+    """
+    lo, hi = env.safe_box
+    env.reset(seed=0)
+    for q, expect in ((lo, -1.0), (hi, 1.0), (0.5 * (lo + hi), 0.0)):
+        env.data.qpos[:] = q
+        assert env.q_normalized == pytest.approx(np.full(env.nq, expect))
+    # And a real configuration lands strictly inside.
+    env.reset(seed=3)
+    assert np.all(np.abs(env.q_normalized) <= 1.0 + 1e-9)
+
+
+def test_y_ext_is_tip_then_normalized_q(env):
+    """Tip MUST come first: azimuth_key reads y[0], y[1] and must keep working."""
+    env.reset(seed=1)
+    ext = env.y_ext
+    assert ext.shape == (3 + env.nq,)
+    assert ext[:3] == pytest.approx(env.y)
+    assert ext[3:] == pytest.approx(env.q_normalized)
+
+    from panda.deepc_setup import azimuth_key
+    assert azimuth_key(ext) == pytest.approx(azimuth_key(env.y))
+
+
+def test_y_ref_ext_is_goal_then_zeros(env):
+    env.reset(seed=1)
+    ref = env.y_ref_ext
+    assert ref.shape == (3 + env.nq,)
+    assert ref[:3] == pytest.approx(env.goal)
+    assert ref[3:] == pytest.approx(np.zeros(env.nq))
+
+
+def test_extended_output_does_not_change_the_reward(env):
+    """`y_ext` is additive: the task, the reward and `y` are untouched.
+
+    This is the guard against the change that was deliberately NOT made -- had `y`
+    itself been widened to 10-D, `env.Q` would have had to become diag(I_3, 0_7) in
+    the same commit to keep the reward identical, and any slip there would silently
+    redefine the task while every reach-rate number kept looking plausible.
+    """
+    env.reset(seed=5)
+    assert env.y.shape == (3,)
+    assert env.y_ref.shape == (3,)
+    assert env.Q.shape == (3, 3)
+    rng = np.random.default_rng(0)
+    for _ in range(5):
+        u = rng.uniform(-env.delta_max, env.delta_max, env.nq)
+        _, reward, _, _, info = env.step(u)
+        err = env.y - env.y_ref
+        expect = -(err @ env.Q @ err + u @ env.R @ u)
+        expect += env.reach_bonus if info["distance"] < env.goal_tolerance else 0.0
+        assert reward == pytest.approx(expect)

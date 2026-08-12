@@ -183,8 +183,8 @@ def format_report(report: dict) -> str:
         "  joint limit violations must be 0 -> the arm never exceeds hardware limits",
         "  qpos safe-box excursions CAN be > 0 -> expected servo overshoot, not an alarm",
         "  tip radius in shell      -> FK matches the model and site",
-        f"  tip z < 0 is EXPECTED    -> no floor geom; MIN_TIP_Z={MIN_TIP_Z} gates"
-        " start/goal only",
+        f"  tip z < 0 is EXPECTED    -> no COLLIDING floor geom (the rendered "
+        f"backdrop is visual-only); MIN_TIP_Z={MIN_TIP_Z} gates start/goal only",
         "  random reached 0         -> the task is not trivially solvable",
     ]
     return "\n".join(lines)
