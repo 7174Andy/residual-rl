@@ -1196,6 +1196,50 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scriptsmake_panda_scenariospy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/make_panda_scenarios.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scriptscollect_panda_datapy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/collect_panda_data.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scriptsrun_panda_deepcpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/run_panda_deepc.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scriptsrecord_panda_deepc_videopy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/record_panda_deepc_video.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tests" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1790,6 +1834,50 @@
     <span class="md-ellipsis">
       
         scripts/record_panda_video.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scriptsmake_panda_scenariospy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/make_panda_scenarios.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scriptscollect_panda_datapy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/collect_panda_data.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scriptsrun_panda_deepcpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/run_panda_deepc.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scriptsrecord_panda_deepc_videopy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/record_panda_deepc_video.py
       
     </span>
   </a>
@@ -2617,13 +2705,154 @@
 </tbody>
 </table>
 <p>fps equals the 50 Hz control rate, so playback is real time. Prints the validity report, then <code>wrote &lt;out&gt; (N frames)</code>.</p>
+<h2 id="scriptsmake_panda_scenariospy"><code>scripts/make_panda_scenarios.py</code><a class="headerlink" href="#scriptsmake_panda_scenariospy" title="Permanent link">&para;</a></h2>
+<p>Generates and freezes the <code>PandaReach-v0</code> evaluation scenario set, then prints its checksum. <strong>Run this once.</strong> The file is frozen the moment any result is recorded against it; regenerating means bumping to v2 and accepting that cross-version numbers are not comparable.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/make_panda_scenarios.py
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--out</code></td>
+<td><code>data/panda_scenarios_v1.npz</code></td>
+<td>Output path</td>
+</tr>
+<tr>
+<td><code>--n</code></td>
+<td>78</td>
+<td>Number of scenarios</td>
+</tr>
+<tr>
+<td><code>--force</code></td>
+<td>off</td>
+<td>Overwrite an existing file (invalidates recorded results)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="scriptscollect_panda_datapy"><code>scripts/collect_panda_data.py</code><a class="headerlink" href="#scriptscollect_panda_datapy" title="Permanent link">&para;</a></h2>
+<p>Collects the DeePC data libraries (one per azimuth anchor) and gates on coverage, failing loudly rather than writing a bad library file. Two gates: clip fraction &lt; 1% (above that, the recorded <code>u</code> differs from what the plant received often enough to corrupt the Hankel), and rank ≥ 133 per library (<code>m_u(T_ini+N) + n_state</code>).</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/collect_panda_data.py<span class="w"> </span>--out<span class="w"> </span>data/panda_libraries_v1.npz
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--out</code></td>
+<td><code>data/panda_libraries_v0.npz</code></td>
+<td>Output path</td>
+</tr>
+<tr>
+<td><code>--T</code></td>
+<td>3000</td>
+<td>Steps per library (was 400; raised for <code>n_cols</code> margin parity with the unicycle's 17.5×)</td>
+</tr>
+<tr>
+<td><code>--seed</code></td>
+<td>0</td>
+<td>RNG seed</td>
+</tr>
+</tbody>
+</table>
+<p>Records both output definitions from the same trajectories: <code>y_i</code> (tip, 3-D) and <code>yext_i</code> (tip + normalized <code>q</code>, 10-D), so a tip-vs-extended comparison varies only the output map and never the data. <code>deepc_setup(output="ext")</code> needs the <code>yext_i</code> arrays and errors on files that predate them.</p>
+<h2 id="scriptsrun_panda_deepcpy"><code>scripts/run_panda_deepc.py</code><a class="headerlink" href="#scriptsrun_panda_deepcpy" title="Permanent link">&para;</a></h2>
+<p>Closed-loop DeePC on <code>PandaReach-v0</code>: the λ sweep, then the full evaluation. Go/no-go gate is a reach rate ≥ 20% over the 78 frozen scenarios.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># phase 3a — 3x3 grid over the 20-scenario SWEEP subset (~56 min)</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_panda_deepc.py<span class="w"> </span>--mode<span class="w"> </span>sweep
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="c1"># phase 3b — the winner over all 78 frozen scenarios (~25 min)</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/run_panda_deepc.py<span class="w"> </span>--mode<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>--lambda-g<span class="w"> </span>5e-2<span class="w"> </span>--lambda-y<span class="w"> </span><span class="m">7</span>.5e4
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--mode</code></td>
+<td><em>required</em></td>
+<td><code>sweep</code> (20 scenarios, 3×3 λ grid) or <code>eval</code> (all 78 at one λ)</td>
+</tr>
+<tr>
+<td><code>--lambda-g</code></td>
+<td><code>5e-3</code></td>
+<td>DeePC L1 weight on <code>g</code></td>
+</tr>
+<tr>
+<td><code>--lambda-y</code></td>
+<td><code>7.5e3</code></td>
+<td>DeePC slack penalty</td>
+</tr>
+<tr>
+<td><code>--no-record</code></td>
+<td>off</td>
+<td>Do not append to <code>data/panda_results.csv</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>eval</code> appends to the shared results CSV keyed by <code>(method, scenario_id)</code>, which is what makes paired tests across methods available with no further bookkeeping. Per-scenario rows are only comparable across runs of the <strong>same</strong> scenario sequence — see the warm-start note in the DeePC section of the decision log.</p>
+<h2 id="scriptsrecord_panda_deepc_videopy"><code>scripts/record_panda_deepc_video.py</code><a class="headerlink" href="#scriptsrecord_panda_deepc_videopy" title="Permanent link">&para;</a></h2>
+<p>Records <em>closed-loop DeePC</em> on <code>PandaReach-v0</code> to MP4, plus a per-scenario cost breakdown splitting the return into its tracking and control halves.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># the frozen showcase scenarios at the swept-winning lambdas</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/record_panda_deepc_video.py<span class="w"> </span>--lambda-g<span class="w"> </span>5e-2<span class="w"> </span>--lambda-y<span class="w"> </span><span class="m">7</span>.5e4
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="c1"># specific scenarios, in the order given</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/record_panda_deepc_video.py<span class="w"> </span>--scenario-ids<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="m">1</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--scenario-ids</code></td>
+<td>the showcase set</td>
+<td>Frozen scenario ids, in playback order</td>
+</tr>
+<tr>
+<td><code>--lambda-g</code></td>
+<td><code>5e-3</code></td>
+<td>DeePC L1 weight on <code>g</code></td>
+</tr>
+<tr>
+<td><code>--lambda-y</code></td>
+<td><code>7.5e3</code></td>
+<td>DeePC slack penalty</td>
+</tr>
+<tr>
+<td><code>--out</code></td>
+<td><code>data/panda_deepc.mp4</code></td>
+<td>Output MP4 path</td>
+</tr>
+</tbody>
+</table>
+<p>Episodes come from the frozen scenario set and the rollout goes through <code>eval.run_scenarios</code> itself, so the footage is of the same episodes <code>run_panda_deepc.py --mode eval</code> scores. Nothing is appended to <code>data/panda_results.csv</code> — this is a rendering entrypoint, not an extra measurement.</p>
 <h2 id="tests"><code>tests/</code><a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
 <p>Pytest, no script wrapper:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_deepc.py<span class="w"> </span>-v
-</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/<span class="w"> </span>-k<span class="w"> </span>library_switch<span class="w">     </span><span class="c1"># just switcher tests</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_deepc.py<span class="w"> </span>-v
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/<span class="w"> </span>-k<span class="w"> </span>library_switch<span class="w">     </span><span class="c1"># just switcher tests</span>
 </span></code></pre></div>
-<p>Test count: 135 across env, controllers, dynamics, wrappers, imitation clone, and residual RL (<code>uv run pytest tests/ --collect-only -q</code> to recount as the suite grows). Tests marked <code>integration</code> need real checkpoints in <code>data/</code> (git-ignored) and are skipped otherwise.</p>
+<p>Test count: 273 across both systems — unicycle env/controllers/dynamics/wrappers/clone/residual, plus the shared <code>core/</code> and the Panda model, env, scenarios, data collection, DeePC setup and eval (<code>uv run pytest tests/ --collect-only -q</code> to recount as the suite grows). Tests marked <code>integration</code> load real data files or checkpoints from <code>data/</code> (git-ignored) and are skipped otherwise.</p>
 
 
 

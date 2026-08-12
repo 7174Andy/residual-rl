@@ -1598,7 +1598,7 @@
 <h2 id="whats-not-in-this-interface">What's <em>not</em> in this interface<a class="headerlink" href="#whats-not-in-this-interface" title="Permanent link">&para;</a></h2>
 <ul>
 <li>No past-trajectory buffer. DeePC manages its own.</li>
-<li>No Hankel matrices. Those are built once at controller construction (<code>controllers/hankel.py</code>) from offline data.</li>
+<li>No Hankel matrices. Those are built once at controller construction (<code>core/hankel.py</code>) from offline data.</li>
 <li>No disturbance signal <code>e</code>. The unicycle goal-reaching task has no exogenous input; this is one of the differences from mixed-traffic Deep-LCC. See the <a href="../../journey/04-deepc-formulation/">DeePC formulation journey entry</a>.</li>
 </ul>
 <h2 id="reading-and-writing-from-a-controller">Reading and writing from a controller<a class="headerlink" href="#reading-and-writing-from-a-controller" title="Permanent link">&para;</a></h2>

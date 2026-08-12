@@ -1680,6 +1680,44 @@
 <p class="admonition-title">First run downloads the model</p>
 <p><code>panda/model.py</code>'s <code>model_path()</code> resolves through <code>robot_descriptions</code>, which shallow-clones <code>mujoco_menagerie</code> into <code>~/.cache/robot_descriptions/</code> the first time anything imports the Panda. That first call needs network access and takes a while; every call after is instant, reading from the cache. The model itself is never the reason a Panda test carries <code>@pytest.mark.integration</code> — this repo's <code>integration</code> marker means "loads real data files from <code>data/</code>" (declared-dependency assets like the Panda model don't count). As of this tree there are zero Panda tests marked <code>integration</code> (<code>uv run pytest --collect-only -m integration -q</code> collects 11, all pre-existing unicycle tests) — the two that used to carry it, pinning aggregate reach-rate statistics for the DLS-IK oracle, were removed with that oracle.</p>
 </div>
+<div class="admonition info">
+<p class="admonition-title">Where the robot model comes from</p>
+<p>Franka Emika Panda, MJCF from
+<a href="https://github.com/google-deepmind/mujoco_menagerie"><code>google-deepmind/mujoco_menagerie</code></a>
+— <code>franka_emika_panda/panda_nohand.xml</code>, the no-gripper variant, which is why
+<code>nq = nv = nu = 7</code> with no extra finger joints to reason about.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>license</td>
+<td><strong>Apache-2.0</strong> (<code>franka_emika_panda/LICENSE</code> in menagerie)</td>
+</tr>
+<tr>
+<td>derived from</td>
+<td>Franka Emika's <a href="https://github.com/frankaemika/franka_ros/tree/develop/franka_description"><code>franka_description</code></a> URDF</td>
+</tr>
+<tr>
+<td>revision</td>
+<td>menagerie <a href="https://github.com/google-deepmind/mujoco_menagerie/commit/feadf76d42f8a2162426f7d226a3b539556b3bf5"><code>feadf76</code></a> (2026-03-18)</td>
+</tr>
+<tr>
+<td>vendored?</td>
+<td>no — <code>robot_descriptions</code> caches it under <code>~/.cache/</code></td>
+</tr>
+</tbody>
+</table>
+<p>The revision is worth pinning because <strong>every number on this page is a property of
+that model revision</strong>, not of MuJoCo or of Panda arms in general. If a menagerie
+update changes a joint range or a servo gain, <code>scripts/mujoco_hello.py</code> reprints
+everything and the difference shows up immediately — which is the whole reason that
+script is in the repo rather than having been a throwaway.</p>
+</div>
 <h2 id="1-mjmodel-vs-mjdata">1. <code>MjModel</code> vs <code>MjData</code><a class="headerlink" href="#1-mjmodel-vs-mjdata" title="Permanent link">&para;</a></h2>
 <p>The one distinction that unlocks everything else: <strong><code>MjModel</code> is the robot, <code>MjData</code> is the moment.</strong></p>
 <ul>

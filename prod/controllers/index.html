@@ -1447,9 +1447,14 @@
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>two_wheel_robot/controllers/
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    __init__.py
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    data_collection.py    # offline (u, y) trajectory generation
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    hankel.py             # block-Hankel matrix construction
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    deepc.py              # DeePC (orientation-keyed library switching built in)
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>core/
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    hankel.py              # block-Hankel matrix construction
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    deepc.py               # DeePC (orientation-keyed library switching built in)
 </span></code></pre></div>
+<p><code>hankel.py</code> and <code>deepc.py</code> live in the top-level <code>core/</code> package, not
+<code>controllers/</code>, because both are system-agnostic — they know nothing about
+the unicycle specifically and are shared with other envs' controllers.</p>
 <p>A controller is anything implementing the <code>Controller</code> protocol:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Controller</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_initial</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
@@ -1469,13 +1474,14 @@
 <p>Each box maps to a module:</p>
 <ul>
 <li><a href="data-collection/">Data collection</a> — <code>controllers/data_collection.py</code></li>
-<li>Block Hankel construction — <code>controllers/hankel.py</code></li>
-<li><a href="deepc/">DeePC controller</a> — <code>controllers/deepc.py</code></li>
-<li><a href="library-switching/">Library switching</a> — orientation-keyed switching built into <code>controllers/deepc.py::DeePC</code></li>
+<li>Block Hankel construction — <code>core/hankel.py</code></li>
+<li><a href="deepc/">DeePC controller</a> — <code>core/deepc.py</code></li>
+<li><a href="library-switching/">Library switching</a> — orientation-keyed switching built into <code>core/deepc.py::DeePC</code></li>
 </ul>
 <h2 id="why-this-layered-design">Why this layered design<a class="headerlink" href="#why-this-layered-design" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong><code>dynamics.py</code></strong> is pure numpy with no Gym dep → controllers and tests can use it directly.</li>
+<li><strong><code>core/</code></strong> imports nothing from <code>two_wheel_robot/</code> (or any other system package) → <code>DeePC</code> and <code>build_hankel</code> are usable by any env's controllers, not just the unicycle's.</li>
 <li><strong><code>controllers/</code></strong> is RL-library-agnostic → no torch/sb3 here. A controller object talks numpy in and out.</li>
 <li><strong><code>rl/</code></strong> is the only place that imports <code>stable_baselines3</code>.</li>
 </ul>
