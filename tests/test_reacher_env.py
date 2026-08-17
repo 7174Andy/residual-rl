@@ -65,12 +65,27 @@ def test_random_actions_almost_never_reach(env):
 
 def test_never_terminates_on_reach(env):
     """Spec D4: terminating would make 'arrive and hold' indistinguishable from
-    'arrive and leave', which is the drift this whole pipeline targets."""
-    env.reset(seed=1, options={"qpos": np.zeros(NQ_ARM), "goal": np.array([0.15, 0.0])})
+    'arrive and leave', which is the drift this whole pipeline targets.
+
+    The goal must sit INSIDE `goal_tolerance` of where the arm is held, or the
+    test is vacuous: `reached` never fires, `terminated` stays False for the
+    trivial reason, and a regression to `terminated = bool(reached)` (the pattern
+    `panda/env.py` uses) would pass silently. At `q = (0, 0)` the fingertip is
+    fully extended at exactly `(0.21, 0)`, so a goal at `(0.205, 0)` sits 5 mm
+    away — inside the 10 mm tolerance, and inside the reachable annulus. The
+    `ever_reached` assertion is what keeps this test honest if those numbers
+    ever move.
+    """
+    env.reset(seed=1, options={"qpos": np.zeros(NQ_ARM),
+                               "goal": np.array([0.205, 0.0])})
+    ever_reached = False
     for _ in range(env.unwrapped.max_steps - 1):
-        _, _, terminated, _trunc, _ = env.step(np.zeros(NQ_ARM, dtype=np.float32))
-        assert not terminated
-    _, _, terminated, truncated, _ = env.step(np.zeros(NQ_ARM, dtype=np.float32))
+        _, _, terminated, _trunc, info = env.step(np.zeros(NQ_ARM, dtype=np.float32))
+        ever_reached = ever_reached or info["reached"]
+        assert not terminated, "terminated fired; D4 requires the full horizon"
+    _, _, terminated, truncated, info = env.step(np.zeros(NQ_ARM, dtype=np.float32))
+    ever_reached = ever_reached or info["reached"]
+    assert ever_reached, "goal was never reached — the termination check is vacuous"
     assert truncated and not terminated
 
 
