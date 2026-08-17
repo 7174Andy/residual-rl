@@ -36,6 +36,14 @@ Pure reference for the env, controllers, and CLI scripts. No "why" — that live
 
     [:octicons-arrow-right-24: MuJoCo primer](mujoco-primer.md)
 
+-   :material-arrow-expand-horizontal:{ .lg .middle } &nbsp; __Reacher-v5__
+
+    ---
+
+    The 2-DoF planar arm used as the tractable control for the Panda — model facts, the `SAFE_MARGIN` and `qpos[2:4]` traps, the DeePC/Select-DPC signal setup, and the measured results.
+
+    [:octicons-arrow-right-24: Reacher-v5](reacher.md)
+
 </div>
 
 ## What's where

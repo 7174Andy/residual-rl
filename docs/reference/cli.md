@@ -359,16 +359,176 @@ uv run python scripts/make_panda_scenarios.py
 Collects the DeePC data libraries (one per azimuth anchor) and gates on coverage, failing loudly rather than writing a bad library file. Two gates: clip fraction < 1% (above that, the recorded `u` differs from what the plant received often enough to corrupt the Hankel), and rank ≥ 133 per library (`m_u(T_ini+N) + n_state`).
 
 ```bash
-uv run python scripts/collect_panda_data.py --out data/panda_libraries_v1.npz
+uv run python scripts/collect_panda_data.py --out data/panda_libraries_v2.npz
 ```
 
 | Flag | Default | Meaning |
 |---|---|---|
-| `--out` | `data/panda_libraries_v0.npz` | Output path |
+| `--out` | `data/panda_libraries_v2.npz` | Output path |
 | `--T` | 3000 | Steps per library (was 400; raised for `n_cols` margin parity with the unicycle's 17.5×) |
 | `--seed` | 0 | RNG seed |
 
+Library versions are not interchangeable: **v0** is T=400 tip-only (predates `yext`), **v1** is T=400 + `yext`, **v2** is T=3000 + `yext` and is the default. v0/v1 are retained as the fixed points a T comparison needs — v0's missing `yext` is asserted by `test_ext_output_rejects_a_libraries_file_without_yext`, so don't overwrite it.
+
 Records both output definitions from the same trajectories: `y_i` (tip, 3-D) and `yext_i` (tip + normalized `q`, 10-D), so a tip-vs-extended comparison varies only the output map and never the data. `deepc_setup(output="ext")` needs the `yext_i` arrays and errors on files that predate them.
+
+## The `q_des` anchor pipeline
+
+Four stages plus two diagnostics, built for the anchor-selection plan and written
+up in [journey 11](../journey/11-panda-anchors.md). This pipeline uses a
+**different interface** from `PandaReach-v0`: `u = q_des` (absolute joint target,
+not a delta) and `y = [q; p_ee]` (10-D). It does not share libraries or results
+with `scripts/collect_panda_data.py` / `run_panda_deepc.py`.
+
+```bash
+uv run python scripts/select_panda_anchors.py --K 4 --samples 600
+uv run python scripts/collect_anchor_libraries.py --anchors data/panda_anchors_k4.npz
+uv run python scripts/verify_libraries.py                       # gate: are they useful?
+uv run python scripts/validate_anchors.py --libs data/panda_anchors_k4_libs.npz
+```
+
+### `scripts/select_panda_anchors.py`
+
+Stage 1 (plan §2–5): samples task-relevant `(configuration, goal)` pairs, clusters
+with k-medoids, and reports the §5 diversity check plus PCA/silhouette diagnostics.
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--K` | 4 | Number of anchors |
+| `--samples` | 1000 | Task goals to sample (plan suggests 500–2000) |
+| `--weights` | none | Per-joint weights `w₁..w₇` for the distance metric (§7) |
+| `--ik` | `none` | Plan §3 inverse kinematics: `none` \| `home` \| `previous` \| `random`. **The most consequential flag here** — see below |
+| `--n-init` | 10 | k-medoids restarts |
+| `--out` | `data/panda_anchors_k4.npz` | Output path |
+| `--seed` | 0 | RNG seed |
+
+Reports `effective dimensionality` and `silhouette`. **Read both before trusting
+the cluster structure.** `--ik` decides whether there is any:
+
+| `--ik` | silhouette | effective dim | |
+|---|---|---|---|
+| `none` | 0.133 | 5.65 / 7 | FK-sampled; matches a bare uniform box draw to 2% |
+| `home` | 0.256 | **3.00 / 7** | plan §3 — a deterministic map from a 3-D goal space |
+| `previous` | 0.195 | 3.62 / 7 | seeds from the last solution; wanders off the manifold |
+| `random` | 0.123 | 5.73 / 7 | null control — reproduces `none`, as it must |
+
+Goals are drawn identically in every mode, so `ik` is the only variable. The
+anchor count needed to cover at the 0.5 rad usable radius scales as `8^d`:
+~126,000 at `d = 5.65`, **512** at `d = 3.00`.
+
+### `scripts/collect_anchor_libraries.py`
+
+Stage 2 (plan §6): bounded persistently-exciting `q_des` around each anchor. Stored
+goal-free (`u`, `q`, `tip`), so one collection serves every goal. Gates on rank.
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--anchors` | `data/panda_anchors_k4.npz` | Anchor file from stage 1 |
+| `--out` | `<anchors>_libs.npz` | Output path |
+| `--T` | 1500 | Steps per library |
+| `--sigma` | 0.25 | Excitation std around the anchor, rad |
+| `--theta` | 0.85 | OU correlation |
+| `--seed` | 0 | RNG seed |
+
+### `scripts/validate_anchors.py`
+
+Stage 3 (plan §8–11): open-loop prediction error per region (split by channel —
+joints in rad, tip in mm), closed-loop reaching, and a split recommendation. Two
+extra modes for the diagnostics journey 11 needed.
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--libs` | `data/panda_anchors_k4_libs.npz` | Library file |
+| `--episodes` | 30 | Held-out closed-loop goals |
+| `--tol` | 0.02 | Reach threshold, m (plan §9 uses 0.02) |
+| `--rate-limit` | none | Clip the applied command to `q ± this` rad/step |
+| `--rate-sweep` | off | Paired confirmation across `--rate-limits` |
+| `--near-goal` | off | Reachability sweep — goal placed at controlled distance |
+| `--du-max` | n/a | *(use `make_controller(du_max=)`; the in-QP constraint)* |
+
+`--rate-sweep` uses **paired** episodes — every setting sees the identical
+`(start, goal)` list — because single episodes swing 1–71% under one setting and
+unpaired comparisons at this n are unreadable.
+
+### `scripts/verify_libraries.py`
+
+**The gate.** Are the Hankel libraries useful to DeePC, as a function of distance
+from the anchor? Three tests, no QP:
+
+- `span` — residual projecting a real trajectory onto the Hankel span.
+- `skill` — `1 − MSE_library/MSE_no-motion`. Negative means worse than assuming the tip doesn't move.
+- `cos` — direction of predicted vs true tip displacement. `<0` steers backwards.
+
+```bash
+uv run python scripts/verify_libraries.py --radii 0.1 0.25 0.5 1 2 4
+```
+
+Measured: skill 0.93 / cos 0.98 at the anchor, skill **−9.93** / cos **−0.03** at
+2 rad. Run this before spending any closed-loop time on a new library set.
+
+### `scripts/test_cluster_lti.py`
+
+Are the clusters LTI? Splits the claim into time-invariance (free by construction),
+linearity at a point (superposition + homogeneity vs command amplitude), and
+spatial invariance across the cluster.
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--amps` | `0.02 0.05 0.10 0.25 0.40` | Command amplitudes to test linearity at |
+| `--radii` | `0 0.25 0.5 1 2 4` | Distances from the anchor for spatial invariance |
+| `--fit-n` | 120 | Samples for the fitted local map |
+
+### `scripts/test_valid_region_control.py`
+
+The gating experiment: does DeePC work *inside* the radius where its libraries are
+valid? Starts the arm a controlled distance from an anchor and runs a random-walk
+control of identical command magnitude on the same episodes.
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--starts` | `0 0.5 2.0` | Joint distance from the anchor to start at, rad |
+| `--goal-dist` | 0.4 | Joint distance from start to goal, rad |
+| `--eps` | 3 | Episodes per start distance |
+| `--du-max` | 0.02 | In-QP rate limit, rad/step (= 1.0 rad/s at 50 Hz) |
+| `--steps` | 50 | Max steps per episode |
+
+Reports **path/net** — tip path length per unit of progress. A controller that
+steers runs 1–2×; measured 1.0 at the anchor and 53.8 at 2 rad.
+
+## `scripts/plot_panda_analysis.py`
+
+Regenerates the three figures behind the linear-region, state-space and anchor
+measurements. Everything is recomputed from the model, not transcribed.
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--figure` | `all` | `linear`, `statespace`, `anchors`, or `all` |
+| `--anchors` | `data/panda_anchors_k4.npz` | Anchor file for the anchor figure |
+| `--out-dir` | `docs/reference` | Where the PNGs go |
+| `--n-samples` | 150 | Probe sequences for the linear-region panels (use 600 to match the documented numbers) |
+
+## `scripts/measure_linear_region.py`
+
+Measures how far from an anchor one local-linear model still predicts — i.e. how anchor cells should be sized. Fits `Y = U @ G + free` at an anchor over the N=12 horizon (that fit *is* the Hankel constraint, made transportable), then applies the same input sequences at offset configurations and reports the horizon-12 tip error against the 25 mm threshold (half `goal_tolerance`).
+
+```bash
+uv run python scripts/measure_linear_region.py
+uv run python scripts/measure_linear_region.py --probe 0.05 --max-offset 1.4 --steps 7
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--joints` | `0 1 2 3 4 5 6` | Joint indices to sweep the anchor offset along |
+| `--n-samples` | 250 | Probe sequences per point; must exceed `N*nu` = 84 to fit |
+| `--max-offset` | 1.2 | Largest joint offset from the anchor, rad |
+| `--steps` | 8 | Offsets per joint |
+| `--probe` | 0.1 | Delta amplitude of the probe sequences, rad |
+| `--seed` | 0 | RNG seed |
+
+Two results, both reproducible from this tree — see [the primer's "linear region" section](mujoco-primer.md#10-the-linear-region-and-what-it-means-for-anchors) for the full tables and what they imply for anchor placement:
+
+- **Azimuth is an exact symmetry, not a nonlinearity axis** (`6.7e-16` m). Asserted by the script, so a broken `rollout` or a model that loses z-symmetry fails loudly.
+- **Horizon excursion dominates anchor placement.** At the env's `DELTA_MAX = 0.2` the linearization is already 50.7 mm wrong *at the anchor*, worse than the 50 mm tolerance; at `--probe 0.05` no joint offset out to 1.4 rad crosses 25 mm.
 
 ## `scripts/run_panda_deepc.py`
 
@@ -387,7 +547,11 @@ uv run python scripts/run_panda_deepc.py --mode eval --lambda-g 5e-2 --lambda-y 
 | `--mode` | *required* | `sweep` (20 scenarios, 3×3 λ grid) or `eval` (all 78 at one λ) |
 | `--lambda-g` | `5e-3` | DeePC L1 weight on `g` |
 | `--lambda-y` | `7.5e3` | DeePC slack penalty |
+| `--libraries` | `data/panda_libraries_v2.npz` | Library file (T=3000; see the collector above) |
+| `--output` | `tip` | DeePC output map: `tip` (3-D) or `ext` (10-D tip+normalized `q`) |
 | `--no-record` | off | Do not append to `data/panda_results.csv` |
+
+The ~56 min / ~25 min figures above were measured against a **T=400** library. `g` has one entry per Hankel column, so T=3000 makes the QP ~8× wider and per-step solve time rises accordingly — time a single λ point before committing to a full grid.
 
 `eval` appends to the shared results CSV keyed by `(method, scenario_id)`, which is what makes paired tests across methods available with no further bookkeeping. Per-scenario rows are only comparable across runs of the **same** scenario sequence — see the warm-start note in the DeePC section of the decision log.
 

@@ -27,6 +27,55 @@ Every number below is copied from a real run of `scripts/mujoco_hello.py` or `sc
     everything and the difference shows up immediately — which is the whole reason that
     script is in the repo rather than having been a throwaway.
 
+!!! info "Where the *dynamics* come from — and what to read"
+
+    The link masses and inertias in `panda_nohand.xml` are **not** Franka's spec sheet.
+    Traced back through the URDF this MJCF was converted from, they are identified
+    parameters from a peer-reviewed paper. `franka_description`'s own header says so:
+
+    > This file does not contain official inertial properties of panda robot. The values
+    > are from the identification results published in: [...] by Claudio Gaz, Marco
+    > Cognetti, Alexander Oliva, Paolo Robuffo Giordano, Alessandro de Luca
+    > — [`franka_description/robots/common/inertial.yaml`](https://github.com/frankaemika/franka_ros/blob/develop/franka_description/robots/common/inertial.yaml)
+
+    The link-1..7 masses in that file (4.970684, 0.646926, 3.228604, 3.587895, 1.225946,
+    1.666555, 0.735522 kg) appear verbatim in `panda_nohand.xml` — those seven links
+    *are* the no-hand arm, so the citation covers exactly this model.
+
+    **Primary source.** C. Gaz, M. Cognetti, A. Oliva, P. Robuffo Giordano, A. De Luca,
+    *"Dynamic Identification of the Franka Emika Panda Robot With Retrieval of Feasible
+    Parameters Using Penalty-Based Optimization"*, IEEE RA-L 4(4):4147–4154, 2019.
+    It gives the DH table, the identified dynamic coefficients, a joint friction model,
+    and — the part that makes it simulator-usable rather than regressor-only — a
+    *physically feasible* (mass, CoM, inertia) set.
+
+    | | |
+    |---|---|
+    | paper page + **errata** | [diag.uniroma1.it/gaz/panda2019.html](https://www.diag.uniroma1.it/gaz/panda2019.html) — note φ₁ for joint 2 is **0.87224**, not 8722.4 |
+    | open PDF | [hal.science/hal-02265293](https://hal.science/hal-02265293/) |
+    | code — `M(q)`, `C(q,q̇)`, `g(q)`, friction | [github.com/marcocognetti/FrankaEmikaPandaDynModel](https://github.com/marcocognetti/FrankaEmikaPandaDynModel) (MATLAB, C++, V-REP) |
+    | official kinematics / limits | [Franka Control Interface docs](https://frankarobotics.github.io/docs/) |
+
+    Model form: `M(q)q̈ + C(q,q̇)q̇ + g(q) + τ_f(q̇) = τ`. The DH constants from that
+    table are readable straight off this MJCF's body offsets — `d₁ = 0.333`,
+    `d₃ = 0.316`, `d₅ = 0.384`, `a₄ = 0.0825`, `a₅ = −0.0825`, `a₇ = 0.088`, flange
+    `0.107` — which is a fast way to confirm you're looking at the same robot the paper
+    identified.
+
+!!! warning "That model is *underneath* this env, not equal to it"
+
+    Two gaps matter before any of the above gets used to reason about `PandaReach-v0`:
+
+    - **MuJoCo doesn't integrate the equation above.** It solves its own constrained
+      forward dynamics ([computation docs](https://mujoco.readthedocs.io/en/stable/computation/index.html)),
+      and menagerie added `armature="0.1"` and `damping="1"` on every joint for solver
+      stability. Those are **not identified values** — they are simulation terms with no
+      counterpart in Gaz et al., and they change the `ctrl → y` response measurably.
+    - **You never command τ.** Section 6: the actuators are PD position servos,
+      `τ = kp·(ctrl − qpos) − kd·qvel`. The identified rigid-body dynamics sit *inside* a
+      servo loop, so the plant this repo identifies is `ctrl → y`, not `τ → y`. That is
+      the same reason `panda/data_collection.py` records `info["ctrl"]`.
+
 ## 1. `MjModel` vs `MjData`
 
 The one distinction that unlocks everything else: **`MjModel` is the robot, `MjData` is the moment.**
@@ -243,6 +292,51 @@ mujoco.mj_jacSite(model, data, jacp, None, tip_site_id)
 `panda/env.py` never uses `mj_jacSite` or any Jacobian-based control — its action interface is delta joint targets, not Cartesian ones. A DLS-IK controller built on this Jacobian was used once, during design, to measure the env's solvability ceiling; it has since been removed as out-of-scope (see the design doc's appendix if that measurement needs redoing) and no numbers from it are reproducible from this tree.
 
 The redundancy still matters for what comes next: seven inputs mapping to a 3-D output means many different joint trajectories realise the same tip trajectory. A later DeePC stage's sparse (`ℓ1`-regularized) solution has no built-in reason to prefer the "natural" one among them — it may track the tip well while producing joint motion that looks ugly or wasteful.
+
+## 10. The linear region, and what it means for anchors
+
+A DeePC library asserts the map `u → y` is LTI over the prediction horizon, so the library is valid wherever that holds. `scripts/measure_linear_region.py` measures it directly: fit `Y = U @ G + free` at an anchor over N=12, then apply the *same* input sequences at an offset configuration and check whether the anchor's `G` still predicts, given the test point's own free response (which `y_ini` supplies to DeePC, so handing it over is fair). Threshold is 25 mm — half the 0.05 m `goal_tolerance`.
+
+**Azimuth is a symmetry, not a nonlinearity.** Joint 1's axis is vertical and gravity is along the same axis, so rotating `q1` rotates the whole arm about z and leaves the joint-space dynamics untouched. Measured, driving `q1 = −1.8` and `q1 = 0.6` with identical delta sequences and de-rotating by `Rz(Δq1)`:
+
+```
+[0] q1 equivariance: max |Rz(dq)*tip(q1=-1.8) - tip(q1=0.6)| = 6.661e-16 m
+```
+
+Machine precision — this is an exact geometric invariant, not an approximation, and the script asserts it. The consequence for `panda/deepc_setup.py` is direct: the four azimuth-keyed libraries differ **only by a known rotation**. Keying on azimuth compensates for `Rz` that could be applied analytically to one library; it buys no model fidelity. This is the "rotating q1 rotates the Jacobian but leaves its singular values alone" remark in that module's docstring, confirmed numerically.
+
+**What actually bounds the linear region is horizon excursion, not anchor distance.** The linearization error at the anchor *itself* — before moving anywhere — as a function of probe amplitude (`n_samples=600`, so this is genuine nonlinearity, not fit variance; the residual *rises* toward ~19 mm as samples grow at `probe=0.1`):
+
+| probe δ | horizon excursion `N·δ` | error at the anchor |
+|---|---|---|
+| 0.02 | 0.24 rad | 0.4 mm |
+| 0.05 | 0.60 rad | 5.4 mm |
+| 0.10 | 1.20 rad | 19.0 mm |
+| 0.12 | 1.44 rad | **24.9 mm** ← crosses threshold |
+| 0.16 | 1.92 rad | 38.0 mm |
+| 0.20 | 2.40 rad | **50.7 mm** |
+
+`PandaReachEnv`'s `DELTA_MAX = 0.2` with `N = 12` puts the operating point on the last row: **the local linear model is already 50.7 mm wrong at the anchor, worse than the 50 mm goal tolerance it is supposed to steer inside.** No anchor placement fixes that — the error is there before any offset is applied.
+
+Anchor distance, by contrast, is cheap. At `probe = 0.05` (5.4 mm floor), sweeping each joint away from the anchor:
+
+```
+      offset:     0.20     0.40     0.60     0.80     1.00     1.20     1.40
+  joint 1:      6.2      8.3     10.9     13.6     16.2     18.8     21.3
+  joint 2:      7.2      9.7     11.8     14.1     16.2     18.3        -
+  joint 3:      6.0      7.7     10.1     12.8     15.7     18.6     21.5
+  joint 4:      6.2      7.7      9.6     11.7     14.1        -        -
+  joint 5:      5.5      5.7      6.0      6.3      6.7      7.1      7.5
+  joint 6:      5.8      6.3      6.9      7.5      8.0      8.6      9.1
+  joint 7:      5.4      5.4      5.4      5.4      5.4      5.4      5.4
+```
+
+No joint crosses 25 mm within 1.4 rad — and joint 1's safe box is only ±2.318 total, so a cell radius of 1.4 rad covers most of the reachable range. Joints 5–7 (the wrist) are essentially flat: they reorient the flange without changing the arm's conditioning, so they need no anchoring at all. Joints 2 and 4 (shoulder and elbow — the *extension* axes) grow fastest, which is the ordering `panda/deepc_setup.py`'s docstring predicts, but even they stay under threshold across the sweep.
+
+!!! warning "The actionable knob is `N · delta_max`, not the anchor count"
+    Reading these two tables together: anchor placement is a second-order effect on this system, and adding anchors cannot buy back a 50.7 mm modelling error incurred at the anchor. The lever that moves the number is the horizon excursion — the 25 mm crossing sits at `N·δ ≈ 1.44 rad`, against the current `12 × 0.2 = 2.4 rad`. Shortening `N`, lowering `delta_max`, or both, is what shrinks it.
+
+    This is a *separate* limit from the one in `PandaReachEnv.y_ext`'s docstring. That one says tip-only `y` fails to observe the state, so the past window maps one-to-many onto futures — a violation of Willems' lemma's precondition that no amount of data or keying fixes. This one says that even with the state observed, the horizon is long enough for curvature to dominate. Both are live; `output="ext"` addresses only the first.
 
 ## Try it yourself
 
