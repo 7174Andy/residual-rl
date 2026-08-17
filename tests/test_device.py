@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 import torch
 
-from two_wheel_robot.rl.device import select_device
+from rl.device import select_device
 
 
 def test_auto_returns_a_torch_device():

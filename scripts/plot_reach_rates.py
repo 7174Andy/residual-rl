@@ -9,7 +9,7 @@ regenerates without re-running the (QP-bound, ~minutes-per-seed) benchmark:
     uv run python scripts/plot_reach_rates.py
 
 Wilson 95% CIs are computed directly from (k, n) via the same
-`two_wheel_robot.rl.clone_eval.wilson_ci` that `eval_residual.py` uses, so the
+`rl.stats.wilson_ci` that `eval_residual.py` uses, so the
 error bars match the CIs reported in the doc exactly.
 """
 from __future__ import annotations
@@ -23,7 +23,7 @@ matplotlib.use("Agg")  # headless: write a PNG, never open a window
 import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.ticker as mticker  # noqa: E402
 
-from two_wheel_robot.rl.clone_eval import wilson_ci  # noqa: E402
+from rl.stats import wilson_ci  # noqa: E402
 
 # dataviz-skill palette: baseline bars read as a neutral (below the chroma floor
 # on purpose -- they're not the focus), residual bars are an ordinal one-hue ramp

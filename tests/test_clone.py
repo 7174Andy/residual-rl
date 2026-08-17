@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from two_wheel_robot.rl.clone import (
+from rl.clone import (
     ClonePredictor,
     load_clone,
     save_clone,

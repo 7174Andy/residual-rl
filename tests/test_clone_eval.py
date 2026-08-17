@@ -4,12 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from two_wheel_robot.rl.clone_eval import (
-    mcnemar_pvalue,
-    regression_by_regime,
-    trajectory_deviation,
-    wilson_ci,
-)
+from rl.stats import mcnemar_pvalue, wilson_ci
+from two_wheel_robot.rl.clone_eval import regression_by_regime, trajectory_deviation
 
 
 def test_wilson_ci_bounds_are_sane():

@@ -12,7 +12,7 @@ import sys
 
 import numpy as np
 
-from two_wheel_robot.rl.clone import load_clone
+from rl.clone import load_clone
 from two_wheel_robot.rl.clone_eval import paired_outcomes, regression_by_regime
 from two_wheel_robot.rl.deepc_setup import build_canonical_deepc
 
