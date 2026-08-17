@@ -16,7 +16,7 @@
         <link rel="prev" href="../cli/">
       
       
-        <link rel="next" href="../../journey/">
+        <link rel="next" href="../reacher/">
       
       
         
@@ -490,6 +490,8 @@
       
         
           
+        
+      
         
       
         
@@ -1147,6 +1149,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#10-the-linear-region-and-what-it-means-for-anchors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. The linear region, and what it means for anchors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#try-it-yourself" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1161,6 +1174,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reacher/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reacher-v5
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1184,6 +1225,10 @@
       
         
           
+        
+      
+        
+      
         
       
         
@@ -1510,6 +1555,62 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../journey/11-panda-anchors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Panda anchors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../journey/12-select-dpc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Select-DPC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1643,6 +1744,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#10-the-linear-region-and-what-it-means-for-anchors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. The linear region, and what it means for anchors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#try-it-yourself" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1717,6 +1829,73 @@ that model revision</strong>, not of MuJoCo or of Panda arms in general. If a me
 update changes a joint range or a servo gain, <code>scripts/mujoco_hello.py</code> reprints
 everything and the difference shows up immediately — which is the whole reason that
 script is in the repo rather than having been a throwaway.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Where the <em>dynamics</em> come from — and what to read</p>
+<p>The link masses and inertias in <code>panda_nohand.xml</code> are <strong>not</strong> Franka's spec sheet.
+Traced back through the URDF this MJCF was converted from, they are identified
+parameters from a peer-reviewed paper. <code>franka_description</code>'s own header says so:</p>
+<blockquote>
+<p>This file does not contain official inertial properties of panda robot. The values
+are from the identification results published in: [...] by Claudio Gaz, Marco
+Cognetti, Alexander Oliva, Paolo Robuffo Giordano, Alessandro de Luca
+— <a href="https://github.com/frankaemika/franka_ros/blob/develop/franka_description/robots/common/inertial.yaml"><code>franka_description/robots/common/inertial.yaml</code></a></p>
+</blockquote>
+<p>The link-1..7 masses in that file (4.970684, 0.646926, 3.228604, 3.587895, 1.225946,
+1.666555, 0.735522 kg) appear verbatim in <code>panda_nohand.xml</code> — those seven links
+<em>are</em> the no-hand arm, so the citation covers exactly this model.</p>
+<p><strong>Primary source.</strong> C. Gaz, M. Cognetti, A. Oliva, P. Robuffo Giordano, A. De Luca,
+<em>"Dynamic Identification of the Franka Emika Panda Robot With Retrieval of Feasible
+Parameters Using Penalty-Based Optimization"</em>, IEEE RA-L 4(4):4147–4154, 2019.
+It gives the DH table, the identified dynamic coefficients, a joint friction model,
+and — the part that makes it simulator-usable rather than regressor-only — a
+<em>physically feasible</em> (mass, CoM, inertia) set.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>paper page + <strong>errata</strong></td>
+<td><a href="https://www.diag.uniroma1.it/gaz/panda2019.html">diag.uniroma1.it/gaz/panda2019.html</a> — note φ₁ for joint 2 is <strong>0.87224</strong>, not 8722.4</td>
+</tr>
+<tr>
+<td>open PDF</td>
+<td><a href="https://hal.science/hal-02265293/">hal.science/hal-02265293</a></td>
+</tr>
+<tr>
+<td>code — <code>M(q)</code>, <code>C(q,q̇)</code>, <code>g(q)</code>, friction</td>
+<td><a href="https://github.com/marcocognetti/FrankaEmikaPandaDynModel">github.com/marcocognetti/FrankaEmikaPandaDynModel</a> (MATLAB, C++, V-REP)</td>
+</tr>
+<tr>
+<td>official kinematics / limits</td>
+<td><a href="https://frankarobotics.github.io/docs/">Franka Control Interface docs</a></td>
+</tr>
+</tbody>
+</table>
+<p>Model form: <code>M(q)q̈ + C(q,q̇)q̇ + g(q) + τ_f(q̇) = τ</code>. The DH constants from that
+table are readable straight off this MJCF's body offsets — <code>d₁ = 0.333</code>,
+<code>d₃ = 0.316</code>, <code>d₅ = 0.384</code>, <code>a₄ = 0.0825</code>, <code>a₅ = −0.0825</code>, <code>a₇ = 0.088</code>, flange
+<code>0.107</code> — which is a fast way to confirm you're looking at the same robot the paper
+identified.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">That model is <em>underneath</em> this env, not equal to it</p>
+<p>Two gaps matter before any of the above gets used to reason about <code>PandaReach-v0</code>:</p>
+<ul>
+<li><strong>MuJoCo doesn't integrate the equation above.</strong> It solves its own constrained
+  forward dynamics (<a href="https://mujoco.readthedocs.io/en/stable/computation/index.html">computation docs</a>),
+  and menagerie added <code>armature="0.1"</code> and <code>damping="1"</code> on every joint for solver
+  stability. Those are <strong>not identified values</strong> — they are simulation terms with no
+  counterpart in Gaz et al., and they change the <code>ctrl → y</code> response measurably.</li>
+<li><strong>You never command τ.</strong> Section 6: the actuators are PD position servos,
+  <code>τ = kp·(ctrl − qpos) − kd·qvel</code>. The identified rigid-body dynamics sit <em>inside</em> a
+  servo loop, so the plant this repo identifies is <code>ctrl → y</code>, not <code>τ → y</code>. That is
+  the same reason <code>panda/data_collection.py</code> records <code>info["ctrl"]</code>.</li>
+</ul>
 </div>
 <h2 id="1-mjmodel-vs-mjdata">1. <code>MjModel</code> vs <code>MjData</code><a class="headerlink" href="#1-mjmodel-vs-mjdata" title="Permanent link">&para;</a></h2>
 <p>The one distinction that unlocks everything else: <strong><code>MjModel</code> is the robot, <code>MjData</code> is the moment.</strong></p>
@@ -1868,10 +2047,75 @@ script is in the repo rather than having been a throwaway.</p>
 <p><strong>The redundancy.</strong> Seven joints drive a 3-D tip position, so the map <code>q ↦ tip</code> has a 4-dimensional space of joint motions that, to first order, don't move the tip at all — the null space of <code>J</code>. This is a real fact about the arm, not an artifact of any particular controller: any 7-DoF-to-3-D mapping has it.</p>
 <p><code>panda/env.py</code> never uses <code>mj_jacSite</code> or any Jacobian-based control — its action interface is delta joint targets, not Cartesian ones. A DLS-IK controller built on this Jacobian was used once, during design, to measure the env's solvability ceiling; it has since been removed as out-of-scope (see the design doc's appendix if that measurement needs redoing) and no numbers from it are reproducible from this tree.</p>
 <p>The redundancy still matters for what comes next: seven inputs mapping to a 3-D output means many different joint trajectories realise the same tip trajectory. A later DeePC stage's sparse (<code>ℓ1</code>-regularized) solution has no built-in reason to prefer the "natural" one among them — it may track the tip well while producing joint motion that looks ugly or wasteful.</p>
+<h2 id="10-the-linear-region-and-what-it-means-for-anchors">10. The linear region, and what it means for anchors<a class="headerlink" href="#10-the-linear-region-and-what-it-means-for-anchors" title="Permanent link">&para;</a></h2>
+<p>A DeePC library asserts the map <code>u → y</code> is LTI over the prediction horizon, so the library is valid wherever that holds. <code>scripts/measure_linear_region.py</code> measures it directly: fit <code>Y = U @ G + free</code> at an anchor over N=12, then apply the <em>same</em> input sequences at an offset configuration and check whether the anchor's <code>G</code> still predicts, given the test point's own free response (which <code>y_ini</code> supplies to DeePC, so handing it over is fair). Threshold is 25 mm — half the 0.05 m <code>goal_tolerance</code>.</p>
+<p><strong>Azimuth is a symmetry, not a nonlinearity.</strong> Joint 1's axis is vertical and gravity is along the same axis, so rotating <code>q1</code> rotates the whole arm about z and leaves the joint-space dynamics untouched. Measured, driving <code>q1 = −1.8</code> and <code>q1 = 0.6</code> with identical delta sequences and de-rotating by <code>Rz(Δq1)</code>:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>[0] q1 equivariance: max |Rz(dq)*tip(q1=-1.8) - tip(q1=0.6)| = 6.661e-16 m
+</span></code></pre></div>
+<p>Machine precision — this is an exact geometric invariant, not an approximation, and the script asserts it. The consequence for <code>panda/deepc_setup.py</code> is direct: the four azimuth-keyed libraries differ <strong>only by a known rotation</strong>. Keying on azimuth compensates for <code>Rz</code> that could be applied analytically to one library; it buys no model fidelity. This is the "rotating q1 rotates the Jacobian but leaves its singular values alone" remark in that module's docstring, confirmed numerically.</p>
+<p><strong>What actually bounds the linear region is horizon excursion, not anchor distance.</strong> The linearization error at the anchor <em>itself</em> — before moving anywhere — as a function of probe amplitude (<code>n_samples=600</code>, so this is genuine nonlinearity, not fit variance; the residual <em>rises</em> toward ~19 mm as samples grow at <code>probe=0.1</code>):</p>
+<table>
+<thead>
+<tr>
+<th>probe δ</th>
+<th>horizon excursion <code>N·δ</code></th>
+<th>error at the anchor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.02</td>
+<td>0.24 rad</td>
+<td>0.4 mm</td>
+</tr>
+<tr>
+<td>0.05</td>
+<td>0.60 rad</td>
+<td>5.4 mm</td>
+</tr>
+<tr>
+<td>0.10</td>
+<td>1.20 rad</td>
+<td>19.0 mm</td>
+</tr>
+<tr>
+<td>0.12</td>
+<td>1.44 rad</td>
+<td><strong>24.9 mm</strong> ← crosses threshold</td>
+</tr>
+<tr>
+<td>0.16</td>
+<td>1.92 rad</td>
+<td>38.0 mm</td>
+</tr>
+<tr>
+<td>0.20</td>
+<td>2.40 rad</td>
+<td><strong>50.7 mm</strong></td>
+</tr>
+</tbody>
+</table>
+<p><code>PandaReachEnv</code>'s <code>DELTA_MAX = 0.2</code> with <code>N = 12</code> puts the operating point on the last row: <strong>the local linear model is already 50.7 mm wrong at the anchor, worse than the 50 mm goal tolerance it is supposed to steer inside.</strong> No anchor placement fixes that — the error is there before any offset is applied.</p>
+<p>Anchor distance, by contrast, is cheap. At <code>probe = 0.05</code> (5.4 mm floor), sweeping each joint away from the anchor:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>      offset:     0.20     0.40     0.60     0.80     1.00     1.20     1.40
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>  joint 1:      6.2      8.3     10.9     13.6     16.2     18.8     21.3
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>  joint 2:      7.2      9.7     11.8     14.1     16.2     18.3        -
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>  joint 3:      6.0      7.7     10.1     12.8     15.7     18.6     21.5
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>  joint 4:      6.2      7.7      9.6     11.7     14.1        -        -
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>  joint 5:      5.5      5.7      6.0      6.3      6.7      7.1      7.5
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>  joint 6:      5.8      6.3      6.9      7.5      8.0      8.6      9.1
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>  joint 7:      5.4      5.4      5.4      5.4      5.4      5.4      5.4
+</span></code></pre></div>
+<p>No joint crosses 25 mm within 1.4 rad — and joint 1's safe box is only ±2.318 total, so a cell radius of 1.4 rad covers most of the reachable range. Joints 5–7 (the wrist) are essentially flat: they reorient the flange without changing the arm's conditioning, so they need no anchoring at all. Joints 2 and 4 (shoulder and elbow — the <em>extension</em> axes) grow fastest, which is the ordering <code>panda/deepc_setup.py</code>'s docstring predicts, but even they stay under threshold across the sweep.</p>
+<div class="admonition warning">
+<p class="admonition-title">The actionable knob is <code>N · delta_max</code>, not the anchor count</p>
+<p>Reading these two tables together: anchor placement is a second-order effect on this system, and adding anchors cannot buy back a 50.7 mm modelling error incurred at the anchor. The lever that moves the number is the horizon excursion — the 25 mm crossing sits at <code>N·δ ≈ 1.44 rad</code>, against the current <code>12 × 0.2 = 2.4 rad</code>. Shortening <code>N</code>, lowering <code>delta_max</code>, or both, is what shrinks it.</p>
+<p>This is a <em>separate</em> limit from the one in <code>PandaReachEnv.y_ext</code>'s docstring. That one says tip-only <code>y</code> fails to observe the state, so the past window maps one-to-many onto futures — a violation of Willems' lemma's precondition that no amount of data or keying fixes. This one says that even with the state observed, the horizon is long enough for curvature to dominate. Both are live; <code>output="ext"</code> addresses only the first.</p>
+</div>
 <h2 id="try-it-yourself">Try it yourself<a class="headerlink" href="#try-it-yourself" title="Permanent link">&para;</a></h2>
 <p>Two commands cover every number this project can still reproduce on <code>PandaReach-v0</code>:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/mujoco_hello.py<span class="w">                            </span><span class="c1"># model facts + workspace survey</span>
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/record_panda_video.py<span class="w"> </span>--episodes<span class="w"> </span><span class="m">3</span><span class="w">         </span><span class="c1"># reached 0/3, writes the MP4</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/mujoco_hello.py<span class="w">                            </span><span class="c1"># model facts + workspace survey</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/record_panda_video.py<span class="w"> </span>--episodes<span class="w"> </span><span class="m">3</span><span class="w">         </span><span class="c1"># reached 0/3, writes the MP4</span>
 </span></code></pre></div>
 <p>Random actions reach <strong>0</strong> goals (<code>panda/validity.py</code>'s own validity check, measured over 20 seeds; the command above reproduces it over 3 as 0/3). That is the one live bound this tree can check: since random reaches 0, any nonzero reach rate a later controller reports is signal, not noise. There used to be an upper bound too — a DLS-IK oracle, full knowledge of the Jacobian, no learning, no noise, reached 0.90 — but that was a one-off design-time measurement from code since removed as out-of-scope, and is no longer checkable here.</p>
 <hr />
@@ -1928,13 +2172,13 @@ script is in the repo rather than having been a throwaway.</p>
         
         
           
-          <a href="../../journey/" class="md-footer__link md-footer__link--next" aria-label="Next: Journey">
+          <a href="../reacher/" class="md-footer__link md-footer__link--next" aria-label="Next: Reacher-v5">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Journey
+                Reacher-v5
               </div>
             </div>
             <div class="md-footer__button md-icon">

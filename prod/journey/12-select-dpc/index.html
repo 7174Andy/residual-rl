@@ -10,13 +10,11 @@
       
       
       
-        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/05-library-switching/">
+        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/12-select-dpc/">
       
       
-        <link rel="prev" href="../04-deepc-formulation/">
+        <link rel="prev" href="../11-panda-anchors/">
       
-      
-        <link rel="next" href="../06-stop-at-goal/">
       
       
         
@@ -27,7 +25,7 @@
     
     
       
-        <title>05. Library switching - two-wheeled-experiment</title>
+        <title>12. Select-DPC - two-wheeled-experiment</title>
       
     
     
@@ -80,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#05-library-switching-one-library-cant-work-four-can" class="md-skip">
+        <a href="#12-select-dpc-and-a-2-dof-arm-to-test-it-on" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              05. Library switching
+              12. Select-DPC
             
           </span>
         </div>
@@ -1217,37 +1215,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    05. Library switching
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../05-library-switching/" class="md-nav__link">
         
   
   
@@ -1263,103 +1234,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#decision" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Decision
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#context-bilinear-dynamics-defeat-a-single-predictor" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Context — bilinear dynamics defeat a single predictor
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#why-local-linearization-works" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Why local linearization works
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Implementation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#outcome" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Outcome
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#caveats" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Caveats
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#code" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Code
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1537,10 +1411,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../12-select-dpc/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Select-DPC
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1556,6 +1457,203 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context-entry-11-left-one-problem-and-two-candidate-escapes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context — entry 11 left one problem and two candidate escapes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Considered
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Considered">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#my-first-select-dpc-was-not-select-dpc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        My first Select-DPC was not Select-DPC
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-the-code-lives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the code lives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#safe_margin-is-not-portable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SAFE_MARGIN is not portable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outcome" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outcome
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Outcome">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-validity-radius-is-05-rad-on-both-arms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The validity radius is ~0.5 rad on BOTH arms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#select-dpc-on-reacher-better-and-cheaper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Select-DPC on Reacher — better and cheaper
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iterating-buys-nothing-and-past-n_max3-it-hurts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Iterating buys nothing — and past n_max=3 it hurts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-drift-found-only-by-removing-early-stopping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The drift — found only by removing early stopping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-panda-coverage-confirmed-from-a-fourth-direction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Panda: coverage confirmed, from a fourth direction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#retractions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retractions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Caveats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1606,10 +1704,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#context-bilinear-dynamics-defeat-a-single-predictor" class="md-nav__link">
+  <a href="#context-entry-11-left-one-problem-and-two-candidate-escapes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Context — bilinear dynamics defeat a single predictor
+        Context — entry 11 left one problem and two candidate escapes
       
     </span>
   </a>
@@ -1617,24 +1715,52 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-local-linearization-works" class="md-nav__link">
+  <a href="#considered" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why local linearization works
+        Considered
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Considered">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#my-first-select-dpc-was-not-select-dpc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        My first Select-DPC was not Select-DPC
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#where-the-code-lives" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Implementation
+        Where the code lives
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#safe_margin-is-not-portable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SAFE_MARGIN is not portable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1643,6 +1769,78 @@
     <span class="md-ellipsis">
       
         Outcome
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Outcome">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-validity-radius-is-05-rad-on-both-arms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The validity radius is ~0.5 rad on BOTH arms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#select-dpc-on-reacher-better-and-cheaper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Select-DPC on Reacher — better and cheaper
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iterating-buys-nothing-and-past-n_max3-it-hurts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Iterating buys nothing — and past n_max=3 it hurts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-drift-found-only-by-removing-early-stopping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The drift — found only by removing early stopping
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-panda-coverage-confirmed-from-a-fourth-direction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Panda: coverage confirmed, from a fourth direction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#retractions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retractions
       
     </span>
   </a>
@@ -1661,10 +1859,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#code" class="md-nav__link">
+  <a href="#next" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Code
+        Next
       
     </span>
   </a>
@@ -1691,113 +1889,300 @@
   
 
 
-<h1 id="05-library-switching-one-library-cant-work-four-can">05. Library switching — one library can't work, four can<a class="headerlink" href="#05-library-switching-one-library-cant-work-four-can" title="Permanent link">&para;</a></h1>
+<h1 id="12-select-dpc-and-a-2-dof-arm-to-test-it-on">12. Select-DPC — and a 2-DoF arm to test it on<a class="headerlink" href="#12-select-dpc-and-a-2-dof-arm-to-test-it-on" title="Permanent link">&para;</a></h1>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p>A <strong>single DeePC library cannot navigate the unicycle to a goal</strong> — the reason is structural, not a tuning problem. So: <strong>pre-collect four data libraries, one per heading quadrant, and hand all four to a single <code>DeePC</code> controller.</strong> Each step, the controller selects the library whose anchor heading is closest to the robot's current heading, swaps its Hankel matrices into one cached QP, and solves. The robot keeps one controller; only the <em>data library</em> feeding the predictor changes.</p>
-<h2 id="context-bilinear-dynamics-defeat-a-single-predictor">Context — bilinear dynamics defeat a single predictor<a class="headerlink" href="#context-bilinear-dynamics-defeat-a-single-predictor" title="Permanent link">&para;</a></h2>
-<p>DeePC's behavioral predictor is a <strong>linear span</strong> of past trajectories. For an LTI system the lemma is exact. For a system that's "linear enough" locally, it approximates well. The unicycle is neither — its dynamics are <em>bilinear</em>:</p>
-<div class="arithmatex">\[
-x_{t+1} = x_t + \Delta t \cdot \cos(\delta_t) \cdot v_t
-\]</div>
-<p>The product <span class="arithmatex">\(\cos(\delta_t) \cdot v_t\)</span> cannot be represented as a linear function of <span class="arithmatex">\((v_t)\)</span> across the full range of <span class="arithmatex">\(\delta_t \in [-\pi, \pi]\)</span>. A single linear predictor trained on all-orientations data <strong>averages out the heading dependence</strong> — it predicts <code>cos(δ) ≈ 0</code> and <code>sin(δ) ≈ 0</code> on average over uniform δ.</p>
-<p>Trained on a broad-PE library covering all orientations:</p>
-<ul>
-<li>The controller's predicted <code>Δx</code> for a given action depends almost entirely on where the data happened to land — not on the <em>current</em> heading.</li>
-<li>Asked "what happens if I drive <code>v = 10</code> right now?" the predictor returns something like "could be <code>+0.25</code> or <code>-0.25</code> or <code>0</code>, depending on which columns the QP selects."</li>
-<li>The QP's safest answer is "do nothing" (<code>v ≈ 0</code>). It cannot reliably claim that moving will reduce the position cost, because its predictor doesn't know which direction <code>v</code> will push the robot.</li>
-</ul>
-<p>Empirically:</p>
-<ul>
-<li>Broad-<code>w</code> collection + single library: <code>v</code> collapses to ~0 across all episodes regardless of hyperparameters (<code>Q_heading</code>, <code>λ_g</code>, <code>λ_y</code>, <code>N</code>).</li>
-<li>Narrow-<code>w</code> collection + single library: <code>w</code> saturates at the bound; the robot moves in a tight circle.</li>
-<li>Adding bearing-aware <code>y_ref</code> + nonzero <code>Q[2, 2]</code>: <code>w</code> varies sensibly but <code>v</code> still collapses.</li>
-</ul>
-<p>Across many hyperparameter sweeps, the failure mode is the same. <strong>It's not tunable</strong> — the root cause is the dynamics, not the QP. This is worth stating explicitly because it isn't obvious from the formulation; several hours of sweeping hyperparameters and reading run-output gradients eventually points to "the predictor is too uncertain to commit to motion," and recognizing that earlier saves time on a future similar pivot.</p>
-<p>The paper's quote is the explicit acknowledgement that one library isn't enough: <em>"the data-driven constraint can be viewed as a local linear approximation, [so] our strategy is to switch the data library based on the robot's current state."</em> The fix is <strong>piecewise linearization</strong> — fit a separate local model in each operating region and route the controller through whichever region you're in.</p>
-<p>From <a href="https://arxiv.org/abs/2603.07395">arXiv:2603.07395</a> Appendix D:</p>
-<blockquote>
-<p><em>"For each prediction horizon W, we construct 4 corresponding data libraries Hd with Tini = 5, each approximately representing the local behavior of the nonlinear system within orientation intervals [0, π/2), [π/2, π), [π, 3π/2), and [3π/2, 2π). During online tracking, the data library associated with the robot's current orientation is selected to improve tracking performance."</em></p>
-</blockquote>
-<p>So four libraries cover the heading circle, each anchored at the midpoint of its quadrant.</p>
-<h2 id="why-local-linearization-works">Why local linearization works<a class="headerlink" href="#why-local-linearization-works" title="Permanent link">&para;</a></h2>
-<p>Within a fixed heading region — say <code>δ ≈ π/4</code> — both <code>cos(δ)</code> and <code>sin(δ)</code> are nearly constant (<code>≈ 0.71</code> each). The dynamics behave locally like:</p>
-<div class="arithmatex">\[
-\Delta x \approx \Delta t \cdot 0.71 \cdot v, \qquad \Delta y \approx \Delta t \cdot 0.71 \cdot v
-\]</div>
-<p>This is <strong>linear in <code>v</code></strong> with fixed slope. A linear behavioral predictor trained on data collected while the robot was near heading <code>π/4</code> will correctly capture this slope and produce confident, non-degenerate predictions.</p>
-<p>By collecting one library <em>starting from each of four orientations</em> (the paper's <code>π/4, 3π/4, 5π/4, 7π/4</code>), each library's data is concentrated in a roughly π/2-wide heading region around its anchor. At runtime we always have <strong>the right library for the current heading</strong>.</p>
-<h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
-<p>Switching lives <strong>inside <code>DeePC</code></strong> — there is no separate wrapper class. One controller holds:</p>
-<ul>
-<li>A list of N pre-collected libraries (each a <code>(Up, Uf, Yp, Yf)</code> Hankel tuple) plus their anchor headings.</li>
-<li>The active library's Hankels in <code>cp.Parameter</code>s, so swapping libraries means writing new parameter values into <strong>one compiled QP</strong> — no recompile per library.</li>
-<li><strong>One shared past-<code>(u, y)</code> buffer</strong> — the robot's actual history is the same regardless of which library predicts the future.</li>
-</ul>
-<p>On each <code>act(y_current, y_ref)</code>:</p>
-<ol>
-<li><code>idx = argmin_i |wrap(y_current[heading_index] − anchor_i)|</code> (trivially 0 with a single library).</li>
-<li>If <code>idx</code> changed since last step, clear the warm-start <code>g</code> — its columns indexed the old library and are meaningless under the new one.</li>
-<li>Write <code>libraries[idx]</code>'s <code>(Up, Uf, Yp, Yf)</code> into the Hankel parameters and solve.</li>
-<li>Slide the shared buffer with the applied <code>(u_t, y_current)</code>.</li>
-</ol>
-<p>The four libraries come from offline rollouts started at the paper's four init headings (<code>controllers/data_collection.PAPER_INIT_HEADINGS</code>); each rollout's data concentrates around one quadrant anchor. <code>scripts/run_deepc.py</code> builds all four by default (<code>--single_library N</code> passes a one-element list for the single-library contrast) and prints <strong>per-episode library usage</strong> so you can see when switching actually triggered:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>episode 1: REACHED   after  94 steps  final_dist=0.46
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  library usage: [0, 0, 17, 77]    # Q3 → Q4 mid-flight
-</span></code></pre></div>
-<h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
-<p>Closed-loop test on broad-<code>w</code> data with library switching enabled (all four libraries loaded). Reproduce with <code>uv run python scripts/run_deepc.py --headless --episodes 4 --seed 0</code> (data: <code>data/libraries_v0.npz</code>, <code>T_ini=5</code>, <code>N=12</code>):</p>
+<p>Add <strong><code>Reacher-v5</code></strong> (Gymnasium's 2-link planar arm) as a third system, and
+implement <strong>Select-DPC</strong> (<a href="https://arxiv.org/abs/2503.18845">Naef, Moffat, Eising &amp; Dorfler,
+arXiv:2503.18845</a>) in <code>core/selectdpc.py</code>, with
+<code>panda/</code> and <code>reacher/</code> as thin adapters.</p>
+<p>Select-DPC replaces fixed local libraries with per-timestep column selection. On
+Reacher it is <strong>strictly better and cheaper</strong> than the anchor pipeline: 96/120 vs
+84/120 reaches, at <strong>4x less compute</strong>. On the Panda it improves every metric and
+remains unusable — which is the fourth independent confirmation that
+<a href="../11-panda-anchors/">entry 11</a>'s coverage diagnosis is the binding constraint.</p>
+<p>Two results here contradict what the papers would lead you to expect, and one
+contradicts a claim made in this repo an hour earlier. All three are recorded
+below rather than quietly dropped.</p>
+<h2 id="context-entry-11-left-one-problem-and-two-candidate-escapes">Context — entry 11 left one problem and two candidate escapes<a class="headerlink" href="#context-entry-11-left-one-problem-and-two-candidate-escapes" title="Permanent link">&para;</a></h2>
+<p>Entry 11 established that the Panda's DeePC libraries are excellent within ~0.5
+rad of their data and <em>anti-informative</em> beyond ~2 rad, that the arm operates at
+~2 rad, and that covering its configuration space at 0.5 rad costs ~10^5
+trajectories. The controller was never the problem.</p>
+<p>That left two escapes: tile denser (unaffordable), or stop tiling. Reacher exists
+to test the second at a budget where the first is also affordable, so the two can
+be separated.</p>
+<p><strong>Reacher removes four of the Panda's difficulties at once</strong>, and three are
+measured rather than assumed:</p>
 <table>
 <thead>
 <tr>
-<th>Episode</th>
-<th>Outcome</th>
-<th>Steps</th>
-<th>Final dist</th>
+<th>Panda</th>
+<th>Reacher</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>0</td>
-<td>truncated</td>
-<td>200</td>
-<td>16.95</td>
+<td>4-D self-motion manifold; the tip does not observe the state</td>
+<td>2 joints drive a 2-D fingertip — no redundancy</td>
 </tr>
 <tr>
-<td>1</td>
-<td><strong>REACHED</strong></td>
-<td>94</td>
-<td><strong>0.46</strong></td>
+<td>gravity is a state-dependent affine term</td>
+<td>planar, gravity perpendicular: <code>u = 0</code> moves the joints by <strong>0.0000 rad</strong> over 50 steps</td>
 </tr>
 <tr>
-<td>2</td>
-<td><strong>REACHED</strong></td>
-<td>35</td>
-<td><strong>0.46</strong></td>
+<td>PD position servo hides the real interface</td>
+<td><code>gaintype=FIXED, biastype=NONE, gear=200</code> — direct torque</td>
 </tr>
 <tr>
-<td>3</td>
-<td><strong>REACHED</strong></td>
-<td>115</td>
-<td><strong>0.48</strong></td>
+<td>~5.7 effective dimensions</td>
+<td>2-D configuration space; and <code>q0</code> is an <strong>exact symmetry</strong> (measured <strong>1.735e-16 m</strong>), so the dynamics depend on <code>q1</code> alone</td>
 </tr>
 </tbody>
 </table>
-<p>Success rate <strong>3/4</strong> on this seed (mean steps-to-reach 81). This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where <code>v</code> was stuck at zero in all four episodes.</p>
-<p>Seed 0 is a lucky draw, though. Over a larger random sample (<code>--episodes 100 --random</code>, base seed <code>4104626029</code>, n=78 before the run was stopped) the aggregate is more sobering:</p>
-<ul>
-<li><strong>Reach rate ≈ 39%</strong> (30/78); the rest truncate at 200 steps.</li>
-<li><strong>QP failures: 0/78</strong> — the solver did not fail once across the whole sample (nor on seed 0).</li>
-<li>Steps-to-reach (successes): mean ≈ 103, range 7–174. Final distance: mean ≈ 4.0, max ≈ 15.8.</li>
-</ul>
-<p>So switching makes goal-reaching <em>possible</em> (~39% vs single-library's 0%), but it is far from reliable — the dominant failure is the truncation/spin mode below, not the QP.</p>
+<p>That last one means the 6x5 = 30-anchor grid encodes only <strong>5 distinct sets of
+dynamics</strong>, each replicated at 6 base rotations — a 6x redundancy that anchoring
+on <code>q1</code> and rotating the fingertip block would remove. Untried.</p>
+<h2 id="considered">Considered<a class="headerlink" href="#considered" title="Permanent link">&para;</a></h2>
+<h3 id="my-first-select-dpc-was-not-select-dpc">My first Select-DPC was not Select-DPC<a class="headerlink" href="#my-first-select-dpc-was-not-select-dpc" title="Permanent link">&para;</a></h3>
+<p>An earlier <code>panda/selectdpc.py</code> scored columns against the <strong>observed past</strong> and
+solved <strong>once</strong>. Reading Algorithm 1 + 2 properly, the paper does neither:</p>
+<ol>
+<li>Selection is against <code>tau~</code>, the <strong>open-loop prediction</strong>, over the full
+   length-L trajectory <code>(u_p, y_p, u_f, y_f)</code> — the data chosen resembles where
+   the controller intends to <em>go</em>.</li>
+<li>It <strong>iterates</strong>: select, solve, re-select against the new prediction, until
+   convergence or <code>n_max</code>. The paper likens this to SQP-MPC's sequential
+   linearization.</li>
+</ol>
+<p>Scoring on the past alone is closer to the <em>Time-Windowed DeePC</em> the paper uses as
+a <strong>baseline</strong>. So the "selection ties fixed libraries" null that version produced
+never tested this method, and is retracted. The corrected algorithm does measurably
+better on the same Panda bank (skill -2.28 -&gt; -1.83, RMSE 197 -&gt; 151 mm).</p>
+<p><strong>Lesson, twice learned today:</strong> implement from the algorithm box, not the
+abstract. The same mistake produced a wrong characterisation of DeePC-GS in
+entry 11's Considered section.</p>
+<h3 id="where-the-code-lives">Where the code lives<a class="headerlink" href="#where-the-code-lives" title="Permanent link">&para;</a></h3>
+<p><code>core/selectdpc.py</code>. The algorithm operates on Hankel blocks and knows nothing
+about either robot; each system supplies its own <code>(u, y)</code> trajectories. The
+alternative was two copies of a non-trivial loop, one of which was already wrong.</p>
+<p>Naming follows the paper: <code>n_cols</code> is its <code>N_cols</code> (columns selected) and <code>n_max</code>
+its iteration cap. These are separate design parameters and are easy to conflate.</p>
+<h3 id="safe_margin-is-not-portable"><code>SAFE_MARGIN</code> is not portable<a class="headerlink" href="#safe_margin-is-not-portable" title="Permanent link">&para;</a></h3>
+<p>Copying the Panda's <code>SAFE_MARGIN = 0.10</code> to Reacher made <strong>14.7% of the task
+impossible</strong>. The Panda trims joint ranges to keep excitation off a hard limit,
+which would be a nonlinearity the local libraries must model. On Reacher that
+reasoning <em>inverts</em>: joint1's limit is what lets the arm fold, and folding is what
+reaches targets near the origin.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>|q1| &lt;= 2.40  (margin 0.10)  -&gt;  reachable annulus [0.0767, 0.21] m
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>|q1| &lt;= 2.88  (margin 0.02)  -&gt;                    [0.0291, 0.21] m
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>goals are drawn uniformly from a disc of radius 0.20
+</span></code></pre></div>
+<p>Four of twenty goals were physically unreachable before this was caught, so the
+true rate was 14/16 = 87.5%, not 70%. <code>reacher/model.py::reachable_annulus</code>
+exists to make that checkable rather than discoverable.</p>
+<h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
+<h3 id="the-validity-radius-is-05-rad-on-both-arms">The validity radius is ~0.5 rad on BOTH arms<a class="headerlink" href="#the-validity-radius-is-05-rad-on-both-arms" title="Permanent link">&para;</a></h3>
+<p><code>scripts/verify_libraries.py</code> (Panda) and <code>scripts/run_reacher_deepc.py</code>, skill vs
+distance from the nearest data:</p>
+<table>
+<thead>
+<tr>
+<th>radius</th>
+<th>Panda (7-DoF, position servo)</th>
+<th>Reacher (2-DoF, torque)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.00</td>
+<td>0.93</td>
+<td>0.94</td>
+</tr>
+<tr>
+<td>0.50</td>
+<td>0.72</td>
+<td>0.84</td>
+</tr>
+<tr>
+<td>1.00</td>
+<td>0.14</td>
+<td>−0.02</td>
+</tr>
+<tr>
+<td>2.00</td>
+<td><strong>−9.93</strong></td>
+<td><strong>−6.06</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Different actuation, different dimensionality, different gravity situation, same
+boundary. That is a far more general number than expected, and it is why the two
+systems' outcomes differ only through <em>where they operate</em>: Reacher's anchor
+spacing is 0.52 rad, the Panda's nearest data is 1.98 rad away.</p>
+<h3 id="select-dpc-on-reacher-better-and-cheaper">Select-DPC on Reacher — better and cheaper<a class="headerlink" href="#select-dpc-on-reacher-better-and-cheaper" title="Permanent link">&para;</a></h3>
+<p>120 scenarios, early stopping OFF, Wilson 95% intervals
+(<code>scripts/eval_reacher_scenarios.py</code>):</p>
+<table>
+<thead>
+<tr>
+<th>controller</th>
+<th>reach rate</th>
+<th>best</th>
+<th>final</th>
+<th>steps</th>
+<th>path/net</th>
+<th>time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>30 fixed anchors</td>
+<td>84/120 [61–77%]</td>
+<td>4.3 mm</td>
+<td>8.9 mm</td>
+<td>21</td>
+<td>1.6</td>
+<td>22.0 m</td>
+</tr>
+<tr>
+<td><strong>Select <code>n_max=1</code></strong></td>
+<td><strong>96/120 [72–86%]</strong></td>
+<td>3.0 mm</td>
+<td>6.6 mm</td>
+<td>16</td>
+<td>1.5</td>
+<td><strong>5.5 m</strong></td>
+</tr>
+<tr>
+<td>Select <code>n_max=3</code></td>
+<td>96/120 [72–86%]</td>
+<td><strong>2.8 mm</strong></td>
+<td><strong>6.3 mm</strong></td>
+<td>18</td>
+<td>1.6</td>
+<td>16.0 m</td>
+</tr>
+<tr>
+<td>random torque</td>
+<td>9/120 [4–14%]</td>
+<td>42.1 mm</td>
+<td>161.7 mm</td>
+<td>20</td>
+<td>7.6</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>Paired against fixed anchors on best distance: <code>n_max=1</code> closer on <strong>70/120</strong>
+(+0.8 mm median), <code>n_max=3</code> on <strong>78/120</strong> (+1.9 mm). The Wilson intervals overlap
+slightly, so the paired tests carry the claim, not the point estimates.</p>
+<h3 id="iterating-buys-nothing-and-past-n_max3-it-hurts">Iterating buys nothing — and past <code>n_max=3</code> it hurts<a class="headerlink" href="#iterating-buys-nothing-and-past-n_max3-it-hurts" title="Permanent link">&para;</a></h3>
+<p><code>scripts/sweep_select_dpc.py</code>, 20 episodes:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>n_max        1      2      3      5      8      (fixed anchors: 11/20, 331.9 ms)
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>reached     16     16     16     15     13
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>ms/step   76.7  163.7  221.4  344.8  504.4
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>iters     1.00   2.00   2.97   4.66   6.69
+</span></code></pre></div>
+<p><strong><code>n_max = 1</code> is the best setting</strong>: the entire gain over fixed anchors comes from
+<em>selecting the right data</em>, not from Algorithm 1's loop. The <code>iters</code> row explains
+the decline — the tolerance only starts firing at <code>n_max=5</code>, so the loop mostly
+runs to its cap, and with nothing pinning it the prediction drifts from the
+measured state. Beyond <code>n_max=3</code> it is strictly dominated: slower <em>and</em> worse.</p>
+<p>The one thing iteration does buy is precision: <code>n_max=3</code> converges 0.3 mm tighter
+and wins more paired comparisons, at 3x the cost and no reach-rate gain.</p>
+<h3 id="the-drift-found-only-by-removing-early-stopping">The drift — found only by removing early stopping<a class="headerlink" href="#the-drift-found-only-by-removing-early-stopping" title="Permanent link">&para;</a></h3>
+<p>Every run before this one stopped at first contact, so <code>final</code> recorded where the
+tip was when it crossed the threshold, not where it settled. Running the full
+horizon:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>              best -&gt; final    ratio
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>fixed          4.3 -&gt; 8.9      2.1x
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Select n_max=1 3.0 -&gt; 6.6      2.2x
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>Select n_max=3 2.8 -&gt; 6.3      2.3x
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>random        42.1 -&gt; 161.7    3.8x
+</span></code></pre></div>
+<p><strong>Every controller arrives at roughly half its final error and then backs off by
+the same factor.</strong> The constancy is the tell: it is not a data or selection
+problem but a property of the receding-horizon cost, which has no terminal term
+and nothing rewarding station-keeping once tracking is nearly satisfied over the
+horizon. <code>docs/journey/06-stop-at-goal.md</code> records the unicycle hitting this.</p>
+<p>Consequence: <strong>every reach-rate number in this project flatters its controller</strong> —
+they touch the target and leave.</p>
+<h3 id="the-panda-coverage-confirmed-from-a-fourth-direction">The Panda: coverage confirmed, from a fourth direction<a class="headerlink" href="#the-panda-coverage-confirmed-from-a-fourth-direction" title="Permanent link">&para;</a></h3>
+<p><code>scripts/run_select_dpc.py</code>, gate on 40 held-out configurations drawn as the env
+draws them:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>tip RMSE</th>
+<th>skill</th>
+<th>cos</th>
+<th>cos&lt;0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>K=65 fixed</td>
+<td>246 mm</td>
+<td>−4.73</td>
+<td>0.23</td>
+<td>45%</td>
+</tr>
+<tr>
+<td>Select-DPC</td>
+<td>151 mm</td>
+<td>−1.83</td>
+<td><strong>0.52</strong></td>
+<td>38%</td>
+</tr>
+</tbody>
+</table>
+<p>Select-DPC improves everything — direction quality more than doubles — and
+selection is working as designed (3 trajectories chosen from 65). It is still
+<em>negative skill</em>: worse than assuming the tip does not move. The nearest data sits
+<strong>1.98 rad</strong> away against a ~0.5 rad validity radius, and no selection rule
+manufactures data that is not there.</p>
+<p><code>scripts/plot_panda_coverage_argument.py</code> assembles the four independent routes to
+this conclusion into one figure.</p>
+<h2 id="retractions">Retractions<a class="headerlink" href="#retractions" title="Permanent link">&para;</a></h2>
+<p><strong>The Panda closed-loop comparison at 40 steps.</strong> All three controllers scored
+0/10, which was reported as evidence they were equivalent. A DLS oracle on the
+same scenarios reaches <strong>1/12</strong> at that budget: the episodes were near-infeasible,
+so the run measured the step budget, not the controllers. <code>scripts/run_select_dpc.py</code>
+now carries a <code>DLS oracle</code> row for exactly this reason — at 100 steps it reaches
+8/10 with <code>path/net 1.0</code>, confirming the task is achievable there. The affected
+figure panel has been rebuilt.</p>
+<p><strong>"Denser anchors will raise Reacher's reach rate."</strong> Predicted, then measured:
+3.6x the anchors (30 -&gt; 108, spacing 1.05 -&gt; 0.52 rad) bought <strong>one</strong> extra reach,
+13/20 -&gt; 14/20, while the open-loop gate improved exactly as predicted. Prediction
+improving without reaching improving is a pattern worth distrusting on sight.</p>
 <h2 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Switching only helps if the robot <strong>actually crosses quadrant boundaries</strong> during an episode. With narrow <code>w</code> data the turn rate is too low and switching becomes a no-op.</li>
-<li><strong>Truncation/spin is the dominant failure</strong> (~61% of random episodes). Episode 0 above is typical: 200 steps, ends 16.95 from goal despite cycling all four libraries — <code>w</code> saturates positive while <code>v</code> stays near zero, so the robot spins in place rather than driving out. Diagnosing these would benefit from logging the QP's <code>σ_y</code> and the controller's predicted vs actual trajectory.</li>
-<li><strong>QP solver failures did not appear</strong> in this measurement (0 across 82 episodes: 78 random + 4 at seed 0), so they are not the bottleneck here — the earlier "occasional <code>user_limit</code> failure" concern is not borne out on this build/data. The QP is still ill-conditioned at the paper's <code>λ_y ≈ 3e6</code> (see <code>deepc.py</code>), so a numerical breakdown remains <em>possible</em> on other data/solvers (SCS is chosen for robustness; CLARABEL can break down), but it is not what limits reaching.</li>
+<li><code>N_cols</code> is held at 300 throughout; the paper sweeps that axis (its Figure 3)
+  and we have not.</li>
+<li>Only norm-based selection is implemented. The paper's Isomap variant exists to
+  dodge the curse of dimensionality in the <code>(T_ini+N)(m+p)</code>-dimensional trajectory
+  space — 102 on Reacher, <strong>289 on the Panda</strong>, where it matters more.</li>
+<li><code>tau</code> mixes units (torque, radians, metres). <code>tip_scale</code> exposes a correction;
+  every number here uses the paper's plain norm, which under-weights the Panda's
+  tip block ~10x.</li>
+<li>One unexplained non-determinism: episode 17 of the Reacher scan scored 19.8 mm
+  in one code path and 184.8 mm in another on identical inputs. Order dependence,
+  episode definition and metric seeding were each ruled out. No aggregate depends
+  on it, but per-episode Reacher classifications should be treated as provisional.</li>
 </ul>
-<h2 id="code">Code<a class="headerlink" href="#code" title="Permanent link">&para;</a></h2>
-<p><code>two_wheel_robot/controllers/deepc.py::DeePC</code> — library switching is built into the controller (<code>libraries</code>, <code>anchor_headings</code>, <code>heading_index</code>; <code>last_library_idx</code> diagnostic). See <a href="../../controllers/library-switching/">library switching reference</a>.</p>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>A terminal cost or stop-at-goal term.</strong> The drift is universal and structural,
+   and fixing it would lift every row rather than trading one against another.</li>
+<li><strong><code>N_cols</code> sweep</strong>, the one design parameter the paper tunes and we did not.</li>
+<li><strong>Exploit <code>q0</code> symmetry</strong> on Reacher — 5 libraries instead of 30 — and the same
+   trick for the Panda's <code>q1</code>.</li>
+<li><strong>On-policy collection for the Panda</strong>: cover the trajectories the controller
+   actually traverses rather than the configuration space. It is the one route to
+   the coverage problem this project has not tried, and it is what the unicycle's
+   clone -&gt; residual pipeline does.</li>
+</ol>
 
 
 
@@ -1833,7 +2218,7 @@ x_{t+1} = x_t + \Delta t \cdot \cos(\delta_t) \cdot v_t
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../04-deepc-formulation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 04. DeePC formulation">
+          <a href="../11-panda-anchors/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 11. Panda anchors">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1843,27 +2228,11 @@ x_{t+1} = x_t + \Delta t \cdot \cos(\delta_t) \cdot v_t
                 Previous
               </span>
               <div class="md-ellipsis">
-                04. DeePC formulation
+                11. Panda anchors
               </div>
             </div>
           </a>
         
-        
-          
-          <a href="../06-stop-at-goal/" class="md-footer__link md-footer__link--next" aria-label="Next: 06. Stopping at the goal">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                06. Stopping at the goal
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
         
       </nav>
     
