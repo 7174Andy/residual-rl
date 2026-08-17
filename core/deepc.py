@@ -27,6 +27,14 @@ QP (per step) — hybrid regularization following arXiv:2603.07395 (Reg-DDPC):
     s.t. Up · g       = u_ini               (hard past-input constraint)
          Yp · g + σ_y = y_ini               (past-output constraint with slack)
          u_min ≤ Uf·g ≤ u_max               (control bounds, optional)
+         |u_j − u_{j−1}| ≤ du_max           (input RATE bound, optional)
+
+`du_max` defaults to `None`, which adds no constraint and leaves every existing
+result bit-identical. It exists because `u_bounds` limits *where* the input may
+sit but not how far it may move in one step — harmless when `u` is a velocity
+(the unicycle), and not harmless when `u` is an absolute position target (the
+Panda's `q_des`), where an unbounded jump walks straight out of the neighbourhood
+the active library was collected in. See `_build_problem` for the measurements.
 
 with `Q̄ = I_N ⊗ Q`, `R̄ = I_N ⊗ R`. `Up/Uf/Yp/Yf` are `cp.Parameter`s set to
 the selected library each step; `u_ini`, `y_ini`, `y_ref_flat` are also
@@ -74,6 +82,7 @@ class DeePC:
         lambda_g: float = 2.0,
         lambda_y: float = 3e6,
         u_bounds: Optional[tuple[np.ndarray, np.ndarray]] = None,
+        du_max: Optional[np.ndarray] = None,
         heading_index: int = 2,
         key_fn: Optional[Callable[[np.ndarray], float]] = None,
         solver: Optional[str] = "SCS",
@@ -155,6 +164,11 @@ class DeePC:
         self.lambda_g = float(lambda_g)
         self.lambda_y = float(lambda_y)
         self.u_bounds = u_bounds
+        # None keeps the original behaviour exactly -- no rate constraint is added,
+        # so every existing unicycle result is bit-identical.
+        self.du_max = (None if du_max is None
+                       else np.broadcast_to(np.asarray(du_max, dtype=np.float64),
+                                            (m_u,)).copy())
         self.heading_index = int(heading_index)
         self.key_fn = key_fn
         self.solver = solver
@@ -230,6 +244,29 @@ class DeePC:
             u_max = np.asarray(u_max, dtype=np.float64).reshape(self.m_u)
             constraints.append(u_future >= np.tile(u_min, self.N))
             constraints.append(u_future <= np.tile(u_max, self.N))
+
+        # Rate limit |u_j - u_{j-1}| <= du_max, with u_{-1} the last applied input.
+        #
+        # `u_bounds` limits WHERE the input may sit, not how far it may move in one
+        # step. For the unicycle that gap is harmless -- u is a velocity, so a jump
+        # is physically fine. For an ABSOLUTE joint-position target it is not:
+        # measured on PandaReach, the QP asked for median 1.9-3.1 rad of movement
+        # per 20 ms step, far outside the neighbourhood its library was collected
+        # in, making every command an extrapolation of a locally-valid model.
+        #
+        # A hard constraint rather than the `S||du||^2` cost DeePC-GS uses
+        # (arXiv:2509.26334): a cost trades rate against tracking and cannot
+        # guarantee the plan stays inside the region where the local model is
+        # valid, and `scripts/test_cluster_lti.py` measures that envelope as a
+        # threshold (superposition holds to ~14-34% at amplitude 0.05, degrading
+        # to ~52-61% at 0.25), not a penalty. Add the soft version too only if the
+        # hard bound proves too rigid.
+        if self.du_max is not None:
+            du_max = np.tile(self.du_max, self.N)
+            u_prev = u_ini_param[-self.m_u:]
+            u_shift = cp.hstack([u_prev, u_future[: -self.m_u]])
+            constraints.append(u_future - u_shift <= du_max)
+            constraints.append(u_future - u_shift >= -du_max)
 
         self._g = g
         self._sigma_y = sigma_y
