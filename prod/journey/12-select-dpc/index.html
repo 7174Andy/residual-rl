@@ -498,6 +498,8 @@
       
         
       
+        
+      
     
     
     
@@ -937,6 +939,34 @@
           </ul>
         </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1493,47 +1523,14 @@
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#considered" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Considered
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Considered">
+    <nav class="md-nav" aria-label="Context — entry 11 left one problem and two candidate escapes">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#my-first-select-dpc-was-not-select-dpc" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        My first Select-DPC was not Select-DPC
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#where-the-code-lives" class="md-nav__link">
     <span class="md-ellipsis">
       
         Where the code lives
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#safe_margin-is-not-portable" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SAFE_MARGIN is not portable
       
     </span>
   </a>
@@ -1640,32 +1637,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#retractions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Retractions
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#caveats" class="md-nav__link">
     <span class="md-ellipsis">
       
         Caveats
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next
       
     </span>
   </a>
@@ -1734,47 +1709,14 @@
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#considered" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Considered
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Considered">
+    <nav class="md-nav" aria-label="Context — entry 11 left one problem and two candidate escapes">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#my-first-select-dpc-was-not-select-dpc" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        My first Select-DPC was not Select-DPC
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#where-the-code-lives" class="md-nav__link">
     <span class="md-ellipsis">
       
         Where the code lives
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#safe_margin-is-not-portable" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SAFE_MARGIN is not portable
       
     </span>
   </a>
@@ -1881,32 +1823,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#retractions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Retractions
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#caveats" class="md-nav__link">
     <span class="md-ellipsis">
       
         Caveats
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next
       
     </span>
   </a>
@@ -1992,48 +1912,19 @@ measured rather than assumed:</p>
 <p>That last one means the 6x5 = 30-anchor grid encodes only <strong>5 distinct sets of
 dynamics</strong>, each replicated at 6 base rotations — a 6x redundancy that anchoring
 on <code>q1</code> and rotating the fingertip block would remove. Untried.</p>
-<h2 id="considered">Considered<a class="headerlink" href="#considered" title="Permanent link">&para;</a></h2>
-<h3 id="my-first-select-dpc-was-not-select-dpc">My first Select-DPC was not Select-DPC<a class="headerlink" href="#my-first-select-dpc-was-not-select-dpc" title="Permanent link">&para;</a></h3>
-<p>An earlier <code>panda/selectdpc.py</code> scored columns against the <strong>observed past</strong> and
-solved <strong>once</strong>. Reading Algorithm 1 + 2 properly, the paper does neither:</p>
-<ol>
-<li>Selection is against <code>tau~</code>, the <strong>open-loop prediction</strong>, over the full
-   length-L trajectory <code>(u_p, y_p, u_f, y_f)</code> — the data chosen resembles where
-   the controller intends to <em>go</em>.</li>
-<li>It <strong>iterates</strong>: select, solve, re-select against the new prediction, until
-   convergence or <code>n_max</code>. The paper likens this to SQP-MPC's sequential
-   linearization.</li>
-</ol>
-<p>Scoring on the past alone is closer to the <em>Time-Windowed DeePC</em> the paper uses as
-a <strong>baseline</strong>. So the "selection ties fixed libraries" null that version produced
-never tested this method, and is retracted. The corrected algorithm does measurably
-better on the same Panda bank (skill -2.28 -&gt; -1.83, RMSE 197 -&gt; 151 mm).</p>
-<p><strong>Lesson, twice learned today:</strong> implement from the algorithm box, not the
-abstract. The same mistake produced a wrong characterisation of DeePC-GS in
-entry 11's Considered section.</p>
 <h3 id="where-the-code-lives">Where the code lives<a class="headerlink" href="#where-the-code-lives" title="Permanent link">&para;</a></h3>
 <p><code>core/selectdpc.py</code>. The algorithm operates on Hankel blocks and knows nothing
 about either robot; each system supplies its own <code>(u, y)</code> trajectories. The
 alternative was two copies of a non-trivial loop, one of which was already wrong.</p>
 <p>Naming follows the paper: <code>n_cols</code> is its <code>N_cols</code> (columns selected) and <code>n_max</code>
 its iteration cap. These are separate design parameters and are easy to conflate.</p>
-<h3 id="safe_margin-is-not-portable"><code>SAFE_MARGIN</code> is not portable<a class="headerlink" href="#safe_margin-is-not-portable" title="Permanent link">&para;</a></h3>
-<p>Copying the Panda's <code>SAFE_MARGIN = 0.10</code> to Reacher made <strong>14.7% of the task
-impossible</strong>. The Panda trims joint ranges to keep excitation off a hard limit,
-which would be a nonlinearity the local libraries must model. On Reacher that
-reasoning <em>inverts</em>: joint1's limit is what lets the arm fold, and folding is what
-reaches targets near the origin.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>|q1| &lt;= 2.40  (margin 0.10)  -&gt;  reachable annulus [0.0767, 0.21] m
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>|q1| &lt;= 2.88  (margin 0.02)  -&gt;                    [0.0291, 0.21] m
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>goals are drawn uniformly from a disc of radius 0.20
-</span></code></pre></div>
-<p>Four of twenty goals were physically unreachable before this was caught, so the
-true rate was 14/16 = 87.5%, not 70%. <code>reacher/model.py::reachable_annulus</code>
-exists to make that checkable rather than discoverable.</p>
 <h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
 <h3 id="the-validity-radius-is-05-rad-on-both-arms">The validity radius is ~0.5 rad on BOTH arms<a class="headerlink" href="#the-validity-radius-is-05-rad-on-both-arms" title="Permanent link">&para;</a></h3>
 <p><code>scripts/verify_libraries.py</code> (Panda) and <code>scripts/run_reacher_deepc.py</code>, skill vs
-distance from the nearest data:</p>
+distance from the nearest data. (<code>skill</code>, <code>cos</code>, <code>best</code>/<code>final</code>, <code>path/net</code> and the
+selection distances are all defined in
+<a href="../../reference/metrics/">Reference › Metrics</a>, with what each one is load-bearing
+for.)</p>
 <table>
 <thead>
 <tr>
@@ -2128,10 +2019,10 @@ spacing is 0.52 rad, the Panda's nearest data is 1.98 rad away.</p>
 slightly, so the paired tests carry the claim, not the point estimates.</p>
 <h3 id="iterating-buys-nothing-and-past-n_max3-it-hurts">Iterating buys nothing — and past <code>n_max=3</code> it hurts<a class="headerlink" href="#iterating-buys-nothing-and-past-n_max3-it-hurts" title="Permanent link">&para;</a></h3>
 <p><code>scripts/sweep_select_dpc.py</code>, 20 episodes:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>n_max        1      2      3      5      8      (fixed anchors: 11/20, 331.9 ms)
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>reached     16     16     16     15     13
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>ms/step   76.7  163.7  221.4  344.8  504.4
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>iters     1.00   2.00   2.97   4.66   6.69
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>n_max        1      2      3      5      8      (fixed anchors: 11/20, 331.9 ms)
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>reached     16     16     16     15     13
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ms/step   76.7  163.7  221.4  344.8  504.4
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>iters     1.00   2.00   2.97   4.66   6.69
 </span></code></pre></div>
 <p><strong><code>n_max = 1</code> is the best setting</strong>: the entire gain over fixed anchors comes from
 <em>selecting the right data</em>, not from Algorithm 1's loop. The <code>iters</code> row explains
@@ -2144,11 +2035,11 @@ and wins more paired comparisons, at 3x the cost and no reach-rate gain.</p>
 <p>Every run before this one stopped at first contact, so <code>final</code> recorded where the
 tip was when it crossed the threshold, not where it settled. Running the full
 horizon:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>              best -&gt; final    ratio
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>fixed          4.3 -&gt; 8.9      2.1x
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Select n_max=1 3.0 -&gt; 6.6      2.2x
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>Select n_max=3 2.8 -&gt; 6.3      2.3x
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>random        42.1 -&gt; 161.7    3.8x
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>              best -&gt; final    ratio
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>fixed          4.3 -&gt; 8.9      2.1x
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Select n_max=1 3.0 -&gt; 6.6      2.2x
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>Select n_max=3 2.8 -&gt; 6.3      2.3x
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>random        42.1 -&gt; 161.7    3.8x
 </span></code></pre></div>
 <p><strong>Every controller arrives at roughly half its final error and then backs off by
 the same factor.</strong> The constancy is the tell: it is not a data or selection
@@ -2302,18 +2193,6 @@ Reacher does not have:</p>
    entirely by joint-space geometry. <code>tip_scale</code> exposes the correction and every
    number above uses the paper's plain norm.</li>
 </ol>
-<h2 id="retractions">Retractions<a class="headerlink" href="#retractions" title="Permanent link">&para;</a></h2>
-<p><strong>The Panda closed-loop comparison at 40 steps.</strong> All three controllers scored
-0/10, which was reported as evidence they were equivalent. A DLS oracle on the
-same scenarios reaches <strong>1/12</strong> at that budget: the episodes were near-infeasible,
-so the run measured the step budget, not the controllers. <code>scripts/run_select_dpc.py</code>
-now carries a <code>DLS oracle</code> row for exactly this reason — at 100 steps it reaches
-8/10 with <code>path/net 1.0</code>, confirming the task is achievable there. The affected
-figure panel has been rebuilt.</p>
-<p><strong>"Denser anchors will raise Reacher's reach rate."</strong> Predicted, then measured:
-3.6x the anchors (30 -&gt; 108, spacing 1.05 -&gt; 0.52 rad) bought <strong>one</strong> extra reach,
-13/20 -&gt; 14/20, while the open-loop gate improved exactly as predicted. Prediction
-improving without reaching improving is a pattern worth distrusting on sight.</p>
 <h2 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>N_cols</code> is held at 300 throughout; the paper sweeps that axis (its Figure 3)
@@ -2334,20 +2213,6 @@ improving without reaching improving is a pattern worth distrusting on sight.</p
   episode definition and metric seeding were each ruled out. No aggregate depends
   on it, but per-episode Reacher classifications should be treated as provisional.</li>
 </ul>
-<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>A terminal cost or stop-at-goal term.</strong> The drift is universal and structural,
-   and fixing it would lift every row rather than trading one against another.</li>
-<li><strong><code>N_cols</code> sweep</strong>, the one design parameter the paper tunes and we did not.</li>
-<li><strong>Exploit <code>q0</code> symmetry</strong> on Reacher — 5 libraries instead of 30 — and the same
-   trick for the Panda's <code>q1</code>.</li>
-<li><strong>On-policy collection for the Panda</strong> — now the only item on this list that
-   can move the Panda at all. Cover the trajectories the controller actually
-   traverses rather than the configuration space: it attacks <code>d_sample</code> directly,
-   which is the quantity the section above shows every selection-side idea is
-   bounded by. It is the one route to the coverage problem this project has not
-   tried, and it is what the unicycle's clone -&gt; residual pipeline does.</li>
-</ol>
 
 
 
