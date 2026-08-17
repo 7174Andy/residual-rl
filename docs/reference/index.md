@@ -20,6 +20,14 @@ Pure reference for the env, controllers, and CLI scripts. No "why" — that live
 
     [:octicons-arrow-right-24: Controllers](../controllers/index.md)
 
+-   :material-ruler:{ .lg .middle } &nbsp; __Metrics__
+
+    ---
+
+    What `skill`, `cos`, `span`, `best`/`final`, `path/net`, `r_K` and the selection distances each mean — and which conclusion each one carries. Read this before any results table.
+
+    [:octicons-arrow-right-24: Metrics](metrics.md)
+
 -   :material-console:{ .lg .middle } &nbsp; __CLI scripts__
 
     ---
@@ -66,5 +74,6 @@ Pure reference for the env, controllers, and CLI scripts. No "why" — that live
 
 ### CLI
 
+- [Metrics](metrics.md) — definitions and, for each, the conclusion it carries.
 - [CLI scripts](cli.md) — full flag reference for all 21 runnable scripts.
 - [MuJoCo primer](mujoco-primer.md) — from-scratch walkthrough of the MuJoCo bindings used by `PandaReach-v0`.

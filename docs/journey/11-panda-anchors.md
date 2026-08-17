@@ -129,7 +129,8 @@ Measured cluster radii are **4.34, 3.84, 3.73, 4.25 rad** — the bottom row. Ab
 
 `scripts/verify_libraries.py` is the gate any future library set should pass.
 `skill` compares against a "the tip does not move" predictor; `cos` is the
-direction of predicted vs true tip displacement.
+direction of predicted vs true tip displacement. Full definitions, and what each
+metric is load-bearing for, in [Reference › Metrics](../reference/metrics.md).
 
 | radius | span | skill | cos | cos > 0.5 | cos < 0 |
 | ------ | ---- | ----- | --- | --------- | ------- |

@@ -112,6 +112,7 @@ nav:
           - Library switching: controllers/library-switching.md
           - Data collection: controllers/data-collection.md
           - API: controllers/api.md
+      - Metrics: reference/metrics.md
       - CLI: reference/cli.md
       - MuJoCo primer: reference/mujoco-primer.md
       - Reacher-v5: reference/reacher.md
