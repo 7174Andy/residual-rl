@@ -1612,6 +1612,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#why-selection-cannot-rescue-a-7-dof-arm-the-floor-is-148-rad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why selection cannot rescue a 7-DoF arm — the floor is 1.48 rad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#three-problems-underneath-the-coverage-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three problems underneath the coverage one
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1831,6 +1853,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#why-selection-cannot-rescue-a-7-dof-arm-the-floor-is-148-rad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why selection cannot rescue a 7-DoF arm — the floor is 1.48 rad
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#three-problems-underneath-the-coverage-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three problems underneath the coverage one
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1900,6 +1944,12 @@ Reacher it is <strong>strictly better and cheaper</strong> than the anchor pipel
 84/120 reaches, at <strong>4x less compute</strong>. On the Panda it improves every metric and
 remains unusable — which is the fourth independent confirmation that
 <a href="../11-panda-anchors/">entry 11</a>'s coverage diagnosis is the binding constraint.</p>
+<p>A fifth measurement, added afterwards, makes that last claim structural rather
+than empirical: the nearest of the Panda bank's <strong>97,500 collected samples</strong> sits
+<strong>1.48 rad</strong> from a typical episode start, against a 0.5 rad validity radius, so
+<strong>no</strong> selection rule — not this one, not Isomap, not an oracle — has anything
+near enough to pick. On Reacher the same number is 0.03 rad. Select-DPC selects;
+it does not collect.</p>
 <p>Two results here contradict what the papers would lead you to expect, and one
 contradicts a claim made in this repo an hour earlier. All three are recorded
 below rather than quietly dropped.</p>
@@ -2144,6 +2194,114 @@ selection is working as designed (3 trajectories chosen from 65). It is still
 manufactures data that is not there.</p>
 <p><code>scripts/plot_panda_coverage_argument.py</code> assembles the four independent routes to
 this conclusion into one figure.</p>
+<h3 id="why-selection-cannot-rescue-a-7-dof-arm-the-floor-is-148-rad">Why selection cannot rescue a 7-DoF arm — the floor is 1.48 rad<a class="headerlink" href="#why-selection-cannot-rescue-a-7-dof-arm-the-floor-is-148-rad" title="Permanent link">&para;</a></h3>
+<p>The argument above had a hole. <strong>1.98 rad is the distance to the nearest
+<em>anchor</em>,</strong> and Select-DPC does not use anchors — it picks Hankel <em>columns</em> out of
+a pooled bank, and collection trajectories wander away from their anchor under OU
+excitation. So "1.98 rad from an anchor" never said how far the <em>selected</em> data
+was. <code>scripts/measure_selection_distance.py</code> measures the thing the algorithm
+actually reaches for: 40 held-out configurations per arm, drawn the way each env
+draws its episode starts, <code>N_cols = 300</code>, stride 4, medians.</p>
+<p><img alt="Select-DPC selection distance against the validity radius, both arms" src="../../reference/panda_selection_distance.png" /></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Panda (7-DoF)</th>
+<th>Reacher (2-DoF)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>collection</td>
+<td>97,500 samples → 24,115 columns / 65 trajectories</td>
+<td>36,000 → 8,880 / 30</td>
+</tr>
+<tr>
+<td>nearest anchor</td>
+<td>1.98 rad</td>
+<td>0.51 rad</td>
+</tr>
+<tr>
+<td><strong>nearest sample collected, anywhere</strong></td>
+<td><strong>1.48 rad</strong></td>
+<td><strong>0.03 rad</strong></td>
+</tr>
+<tr>
+<td>nearest bank column</td>
+<td>1.51 rad</td>
+<td>0.05 rad</td>
+</tr>
+<tr>
+<td>median selected column</td>
+<td>2.01 rad</td>
+<td>0.58 rad</td>
+</tr>
+<tr>
+<td><strong>selected columns inside 0.5 rad</strong></td>
+<td><strong>0%</strong></td>
+<td><strong>36%</strong></td>
+</tr>
+<tr>
+<td>skill / cos</td>
+<td>−1.83 / 0.52</td>
+<td><strong>+0.73</strong> / 0.92</td>
+</tr>
+<tr>
+<td>negative skill</td>
+<td>26/40</td>
+<td>7/40</td>
+</tr>
+</tbody>
+</table>
+<p>The Panda's <code>nearest anchor</code>, <code>skill</code> and <code>cos</code> rows reproduce entry 11 and the
+gate table above <strong>exactly</strong> (1.98, −1.83, 0.52) on an independently written code
+path, which is what makes the new rows worth trusting.</p>
+<p>Four things this settles:</p>
+<ol>
+<li><strong>The wandering is real but useless.</strong> Nearest anchor 1.98 rad, nearest actual
+   sample 1.48 rad — collection does spread the data by ~0.5 rad, and that buys
+   nothing against a 0.5 rad validity radius. <strong>Not one</strong> of the 300 columns
+   Algorithm 2 selects lies inside it. Reacher puts 36% of its selection inside,
+   and its skill is <strong>positive</strong>.</li>
+<li><strong>The windowing convention does not matter.</strong> A column is a length-17 window,
+   not a point — on the Panda it traverses a median 0.58 rad — so locating it by
+   its first sample is a choice. <code>d_sample</code>, the nearest of all 97,500 collected
+   configurations with no windowing at all, gives 1.48 against the column figure's
+   1.51. The gap is 0.03 rad; nothing here rests on the convention.</li>
+<li><strong>It is not a data-volume problem.</strong> The Panda's bank holds 2.7× Reacher's
+   samples and is still <strong>~50× further</strong> from what it needs. More trajectories of
+   the same kind only walk <code>r_K</code> down the power law in panel B of
+   <code>panda_coverage_argument.png</code>, which is why the count needed is ~10⁵.</li>
+<li><strong>The bound is on selection itself, not on this selection rule.</strong> <code>d_sample</code> is
+   the floor: no rule can pick data that was never collected. Isomap embedding, a
+   unit-corrected norm, a swept <code>N_cols</code>, an oracle that picks the 300 genuinely
+   best columns — every one of them still chooses from a set whose nearest member
+   sits 3× outside the validity radius. That is a far stronger statement than
+   "Select-DPC scored −1.83", and it is why the answer here is collection, not a
+   better selector.</li>
+</ol>
+<p>Panel A is the compact form: the two point clouds land on the <em>same</em> validity
+curve, in different places. Selection moves you along that curve; it cannot move
+the curve.</p>
+<h3 id="three-problems-underneath-the-coverage-one">Three problems underneath the coverage one<a class="headerlink" href="#three-problems-underneath-the-coverage-one" title="Permanent link">&para;</a></h3>
+<p>Coverage is binding, so these are untested rather than refuted — but if collection
+were fixed tomorrow, Select-DPC on a 7-DoF arm would still face three things
+Reacher does not have:</p>
+<ol>
+<li><strong><code>y</code> does not observe the state.</strong> The 4-D self-motion manifold makes
+   <code>(u_ini, y_ini)</code> map one-to-many onto futures, violating what Willems' lemma
+   needs from the past window. <code>y = [q; p_ee]</code> patches it, and that patch is the
+   env adapter's doing, not the algorithm's — Select-DPC inherits the fix, it does
+   not provide one.</li>
+<li><strong>A 289-dimensional trajectory space</strong> against Reacher's 102. Algorithm 2's
+   plain Euclidean distance is exactly what the paper's Isomap variant exists to
+   rescue at this dimension, and only the norm-based method is implemented here.</li>
+<li><strong><code>tau</code> mixes units</strong> — <code>q_des</code> (rad), <code>q</code> (rad) and <code>p_ee</code> (m) — so the tip
+   block is weighted ~10× below the joint blocks and selection is driven almost
+   entirely by joint-space geometry. <code>tip_scale</code> exposes the correction and every
+   number above uses the paper's plain norm.</li>
+</ol>
 <h2 id="retractions">Retractions<a class="headerlink" href="#retractions" title="Permanent link">&para;</a></h2>
 <p><strong>The Panda closed-loop comparison at 40 steps.</strong> All three controllers scored
 0/10, which was reported as evidence they were equivalent. A DLS oracle on the
@@ -2166,6 +2324,11 @@ improving without reaching improving is a pattern worth distrusting on sight.</p
 <li><code>tau</code> mixes units (torque, radians, metres). <code>tip_scale</code> exposes a correction;
   every number here uses the paper's plain norm, which under-weights the Panda's
   tip block ~10x.</li>
+<li>The selection-distance table is <strong>n = 40 configurations per arm, one seed, one
+  <code>N_cols</code>, one stride</strong>. The effects are 30x, not marginal, and the three rows
+  that overlap prior runs reproduce them exactly — but it is not a confirmation
+  run. The Reacher bank is also collected fresh each invocation (30 anchors x
+  1200 samples) rather than loaded, so its rows move slightly with <code>--seed</code>.</li>
 <li>One unexplained non-determinism: episode 17 of the Reacher scan scored 19.8 mm
   in one code path and 184.8 mm in another on identical inputs. Order dependence,
   episode definition and metric seeding were each ruled out. No aggregate depends
@@ -2178,10 +2341,12 @@ improving without reaching improving is a pattern worth distrusting on sight.</p
 <li><strong><code>N_cols</code> sweep</strong>, the one design parameter the paper tunes and we did not.</li>
 <li><strong>Exploit <code>q0</code> symmetry</strong> on Reacher — 5 libraries instead of 30 — and the same
    trick for the Panda's <code>q1</code>.</li>
-<li><strong>On-policy collection for the Panda</strong>: cover the trajectories the controller
-   actually traverses rather than the configuration space. It is the one route to
-   the coverage problem this project has not tried, and it is what the unicycle's
-   clone -&gt; residual pipeline does.</li>
+<li><strong>On-policy collection for the Panda</strong> — now the only item on this list that
+   can move the Panda at all. Cover the trajectories the controller actually
+   traverses rather than the configuration space: it attacks <code>d_sample</code> directly,
+   which is the quantity the section above shows every selection-side idea is
+   bounded by. It is the one route to the coverage problem this project has not
+   tried, and it is what the unicycle's clone -&gt; residual pipeline does.</li>
 </ol>
 
 
