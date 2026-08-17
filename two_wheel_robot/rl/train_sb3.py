@@ -2,10 +2,11 @@
 from-scratch (vanilla) RL baseline that learns the same task with no DeePC at all.
 
 TD3 (default) or SAC (fallback for the hard-exploration collapse regime) — both are
-SB3 off-policy continuous-control algorithms on the same env/benchmark. The only
-module in the project that imports stable_baselines3 (per CLAUDE.md). The actor's
-action/mean head is zero-initialized so the initial residual is 0 and the policy
-starts identical to the clone (no-regression at init).
+SB3 off-policy continuous-control algorithms on the same env/benchmark. This module
+holds the unicycle's env construction and training entrypoints; the algorithm-agnostic
+SB3 plumbing (model building, checkpointing, actor zero-init, policy loading) lives in
+`rl/sb3.py`. The actor's action/mean head is zero-initialized so the initial residual
+is 0 and the policy starts identical to the clone (no-regression at init).
 """
 from __future__ import annotations
 
