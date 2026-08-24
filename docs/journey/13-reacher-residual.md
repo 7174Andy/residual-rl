@@ -135,11 +135,24 @@ The figure's panel C plots the per-checkpoint difference directly: **+51 pp at
 its widest (75k)**, sign flip between 125k and 150k, and never outside ±8 pp
 after that.
 
+Rerun across **five training seeds** per arm (seeds 1–4 added 2026-08-24;
+checkpoints and per-seed sweep CSVs in `data/reacher_ckpt_seeds/`, figure
+`docs/reference/reacher_crossover_seeds.png` via
+`scripts/plot_reacher_crossover_seeds.py`; CSVs are gitignored repo-wide), the
+crossover survives but its location does not. The residual leads on 5/5 seeds
+at 25k and 50k (pooled +29 and +34 pp over 600 episodes) and vanilla leads on
+5/5 seeds from 325k on — but the first checkpoint where vanilla catches the
+residual is **75k / 100k / 125k / 150k / 225k** depending on seed (this run's
+150k is the median draw). The pooled mean difference crosses zero between
+125k and 150k, so "~150k" survives only as the average; the claims below are
+restated against the seed range.
+
 Three measured claims replace the asserted one:
 
-1. **The head start is worth ~130–150k steps.** The residual dominates at every
-   checkpoint through 125k (97 vs 36 at 75k is the widest gap); vanilla
-   overtakes at 150k and the two are inside each other's intervals after.
+1. **The head start is worth ~150k steps on average — 75k–225k by seed.** On
+   this seed the residual dominates at every checkpoint through 125k (97 vs 36
+   at 75k is the widest gap); vanilla overtakes at 150k and the two are inside
+   each other's intervals after.
    Vanilla needs ~100k steps to catch the frozen clone (82/120) and ~125–150k
    to reach expert level. Precision tells the same story: the residual's
    median final distance is under the 10 mm tolerance by 75k, vanilla's by
@@ -154,8 +167,10 @@ Three measured claims replace the asserted one:
 3. **The zero-training point is the clone itself** — the pipeline's real
    pitch is that it starts at 82/120 having spent zero environment steps,
    where vanilla starts at random. The honest statement of the advantage is
-   therefore budget-shaped: below ~150k environment steps the pipeline's best
-   policy wins; above, vanilla does.
+   therefore budget-shaped, with the five-seed bands: below ~75k environment
+   steps the pipeline's best policy wins on every seed; above ~325k vanilla
+   does on every seed; in between the winner is seed-dependent (mean crossing
+   ~150k).
 
 ## How DAgger solves the imitation-learning problem
 
@@ -423,8 +438,9 @@ measured.
 - The crossover sweep is one training run per arm sliced at 16 checkpoints, not
   16 independent runs — adjacent points share history, so the curve's noise
   (residual oscillating 110–120 after 200k, vanilla's 119 blip at 300k) is
-  autocorrelated, and the ~150k crossover point carries single-seed
-  uncertainty.
+  autocorrelated. The single-seed uncertainty on the ~150k crossing was later
+  measured with four more seeds per arm: first catch-up ranges 75k–225k
+  (`docs/reference/reacher_crossover_seeds.png`).
 - `path/net` for the `random` row is a median over 118, not 120: two scenarios made
   no progress, so `eff` is NaN there by design.
 - **The invariant tests skip on a clean checkout.** `data/` is gitignored, so the
