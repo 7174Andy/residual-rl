@@ -22,8 +22,8 @@ from rl.sb3 import build_model, check_algo, ckpt_cb, zero_init_actor
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--clone", default="data/reacher_clone.pt")
-    p.add_argument("--out", default="data/reacher_residual_sac.zip")
+    p.add_argument("--clone", default="data/dagger_clone_r3.pt")
+    p.add_argument("--out", default="data/reacher_residual_dagger_200k.zip")
     p.add_argument("--algo", default="sac", choices=["sac", "td3"])
     p.add_argument("--steps", type=int, default=200_000)
     p.add_argument("--residual-frac", type=float, default=1.0)

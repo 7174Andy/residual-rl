@@ -81,11 +81,11 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--scenarios", default="data/reacher_scenarios_v1.npz")
-    p.add_argument("--clone", default="data/reacher_clone_600.pt")
-    p.add_argument("--residual", default="data/reacher_residual_sac.zip")
-    p.add_argument("--vanilla", default="data/reacher_vanilla_sac.zip")
+    p.add_argument("--clone", default="data/dagger_clone_r3.pt")
+    p.add_argument("--residual", default="data/reacher_residual_dagger_200k.zip")
+    p.add_argument("--vanilla", default="data/reacher_vanilla_200k.zip")
     p.add_argument("--algo", default="sac")
-    p.add_argument("--episodes", type=int, default=40)
+    p.add_argument("--episodes", type=int, default=120)
     p.add_argument("--out", default="docs/reference/reacher_residual.png")
     p.add_argument("--memoryless", action="store_true",
                    help="build the Select-DPC row with carry_prediction=False. "

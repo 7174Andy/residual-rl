@@ -8,7 +8,7 @@ import pytest
 
 import reacher  # noqa: F401
 
-CLONE = "data/reacher_clone_600.pt"
+CLONE = "data/dagger_clone_r3.pt"
 
 def _skip_if_stale(path):
     """Skip with a legible reason if the checkpoint predates the feature change.

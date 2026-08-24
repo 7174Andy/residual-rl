@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import argparse
 import itertools
+import os
+import time
 
 import numpy as np
 
@@ -26,18 +28,65 @@ LAMBDA_Y_GRID = (7.5e2, 7.5e3, 7.5e4)
 
 
 def run_one(lambda_g, lambda_y, ids, scen, method, trace_ids=(),
-            libraries_path=dc.LIBRARIES_PATH, output="tip"):
+            libraries_path=dc.LIBRARIES_PATH, output="tip", progress=False,
+            on_row=None):
+    """Roll one (lambda, output, library) configuration over `ids`.
+
+    `progress` drives the scenarios one at a time so a long run reports as it
+    goes -- `eval.run_scenarios` is silent, and at T=3000 a 78-scenario arm takes
+    hours, where silence is indistinguishable from a hang. Numerically identical
+    to one batched call: the only per-call work is the idempotent
+    `validate_against_env`, each scenario does its own `reset_to`, and the
+    DeePC past-buffer warm-start carries through the shared `policy` either way.
+
+    `on_row(row)` is called as each scenario finishes, so a run that is
+    interrupted keeps what it already measured. A 78-scenario arm at T=3000 is
+    hours long; recording only at the end means a stop at scenario 77 writes
+    nothing, which is exactly how one ext arm was already lost.
+    """
     deepc, info = ds.build_canonical_panda_deepc(
         libraries_path=libraries_path, lambda_g=lambda_g, lambda_y=lambda_y,
         output=output,
     )
     env = PandaReachEnv()
+    policy = ds.DeePCPolicy(deepc, info)
     try:
-        rows = pe.run_scenarios(env, ds.DeePCPolicy(deepc, info), ids, scen,
-                                method=method, trace_ids=trace_ids)
+        if not progress:
+            return pe.run_scenarios(env, policy, ids, scen,
+                                    method=method, trace_ids=trace_ids)
+        rows: list[dict] = []
+        t0 = time.time()
+        for n, sid in enumerate(ids, 1):
+            fresh = pe.run_scenarios(env, policy, [sid], scen,
+                                     method=method, trace_ids=trace_ids)
+            rows += fresh
+            if on_row is not None:
+                for r in fresh:
+                    on_row(r)
+            hits = sum(r["reached"] for r in rows)
+            print(f"  [{output}] {n:3d}/{len(ids)} sid={sid:<3d} "
+                  f"reached={hits}/{n}  steps={rows[-1]['steps']:3d}  "
+                  f"{time.time() - t0:6.0f}s", flush=True)
     finally:
         env.close()
     return rows
+
+
+def method_name(output: str, libraries_path: str) -> str:
+    """CSV method key, tagged with the library file's version suffix.
+
+    `data/panda_results.csv` is keyed by `(method, scenario_id)` and
+    `eval.append_results` appends blindly, so an untagged name silently mixes
+    libraries: a T=3000 run recorded as plain "deepc" would sit alongside the
+    T=400 rows under one key and every paired test downstream would be comparing
+    a mixture to itself. Derived from the path rather than taken as a flag,
+    because a flag is a thing you forget exactly once.
+
+    The 78 legacy rows under the bare key "deepc" predate this and are the v0
+    (T=400, tip) run; re-running v0 now records as "deepc_v0" instead.
+    """
+    version = os.path.basename(libraries_path).removesuffix(".npz").rsplit("_", 1)[-1]
+    return f"{'deepc' if output == 'tip' else 'deepc_ext'}_{version}"
 
 
 def summarize(rows):
@@ -104,16 +153,32 @@ def main() -> None:
     print(f"\nphase 3b: {len(ids)} scenarios at "
           f"lambda_g={args.lambda_g:.1e} lambda_y={args.lambda_y:.1e} "
           f"output={args.output!r}\n")
-    # "deepc" stays the tip-only method name so the rows already in the shared CSV
-    # keep their meaning; the ext arm records under a distinct method rather than
-    # silently mixing two different output maps under one key.
-    method = "deepc" if args.output == "tip" else "deepc_ext"
-    rows = run_one(args.lambda_g, args.lambda_y, ids, scen,
-                   method=method, trace_ids=sc.SHOWCASE_IDS,
-                   libraries_path=args.libraries, output=args.output)
+    # Distinct method per (output map, library version) -- see `method_name`.
+    method = method_name(args.output, args.libraries)
+    print(f"recording as method {method!r}")
+    # Resume: `append_results` does not dedupe, so re-running an interrupted arm
+    # would leave two rows per scenario under one (method, scenario_id) key and
+    # quietly corrupt every paired test that reads it. Skipping what is already
+    # recorded makes an interrupted arm resumable and duplicate-free. To
+    # re-measure a scenario, delete its row first.
+    done: dict[int, dict] = {}
+    if not args.no_record and os.path.exists(pe.RESULTS_PATH):
+        done = {r["scenario_id"]: r for r in pe.read_results()
+                if r["method"] == method}
+        if done:
+            ids = [i for i in ids if i not in done]
+            print(f"resuming: {len(done)} scenarios already recorded under "
+                  f"{method!r}, {len(ids)} to go")
+
+    on_row = None if args.no_record else (lambda r: pe.append_results([r]))
+    fresh = run_one(args.lambda_g, args.lambda_y, ids, scen,
+                    method=method, trace_ids=sc.SHOWCASE_IDS,
+                    libraries_path=args.libraries, output=args.output,
+                    progress=True, on_row=on_row)
     if not args.no_record:
-        pe.append_results(rows)
-        print(f"appended {len(rows)} rows to {pe.RESULTS_PATH}")
+        print(f"recorded {len(fresh)} rows to {pe.RESULTS_PATH} (incrementally)")
+    # Summarize over the whole arm, not just this session's slice.
+    rows = list(done.values()) + fresh
     s = summarize(rows)
     for k, v in s.items():
         print(f"  {k:16s} {v}")

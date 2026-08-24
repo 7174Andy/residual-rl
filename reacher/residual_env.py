@@ -84,6 +84,23 @@ class ResidualSelectEnv(gym.Env):
         self._y_buf: Optional[np.ndarray] = None
         self.u_base: Optional[np.ndarray] = None
 
+    @property
+    def max_steps(self) -> int:
+        """The inner env's horizon, surfaced so a shared episode loop can drive
+        this env like any other.
+
+        Without it `env.unwrapped.max_steps` fails here (a bare `gym.Env` is its
+        own `unwrapped`), which is why the evaluation carried a hand-copied
+        rollout loop instead of reusing `reacher/eval.py::run_episode` -- the
+        `I6` finding from review. Exposing it is the fix.
+        """
+        return self.base.max_steps
+
+    @property
+    def goal(self) -> np.ndarray:
+        """The inner env's goal, for the same reason."""
+        return self.base.goal
+
     def _base_action(self) -> np.ndarray:
         assert self._u_buf is not None and self._y_buf is not None  # primed by reset()
         feat = featurize(self._u_buf, self._y_buf, self.base.y, self.base.goal,

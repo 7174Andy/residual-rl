@@ -302,6 +302,25 @@ class DeePC:
         # A fresh episode invalidates any prior warm-start.
         self._prev_idx = -1
         self._g.value = None
+        # Clearing the VARIABLE's value is not enough, and that gap was a real bug.
+        # `solve(warm_start=True)` restarts the solver from cached state held on the
+        # Problem object, which survives `_g.value = None`. SCS is first-order with
+        # a finite tolerance, so without this every episode began from wherever the
+        # PREVIOUS episode's last solve landed: measured at ~1-5 mm on ~1000 mm
+        # Panda reaches, enough that reversing evaluation order changed the answers
+        # and a parallel sweep could not reproduce a serial one. Any sweep that
+        # loops episodes over one controller was affected.
+        #
+        # Asserted rather than getattr-guarded on purpose: if a cvxpy upgrade
+        # renames this, the right outcome is a loud failure, not silently
+        # reintroducing an order dependence that took a parallel/serial mismatch to
+        # notice in the first place.
+        assert hasattr(self._problem, "_solver_cache"), (
+            f"cvxpy {cp.__version__} exposes no Problem._solver_cache, so "
+            "warm-start state cannot be cleared between episodes; find its "
+            "replacement before deleting this check"
+        )
+        self._problem._solver_cache = {}
 
     def prime_buffer(self, u_buf: np.ndarray, y_buf: np.ndarray) -> None:
         """Seed the past buffer with an explicit `(u_buf, y_buf)` of length T_ini.

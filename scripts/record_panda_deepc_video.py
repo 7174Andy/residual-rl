@@ -22,6 +22,7 @@ import argparse
 import numpy as np
 
 from core.video_encoding import encode_video
+from panda import data_collection as dc
 from panda import deepc_setup as ds
 from panda import eval as pe
 from panda import scenarios as sc
@@ -49,16 +50,22 @@ def main() -> None:
                          f"(default: the showcase set {tuple(sc.SHOWCASE_IDS)})")
     ap.add_argument("--lambda-g", type=float, default=ds.LAMBDA_G_DEFAULT)
     ap.add_argument("--lambda-y", type=float, default=ds.LAMBDA_Y_DEFAULT)
+    ap.add_argument("--libraries", default=dc.LIBRARIES_PATH)
+    ap.add_argument("--output", choices=("tip", "ext"), default="tip",
+                    help="DeePC output map, as in run_panda_deepc.py: 'tip' (3-D) "
+                         "or 'ext' (10-D tip+normalized q; needs a v1+ library)")
     ap.add_argument("--out", default="data/panda_deepc.mp4")
     args = ap.parse_args()
 
     scen = sc.load()
     print(f"scenarios {sc.SCENARIOS_PATH}  checksum {sc.checksum(scen)}")
     print(f"lambda_g={args.lambda_g:.1e}  lambda_y={args.lambda_y:.1e}  "
+          f"output={args.output!r}  libraries {args.libraries}  "
           f"ids {args.scenario_ids}\n")
 
     deepc, info = ds.build_canonical_panda_deepc(
-        lambda_g=args.lambda_g, lambda_y=args.lambda_y
+        lambda_g=args.lambda_g, lambda_y=args.lambda_y,
+        libraries_path=args.libraries, output=args.output,
     )
     env = PandaReachEnv(render_mode="rgb_array")
     frames: list[np.ndarray] = []

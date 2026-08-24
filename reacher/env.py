@@ -33,8 +33,8 @@ from gymnasium import spaces
 
 from reacher.deepc_setup import y_ref_for
 from reacher.model import (
-    NQ_ARM, fingertip, frame_skip, is_reachable, load_model, safe_box,
-    sample_config, sample_goal, set_state, step_torque,
+    NQ_ARM, fingertip, frame_skip, is_reachable, load_model, model_path,
+    safe_box, sample_config, sample_goal, set_state, step_torque,
 )
 
 # Observation bound for joint velocity. Not a physical limit -- torque 200 x gear
@@ -55,9 +55,25 @@ class ReacherGoalEnv(gym.Env):
         reach_bonus: float = 1.0,
         ctrl_cost: float = 1.0e-3,
         render_mode: Optional[str] = None,
+        render_size: int = 720,
     ):
         super().__init__()
-        self.model, self.data = load_model()
+        if render_mode is None:
+            self.model, self.data = load_model()
+        else:
+            # `reacher.xml` caps its offscreen buffer at 640, and a 10 mm
+            # tolerance on a 210 mm workspace is illegible below ~700 px, so the
+            # buffer is widened before the model is built. Only done when
+            # rendering, so the headless path stays byte-identical.
+            import mujoco as _mj
+            xml = open(model_path()).read().replace(
+                "<worldbody>",
+                f"<visual><global offwidth='{render_size}' "
+                f"offheight='{render_size}'/></visual>\n<worldbody>", 1)
+            self.model = _mj.MjModel.from_xml_string(xml)
+            self.model.vis.headlight.ambient[:] = 0.5
+            self.model.vis.headlight.diffuse[:] = 0.7
+            self.data = _mj.MjData(self.model)
         self.frame_skip = frame_skip(self.model)
         self._lo, self._hi = safe_box(self.model)
 
@@ -70,6 +86,8 @@ class ReacherGoalEnv(gym.Env):
         self.reach_bonus = float(reach_bonus)
         self.ctrl_cost = float(ctrl_cost)
         self.render_mode = render_mode
+        self.render_size = int(render_size)
+        self._renderer = None    # lazy: constructing one costs a GL context
 
         self.action_space = spaces.Box(-1.0, 1.0, shape=(NQ_ARM,), dtype=np.float32)
         # obs = [cos q(2), sin q(2), qvel(2), tip - goal(2)] = 8.
@@ -212,7 +230,28 @@ class ReacherGoalEnv(gym.Env):
                 self._build_info(reached=reached, dist=dist))
 
     def render(self):
-        return None
+        """`rgb_array` only. Top-down, framed on the 0.21 m reach envelope."""
+        if self.render_mode is None:
+            return None
+        import mujoco
+
+        if self._renderer is None:
+            self._renderer = mujoco.Renderer(
+                self.model, height=self.render_size, width=self.render_size)
+            self._cam = mujoco.MjvCamera()
+            self._cam.type = mujoco.mjtCamera.mjCAMERA_FREE
+            self._cam.lookat[:] = [0.0, 0.0, 0.0]
+            # Top-down at MuJoCo's default 45 deg fovy, visible half-height is
+            # ~0.414*d. The workspace needs 0.21 m (the arm's reach, and the goal
+            # disc sits inside it), so d >= 0.51; 0.62 adds margin. Tightening to
+            # 0.46 crops the arm at full extension.
+            self._cam.distance = 0.62
+            self._cam.elevation = -90.0    # straight down: the arm is planar
+            self._cam.azimuth = 90.0
+        self._renderer.update_scene(self.data, self._cam)
+        return self._renderer.render()
 
     def close(self):
-        return None
+        if self._renderer is not None:
+            self._renderer.close()
+            self._renderer = None

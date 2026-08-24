@@ -41,8 +41,8 @@ from rl.stats import wilson_ci
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--clone", default="data/reacher_clone.pt")
-    p.add_argument("--dataset", default="data/reacher_clone_dataset.npz")
+    p.add_argument("--clone", default="data/dagger_clone_r3.pt")
+    p.add_argument("--dataset", default="data/dagger_r3.npz")
     p.add_argument("--scenarios", default="data/reacher_scenarios_v1.npz")
     p.add_argument("--episodes", type=int, default=40)
     p.add_argument("--n-cols", type=int, default=300)

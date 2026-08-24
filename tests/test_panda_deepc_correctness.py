@@ -25,6 +25,10 @@ from panda import deepc_setup as ds
 T_INI, N = 5, 12
 M_U, P_Y = 7, 3
 
+# The T=400 library, pinned deliberately -- see
+# `test_replay_of_collected_data_recovers_the_single_true_column`.
+LIB_T400 = "data/panda_libraries_v0.npz"
+
 
 def _panda_deepc(hankel, delta_max, **kw):
     opts = dict(
@@ -81,8 +85,17 @@ def test_replay_of_collected_data_recovers_the_single_true_column():
     past buffer time-reversed, 13.11 and 1.2e-1. `sigma_y` alone separates these
     by only ~20x (7.5e-6 vs 2.3e-4), which is why it is the weakest assertion here
     rather than the headline one.
+
+    Pinned to the T=400 library rather than `dc.LIBRARIES_PATH`, because uniqueness
+    of `e_j` is what this test leans on and T=3000 destroys it *by design*. With
+    `K_RET` holding the walk near the anchor, 8x more columns means the true column
+    acquires near-twins that attain nearly the same objective; SCS then returns a
+    blend and the prediction error rises 2e-4 -> 1.3e-3, breaking the 1e-3 bound
+    while `|g|_1 < 1.05` still passes. That is redundancy, not miswiring -- and this
+    test exists to detect miswiring, so it wants the library where the signature is
+    sharp. 1.3 mm against a 50 mm `goal_tolerance` is not a control-relevant error.
     """
-    with np.load(dc.LIBRARIES_PATH) as z:
+    with np.load(LIB_T400) as z:
         u, y = z["u_0"], z["y_0"]
         delta_max = float(z["delta_max"])
     hankel = build_hankel(u, y, T_ini=T_INI, N=N)

@@ -17,8 +17,11 @@ from rl.clone import save_clone, train_clone
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--dataset", default="data/reacher_clone_dataset.npz")
-    p.add_argument("--out", default="data/reacher_clone.pt")
+    p.add_argument("--dataset", default="data/dagger_r3.npz",
+                   help="the DAgger-aggregated set; BC-only sets do not pass "
+                        "the fidelity gate (journey 13)")
+    p.add_argument("--out", default="data/reacher_clone.pt",
+                   help="the shipped clone is data/dagger_clone_r3.pt")
     p.add_argument("--epochs", type=int, default=200)
     p.add_argument("--hidden", type=int, nargs="+", default=[256, 256])
     p.add_argument("--lr", type=float, default=1e-3)

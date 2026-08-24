@@ -24,7 +24,7 @@ from rl.sb3 import build_model, check_algo, ckpt_cb
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--out", default="data/reacher_vanilla_sac.zip")
+    p.add_argument("--out", default="data/reacher_vanilla_200k.zip")
     p.add_argument("--algo", default="sac", choices=["sac", "td3"])
     p.add_argument("--steps", type=int, default=200_000)
     p.add_argument("--lr", type=float, default=3e-4)
