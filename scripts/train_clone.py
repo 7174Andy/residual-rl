@@ -12,7 +12,7 @@ import sys
 
 import numpy as np
 
-from two_wheel_robot.rl.clone import save_clone, train_clone
+from rl.clone import save_clone, train_clone
 
 
 def main() -> int:

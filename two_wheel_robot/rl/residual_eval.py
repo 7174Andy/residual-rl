@@ -12,13 +12,12 @@ import gymnasium as gym
 import numpy as np
 
 import two_wheel_robot.env  # noqa: F401  registers Gym ID
+from rl.stats import mcnemar_pvalue, wilson_ci
 from two_wheel_robot.env.env import UnicycleGoalEnv
 from two_wheel_robot.rl.clone_eval import (
-    mcnemar_pvalue,
     run_clone_closed_loop_with_actions,
     run_deepc_closed_loop_with_actions,
     trajectory_deviation,
-    wilson_ci,
 )
 from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
 from two_wheel_robot.rl.trace_reward import DEFAULT_Q, DEFAULT_R, recompute_reward

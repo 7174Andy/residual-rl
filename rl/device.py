@@ -1,4 +1,4 @@
-# two_wheel_robot/rl/device.py
+# rl/device.py
 """Torch device selection for clone training and RL.
 
 CUDA -> MPS -> CPU, with explicit overrides honored. An unavailable explicit

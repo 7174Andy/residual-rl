@@ -13,6 +13,7 @@ from panda import data_collection as dc
 from panda import deepc_setup as ds
 from panda.env import PandaReachEnv
 
+LIB_V0 = "data/panda_libraries_v0.npz"
 LIB_V1 = "data/panda_libraries_v1.npz"
 
 
@@ -110,9 +111,13 @@ def test_ext_output_widens_p_y_but_keeps_the_cost_identical():
 
 @pytest.mark.integration
 def test_ext_output_rejects_a_libraries_file_without_yext():
-    """v0 predates the extended output; failing loudly beats silently using tips."""
+    """v0 predates the extended output; failing loudly beats silently using tips.
+
+    Pinned to v0 explicitly, not to `dc.LIBRARIES_PATH` -- the default now points at
+    a file that *has* `yext`, so reading the constant would make this vacuous.
+    """
     with pytest.raises(KeyError, match="yext_0"):
-        ds.build_canonical_panda_deepc(libraries_path=dc.LIBRARIES_PATH, output="ext")
+        ds.build_canonical_panda_deepc(libraries_path=LIB_V0, output="ext")
 
 
 def test_policy_reads_the_output_its_info_names():

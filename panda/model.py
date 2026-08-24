@@ -136,7 +136,7 @@ SCENE_FLOOR_GEOM = "backdrop_floor"
 
 
 def load_model(
-    scene: bool = False, extra_xml: str = ""
+    scene: bool = False, extra_xml: str = "", servo_scale: float = 1.0
 ) -> tuple[mujoco.MjModel, mujoco.MjData]:
     """Compile the model and return `(MjModel, MjData)`.
 
@@ -148,6 +148,44 @@ def load_model(
     Unlike `_SCENE_XML` this is NOT guaranteed physics-neutral -- that is on the
     caller (mocap bodies with `contype=0 conaffinity=0` are; anything with a
     joint or a colliding geom is not, and would invalidate the constants above).
+
+    `servo_scale` multiplies the PD position-servo gains, `kp` AND `kd` together
+    so the ratio `kd/kp` (0.10 s) is preserved. It defaults to 1.0, which leaves
+    menagerie's shipped gains and every existing measurement in this repo
+    untouched -- pass it explicitly to opt in.
+
+    Preserving `kd/kp` does NOT preserve the damping ratio, and the difference is
+    visible: `zeta = kd / (2*sqrt(kp*J))` scales as `sqrt(servo_scale)`, so /50
+    drops it ~7x. Measured on a 0.2 rad step of joint 1, the servo goes from
+    overdamped (0% overshoot, monotone approach) to lightly underdamped (15.6%
+    overshoot, oscillatory settle). It still converges to the commanded angle
+    with no steady-state step error, and `zeta ~ 0.5` is an ordinary servo design
+    point rather than a pathology -- but a caller expecting the shipped servo's
+    dead-beat character will not get it.
+
+    Why the knob exists. Menagerie pairs very stiff gains (`kp` 2000-4500) with
+    the real Franka's torque limits (`forcerange` 12-87 N.m), which is fine for
+    the quasi-static posing those gains were tuned for and badly wrong for
+    motion. Two ceilings follow, and both are 1-2 orders of magnitude below what
+    the arm is rated for:
+
+        linear range   |q_des - q| < forcerange/kp = 0.006 (wrist) .. 0.025 rad
+        speed ceiling  |qdot|      < forcerange/kd = 0.06  (wrist) .. 0.19 rad/s
+
+    Past either one the actuator clips and the plant is bang-bang. The speed
+    ceiling is the harder of the two: damping ALONE saturates the actuator above
+    0.06 rad/s, so no choice of command keeps the arm both moving and linear.
+    `scripts/test_local_linearity.py` measures what that costs -- the input-output
+    map stops being differentiable, which is the precondition Select-DPC's
+    Jacobian estimate (arXiv:2503.18845 App. B) needs. At `servo_scale = 0.02`
+    the two ceilings become 0.30-0.97 rad and 3.0-9.7 rad/s, i.e. the excitation
+    fits inside the linear range and the speed ceiling clears the Panda's rated
+    2.175 rad/s.
+
+    This is a gain change, not a physics cheat: `forcerange` is untouched, so the
+    arm still cannot exceed the real robot's torque limits. A soft position servo
+    is an ordinary robot interface (impedance control); the shipped stiff one is
+    the unusual choice for this workload.
     """
     path = model_path()
     if scene or extra_xml:
@@ -175,6 +213,15 @@ def load_model(
     # affect any rollout.
     model.vis.headlight.ambient[:] = 0.4
     model.vis.headlight.diffuse[:] = 0.8
+    if servo_scale != 1.0:
+        # A `position` actuator is force = gainprm[0]*ctrl + biasprm[1]*q +
+        # biasprm[2]*qdot, with gainprm[0] = -biasprm[1] = kp and biasprm[2] = -kd.
+        # All three have to move together: scaling the gain without the matching
+        # bias term leaves force = kp'*ctrl - kp*q, which is no longer a position
+        # servo at all -- it holds a target of (kp'/kp)*ctrl.
+        model.actuator_gainprm[:, 0] *= servo_scale
+        model.actuator_biasprm[:, 1] *= servo_scale
+        model.actuator_biasprm[:, 2] *= servo_scale
     return model, mujoco.MjData(model)
 
 

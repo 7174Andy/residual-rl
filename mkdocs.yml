@@ -129,3 +129,4 @@ nav:
       - 10. Sample efficiency + SAC: journey/10-sample-efficiency.md
       - 11. Panda anchors: journey/11-panda-anchors.md
       - 12. Select-DPC: journey/12-select-dpc.md
+      - 13. Reacher residual RL: journey/13-reacher-residual.md

@@ -10,14 +10,15 @@ LIB = "data/libraries_v0.npz"
 def test_zero_init_makes_residual_zero(cls_name):
     import stable_baselines3 as sb3
 
-    from two_wheel_robot.rl.train_sb3 import _zero_init_actor, make_residual_env
+    from rl.sb3 import zero_init_actor
+    from two_wheel_robot.rl.train_sb3 import make_residual_env
 
     Algo = getattr(sb3, cls_name)
     venv = make_residual_env(CLONE, LIB, residual_frac=1.0)
     try:
         model = Algo("MlpPolicy", venv, policy_kwargs=dict(net_arch=[256, 256]),
                      device="cpu", seed=0)
-        _zero_init_actor(model)  # TD3: zeros online+target mu; SAC: zeros the mean head
+        zero_init_actor(model)  # TD3: zeros online+target mu; SAC: zeros the mean head
         obs = venv.reset()
         action, _ = model.predict(obs, deterministic=True)
         assert np.allclose(action, 0.0, atol=1e-6)  # deterministic residual starts at 0

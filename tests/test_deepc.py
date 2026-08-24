@@ -306,3 +306,54 @@ def test_solver_error_is_reported_as_runtime_error():
     c._problem.solve = boom
     with pytest.raises(RuntimeError):
         c.act(np.array([0.0, 0.0, 0.1]), np.array([1.0, 1.0, 0.0]))
+
+
+# ---- Episode independence (warm-start leakage) -------------------------------
+
+
+def _run_episode(ctrl, u_seq, y0):
+    """Drive `ctrl` for a few steps from a fresh reset; return the actions."""
+    ctrl.reset(y0, u_initial=np.zeros(2))
+    out, y = [], np.asarray(y0, dtype=np.float64)
+    for _ in range(4):
+        u = ctrl.act(y, np.zeros(3))
+        out.append(np.asarray(u).copy())
+        y = y + 0.05 * np.concatenate([u, [0.0]])
+    return np.array(out)
+
+
+def test_reset_makes_episodes_independent_of_evaluation_order():
+    """`reset()` must clear the SOLVER's warm start, not just the variable value.
+
+    `solve(warm_start=True)` restarts from cached state on the cvxpy Problem, which
+    survives `_g.value = None`. Leaving it made every episode begin from wherever
+    the previous one's last solve landed, so results depended on evaluation order
+    and a parallel sweep could not reproduce a serial one. Regression test: the
+    same episode must give the same actions whether it runs first, after another
+    episode, or on a controller that has never solved before.
+    """
+    starts = [np.array([0.4, -0.2, 0.1]),
+              np.array([-0.9, 0.7, -0.3]),
+              np.array([0.2, 0.5, 0.8])]
+    # SCS, not the scenarios' CLARABEL. This must exercise the solver the bug
+    # lives in: cvxpy's warm start is a no-op for interior-point CLARABEL, so
+    # under it this test passes with the fix REMOVED and proves nothing. SCS is
+    # also `core/deepc.py`'s default, i.e. what every Panda/Reacher run uses.
+    build = lambda: _build_single(solver="SCS")
+
+    virgin = [_run_episode(build(), np.nan, y0) for y0 in starts]
+
+    shared = build()
+    in_order = [_run_episode(shared, np.nan, y0) for y0 in starts]
+
+    shared_rev = build()
+    rev = {i: _run_episode(shared_rev, np.nan, starts[i])
+           for i in reversed(range(len(starts)))}
+
+    for i in range(len(starts)):
+        np.testing.assert_allclose(
+            in_order[i], virgin[i], atol=1e-7,
+            err_msg=f"episode {i} on a reused controller differs from a fresh one")
+        np.testing.assert_allclose(
+            rev[i], virgin[i], atol=1e-7,
+            err_msg=f"episode {i} depends on the order episodes were run in")

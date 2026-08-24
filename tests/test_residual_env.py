@@ -49,7 +49,7 @@ def test_obs_without_base_is_5d():
 def test_zero_residual_matches_clone_rollout():
     import gymnasium as gym
     import two_wheel_robot.env  # noqa: F401
-    from two_wheel_robot.rl.clone import load_clone
+    from rl.clone import load_clone
     from two_wheel_robot.rl.clone_eval import run_clone_closed_loop
     from two_wheel_robot.rl.deepc_setup import build_canonical_deepc
     from two_wheel_robot.rl.residual_env import ResidualDeePCEnv

@@ -9,16 +9,17 @@ LIB = "data/libraries_v0.npz"
 def test_run_residual_closed_loop_shapes():
     from stable_baselines3 import TD3
 
+    from rl.sb3 import zero_init_actor
     from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
     from two_wheel_robot.rl.residual_eval import run_residual_closed_loop
-    from two_wheel_robot.rl.train_sb3 import _zero_init_actor, make_residual_env
+    from two_wheel_robot.rl.train_sb3 import make_residual_env
 
     res = ResidualDeePCEnv(clone_path=CLONE, libraries_path=LIB)
     venv = make_residual_env(CLONE, LIB, residual_frac=1.0)
     try:
         model = TD3("MlpPolicy", venv, policy_kwargs=dict(net_arch=[256, 256]),
                     device="cpu", seed=0)
-        _zero_init_actor(model)
+        zero_init_actor(model)
         reached, traj = run_residual_closed_loop(model, res, seed=3)
         assert isinstance(reached, bool)
         assert traj.ndim == 2 and traj.shape[1] == 3
@@ -31,11 +32,12 @@ def test_run_residual_closed_loop_shapes():
 def test_benchmark_keys_and_zero_init_invariant():
     from stable_baselines3 import TD3
 
-    from two_wheel_robot.rl.clone import load_clone
+    from rl.clone import load_clone
+    from rl.sb3 import zero_init_actor
     from two_wheel_robot.rl.deepc_setup import build_canonical_deepc
     from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
     from two_wheel_robot.rl.residual_eval import benchmark
-    from two_wheel_robot.rl.train_sb3 import _zero_init_actor, make_residual_env
+    from two_wheel_robot.rl.train_sb3 import make_residual_env
 
     deepc, info = build_canonical_deepc(libraries_path=LIB)
     predictor = load_clone(CLONE, device="cpu")
@@ -44,7 +46,7 @@ def test_benchmark_keys_and_zero_init_invariant():
     try:
         model = TD3("MlpPolicy", venv, policy_kwargs=dict(net_arch=[256, 256]),
                     device="cpu", seed=0)
-        _zero_init_actor(model)  # residual == 0 -> residual policy behaves like clone
+        zero_init_actor(model)  # residual == 0 -> residual policy behaves like clone
         rep = benchmark(model, deepc, predictor, res, info, seeds=[0, 1, 2])
     finally:
         res.close()

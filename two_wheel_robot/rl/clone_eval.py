@@ -9,46 +9,16 @@ Pure-numpy statistics (no scipy).
 """
 from __future__ import annotations
 
-from math import erfc, sqrt
 from typing import cast
 
 import gymnasium as gym
 import numpy as np
 
 import two_wheel_robot.env  # noqa: F401  registers Gym ID
+from rl.stats import mcnemar_pvalue, wilson_ci  # re-exported for existing callers
 from two_wheel_robot.env.env import UnicycleGoalEnv
 from two_wheel_robot.rl.deepc_setup import bearing_y_ref
 from two_wheel_robot.rl.features import featurize
-
-
-# ----- statistics -------------------------------------------------------------
-
-def wilson_ci(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
-    """Wilson score interval for a binomial proportion k/n."""
-    if n == 0:
-        return (0.0, 0.0)
-    p = k / n
-    denom = 1.0 + z * z / n
-    center = (p + z * z / (2 * n)) / denom
-    half = (z * sqrt(p * (1 - p) / n + z * z / (4 * n * n))) / denom
-    return (max(0.0, center - half), min(1.0, center + half))
-
-
-def mcnemar_pvalue(b: int, c: int) -> float:
-    """McNemar p-value, continuity-corrected, via the exact chi2(1) survival.
-
-    `b` = #(DeePC reach, clone fail), `c` = #(DeePC fail, clone reach). The
-    statistic is `chi2(1)`-distributed, whose survival function is
-    `erfc(sqrt(stat/2))`.
-    """
-    n = b + c
-    if n == 0:
-        return 1.0
-    stat = max(0.0, abs(b - c) - 1.0) ** 2 / n
-    # stat == 0 (|b - c| <= 1) -> erfc(0) == 1.0; the guard just makes that explicit.
-    if stat <= 0.0:
-        return 1.0
-    return erfc(sqrt(stat / 2.0))
 
 
 # ----- (1) regression by regime ----------------------------------------------

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import argparse
 
-from two_wheel_robot.rl.clone import load_clone
+from rl.clone import load_clone
 from two_wheel_robot.rl.deepc_setup import build_canonical_deepc
 from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
 from two_wheel_robot.rl.residual_eval import benchmark

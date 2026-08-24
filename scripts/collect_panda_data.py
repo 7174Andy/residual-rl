@@ -26,17 +26,26 @@ def main() -> int:
     ap.add_argument("--out", default=dc.LIBRARIES_PATH)
     ap.add_argument("--T", type=int, default=dc.DEFAULT_T)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--anchors", type=float, nargs="+", default=None,
+                    help="joint-1 anchor values (default: the four in "
+                         "data_collection.PANDA_ANCHOR_Q1). Azimuth ~= q1, and "
+                         "joint 1's safe box is +-2.318, so no q1 anchor can cover "
+                         "goals behind the robot -- those need a different arm "
+                         "configuration, not more anchors here.")
     args = ap.parse_args()
+
+    anchors = tuple(args.anchors) if args.anchors else dc.PANDA_ANCHOR_Q1
 
     env = PandaReachEnv(max_steps=10**9)
     try:
         payload = dc.collect_libraries(env, T=args.T,
-                                       rng=np.random.default_rng(args.seed))
+                                       rng=np.random.default_rng(args.seed),
+                                       anchors=anchors)
         rep = dc.coverage_report(payload)
     finally:
         env.close()
 
-    print(f"anchors q1        {list(dc.PANDA_ANCHOR_Q1)}")
+    print(f"anchors q1        {[round(a, 3) for a in anchors]}")
     print(f"anchor azimuths   {[round(np.degrees(a), 1) for a in rep['anchor_azimuths']]} deg")
     print(f"excitation        theta={dc.OU_THETA} sigma={dc.OU_SIGMA_FRAC}*dmax k_ret={dc.K_RET}")
     print(f"clip fraction     {100 * rep['clip_frac']:.2f}%   (gate < {100 * CLIP_GATE:.0f}%)")

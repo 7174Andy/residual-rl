@@ -23,7 +23,9 @@ import numpy as np
 
 from panda.model import safe_box
 
-LIBRARIES_PATH = "data/panda_libraries_v0.npz"
+# v2 is the T=3000 collection (see DEFAULT_T below); v0 (T=400, tip-only, predates
+# `yext`) and v1 (T=400 + `yext`) are kept as the fixed points a T comparison needs.
+LIBRARIES_PATH = "data/panda_libraries_v2.npz"
 
 # Interior to joint 1's safe box of +-2.318, unlike the unicycle's heading anchors.
 PANDA_ANCHOR_Q1 = (-1.8, -0.6, 0.6, 1.8)
@@ -130,14 +132,22 @@ def collect_trajectory(env, anchor: np.ndarray, T: int, rng: np.random.Generator
 
 
 def collect_libraries(env, T: int = DEFAULT_T,
-                      rng: np.random.Generator | None = None) -> dict:
-    """One library per anchor. Returns the npz payload."""
+                      rng: np.random.Generator | None = None,
+                      anchors=PANDA_ANCHOR_Q1) -> dict:
+    """One library per anchor. Returns the npz payload.
+
+    `anchors` is a parameter rather than the module constant so a coverage
+    experiment can vary anchor placement without changing what the shipped
+    libraries were built from. Libraries are *selected* by key, not concatenated,
+    so adding anchors costs collection time and file size but not solve time --
+    unlike widening the output, which grows every QP.
+    """
     if rng is None:
         rng = np.random.default_rng()
     payload: dict = {}
     azimuths = []
     clips = []
-    for i, q1 in enumerate(PANDA_ANCHOR_Q1):
+    for i, q1 in enumerate(anchors):
         anchor = anchor_qpos(env.model, q1)
         out = collect_trajectory(env, anchor, T, rng)
         payload[f"u_{i}"] = out["u"]
@@ -149,7 +159,7 @@ def collect_libraries(env, T: int = DEFAULT_T,
         _reset_to_anchor(env, anchor)
         tip = env.y
         azimuths.append(float(np.arctan2(tip[1], tip[0])))
-    payload["anchor_q1"] = np.asarray(PANDA_ANCHOR_Q1, dtype=np.float64)
+    payload["anchor_q1"] = np.asarray(anchors, dtype=np.float64)
     payload["anchor_azimuths"] = np.asarray(azimuths, dtype=np.float64)
     payload["clip_frac"] = np.asarray(float(np.mean(clips)))
     payload["delta_max"] = np.asarray(float(env.delta_max))

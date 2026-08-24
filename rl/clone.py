@@ -1,4 +1,4 @@
-# two_wheel_robot/rl/clone.py
+# rl/clone.py
 """The deep-lcc behavioral clone: an MLP f_theta(features) -> (v, w).
 
 Inputs are standardized (continuous columns only; the trailing n_lib one-hot
@@ -12,7 +12,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from two_wheel_robot.rl.device import select_device
+from rl.device import select_device
 
 
 class CloneMLP(nn.Module):
