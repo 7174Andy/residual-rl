@@ -1396,6 +1396,8 @@
       
         
       
+        
+      
     
     
     
@@ -1745,6 +1747,34 @@
     
   
     12. Select-DPC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../journey/13-reacher-residual/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13. Reacher residual RL
   
 
     
@@ -2384,7 +2414,7 @@ selected per solve, held at 300 throughout) and <code>n_max</code> (the iteratio
 </table>
 <p>Different actuation, different dimensionality, different gravity situation, same
 boundary. The two systems' outcomes differ only through <em>where they operate</em>.</p>
-<p><img alt="Reacher DeePC results" src="reacher_results.png" /></p>
+<p><img alt="Reacher DeePC results" src="../reacher_results.png" /></p>
 <h3 id="closed-loop-120-scenarios">Closed loop, 120 scenarios<a class="headerlink" href="#closed-loop-120-scenarios" title="Permanent link">&para;</a></h3>
 <p>Early stopping <strong>off</strong>, Wilson 95 % intervals (<code>scripts/eval_reacher_scenarios.py</code>):</p>
 <table>
@@ -2444,7 +2474,7 @@ boundary. The two systems' outcomes differ only through <em>where they operate</
 final error and then backs off by the same factor (~2.1–2.3×; random 3.8×). There
 is no terminal cost and nothing rewards station-keeping, so every reach rate in
 this project flatters its controller — they touch the target and leave.</p>
-<p><img alt="Reacher 120-scenario evaluation" src="reacher_scenarios.png" /></p>
+<p><img alt="Reacher 120-scenario evaluation" src="../reacher_scenarios.png" /></p>
 <h3 id="n_max-1-is-the-right-setting"><code>n_max = 1</code> is the right setting<a class="headerlink" href="#n_max-1-is-the-right-setting" title="Permanent link">&para;</a></h3>
 <p><code>scripts/sweep_select_dpc.py</code>, 20 episodes (fixed anchors: 11/20, 331.9 ms/step):</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>n_max        1      2      3      5      8
@@ -2456,8 +2486,8 @@ this project flatters its controller — they touch the target and leave.</p>
 Algorithm 1's loop. Beyond <code>n_max = 3</code> it is strictly dominated — slower <em>and</em>
 worse. Iteration buys only precision: <code>n_max=3</code> converges 0.3 mm tighter at 3× the
 cost.</p>
-<p><img alt="n_max sweep" src="reacher_nmax_sweep.png" />
-<img alt="Select-DPC vs fixed anchors, paired" src="reacher_select_dpc.png" /></p>
+<p><img alt="n_max sweep" src="../reacher_nmax_sweep.png" />
+<img alt="Select-DPC vs fixed anchors, paired" src="../reacher_select_dpc.png" /></p>
 <h3 id="what-it-looks-like">What it looks like<a class="headerlink" href="#what-it-looks-like" title="Permanent link">&para;</a></h3>
 <p>Top-down, 0.21 m workspace. The red sphere is the target; the ring around it is
 the 10 mm reach tolerance, drawn because at 1 cm against a 21 cm workspace a miss

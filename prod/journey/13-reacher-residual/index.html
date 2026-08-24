@@ -10,13 +10,11 @@
       
       
       
-        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/11-panda-anchors/">
+        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/13-reacher-residual/">
       
       
-        <link rel="prev" href="../10-sample-efficiency/">
+        <link rel="prev" href="../12-select-dpc/">
       
-      
-        <link rel="next" href="../12-select-dpc/">
       
       
         
@@ -27,7 +25,7 @@
     
     
       
-        <title>11. Panda anchors - two-wheeled-experiment</title>
+        <title>13. Reacher residual RL - two-wheeled-experiment</title>
       
     
     
@@ -80,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#11-panda-anchors-the-controller-works-the-libraries-dont-reach" class="md-skip">
+        <a href="#13-residual-rl-on-reacher-dagger-fixes-the-clone-and-vanilla-still-ties" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              11. Panda anchors
+              13. Reacher residual RL
             
           </span>
         </div>
@@ -1417,37 +1415,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    11. Panda anchors
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../11-panda-anchors/" class="md-nav__link">
         
   
   
@@ -1463,192 +1434,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#decision" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Decision
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#context-a-7-dof-arm-is-not-a-unicycle-in-a-specific-way" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Context — a 7-DoF arm is not a unicycle, in a specific way
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#considered" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Considered
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Considered">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#the-output-the-plans-d_g-vs-the-tip-vector" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The output: the plan's d_g vs the tip vector
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rate-limiting-post-hoc-clip-vs-a-constraint-in-the-qp" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Rate limiting: post-hoc clip vs a constraint in the QP
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#more-anchors-vs-dropping-anchors" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        More anchors vs dropping anchors
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#outcome" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Outcome
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Outcome">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#the-clusters-are-not-lti-at-the-radius-they-cover" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The clusters are not LTI at the radius they cover
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-libraries-themselves-are-excellent-inside-05-rad" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The libraries themselves are excellent — inside 0.5 rad
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-gating-experiment" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The gating experiment
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-measurement-discipline-that-was-missing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The measurement discipline that was missing
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#anchor-selection-the-ik-stage-is-the-load-bearing-step" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Anchor selection — the IK stage is the load-bearing step
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#caveats" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Caveats
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1686,10 +1471,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../13-reacher-residual/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13. Reacher residual RL
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1705,6 +1517,292 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The result
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-dagger-works-in-this-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How DAgger works in this pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How DAgger works in this pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem-it-solves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The problem it solves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-deepc-specific-trap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The DeePC-specific trap
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-it-bought" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it bought
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-metric-that-misled-and-the-one-that-didnt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The metric that misled, and the one that didn't
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Considered
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Considered">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reachergoal-v0-departs-from-stock-reacher-v5-in-three-ways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ReacherGoal-v0 departs from stock Reacher-v5 in three ways
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outcome-what-was-tried-before-dagger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outcome — what was tried before DAgger
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Outcome — what was tried before DAgger">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#select-dpc-is-recurrent-making-it-memoryless-does-not-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Select-DPC is recurrent; making it memoryless does not help
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-library-one-hot-better-representation-worse-closed-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The library one-hot: better representation, worse closed loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#neither-encoding-horn-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Neither encoding horn works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-exclusion-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The exclusion table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#retractions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retractions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Retractions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-evaluation-set-leak" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The evaluation-set leak
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eight-diagnoses-of-the-clone-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eight diagnoses of the clone failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-withdrawn-claims" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other withdrawn claims
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#caveats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Caveats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1755,10 +1853,93 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#context-a-7-dof-arm-is-not-a-unicycle-in-a-specific-way" class="md-nav__link">
+  <a href="#the-result" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Context — a 7-DoF arm is not a unicycle, in a specific way
+        The result
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-dagger-works-in-this-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How DAgger works in this pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How DAgger works in this pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem-it-solves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The problem it solves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-deepc-specific-trap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The DeePC-specific trap
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-it-bought" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it bought
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-metric-that-misled-and-the-one-that-didnt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The metric that misled, and the one that didn't
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
       
     </span>
   </a>
@@ -1778,32 +1959,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#the-output-the-plans-d_g-vs-the-tip-vector" class="md-nav__link">
+  <a href="#reachergoal-v0-departs-from-stock-reacher-v5-in-three-ways" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The output: the plan's d_g vs the tip vector
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rate-limiting-post-hoc-clip-vs-a-constraint-in-the-qp" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Rate limiting: post-hoc clip vs a constraint in the QP
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#more-anchors-vs-dropping-anchors" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        More anchors vs dropping anchors
+        ReacherGoal-v0 departs from stock Reacher-v5 in three ways
       
     </span>
   </a>
@@ -1816,22 +1975,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#outcome" class="md-nav__link">
+  <a href="#outcome-what-was-tried-before-dagger" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Outcome
+        Outcome — what was tried before DAgger
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Outcome">
+    <nav class="md-nav" aria-label="Outcome — what was tried before DAgger">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#the-clusters-are-not-lti-at-the-radius-they-cover" class="md-nav__link">
+  <a href="#select-dpc-is-recurrent-making-it-memoryless-does-not-help" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The clusters are not LTI at the radius they cover
+        Select-DPC is recurrent; making it memoryless does not help
       
     </span>
   </a>
@@ -1839,10 +1998,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-libraries-themselves-are-excellent-inside-05-rad" class="md-nav__link">
+  <a href="#the-library-one-hot-better-representation-worse-closed-loop" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The libraries themselves are excellent — inside 0.5 rad
+        The library one-hot: better representation, worse closed loop
       
     </span>
   </a>
@@ -1850,10 +2009,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-gating-experiment" class="md-nav__link">
+  <a href="#neither-encoding-horn-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The gating experiment
+        Neither encoding horn works
       
     </span>
   </a>
@@ -1861,10 +2020,38 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-measurement-discipline-that-was-missing" class="md-nav__link">
+  <a href="#the-exclusion-table" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The measurement discipline that was missing
+        The exclusion table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#retractions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retractions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Retractions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-evaluation-set-leak" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The evaluation-set leak
       
     </span>
   </a>
@@ -1872,10 +2059,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#anchor-selection-the-ik-stage-is-the-load-bearing-step" class="md-nav__link">
+  <a href="#eight-diagnoses-of-the-clone-failure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Anchor selection — the IK stage is the load-bearing step
+        Eight diagnoses of the clone failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-withdrawn-claims" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other withdrawn claims
       
     </span>
   </a>
@@ -1929,435 +2127,522 @@
   
 
 
-<h1 id="11-panda-anchors-the-controller-works-the-libraries-dont-reach">11. Panda anchors — the controller works, the libraries don't reach<a class="headerlink" href="#11-panda-anchors-the-controller-works-the-libraries-dont-reach" title="Permanent link">&para;</a></h1>
+<h1 id="13-residual-rl-on-reacher-dagger-fixes-the-clone-and-vanilla-still-ties">13. Residual RL on Reacher — DAgger fixes the clone, and vanilla still ties<a class="headerlink" href="#13-residual-rl-on-reacher-dagger-fixes-the-clone-and-vanilla-still-ties" title="Permanent link">&para;</a></h1>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p>Build the anchor-selection pipeline for <code>PandaReach</code>'s DeePC stage on a new
-interface — <strong><code>u = q_des</code></strong> (absolute joint target) and <strong><code>y = [q; p_ee]</code></strong> (10-D)
-— with anchors from <strong>k-medoids over task-relevant configurations</strong> and library
-selection by <strong>nearest anchor in joint space</strong>. Two changes to the plan as written
-were forced by measurement: the output is the tip <em>vector</em>, not the plan's scalar
-goal-distance, and the QP carries a <strong>hard input-rate constraint</strong>
-<code>|u_j − u_{j−1}| ≤ du_max</code>.</p>
-<p>The result: <strong>inside ~0.5 rad of an anchor the controller is excellent</strong> — 3/3
-reaches with a path-to-progress ratio of <strong>1.0</strong>, i.e. it travels almost exactly
-the distance required. Beyond ~2 rad it collapses completely. Measured cluster
-radius is <strong>~4 rad</strong>.</p>
-<p>So the open problem is <strong>coverage, not control</strong>. Nothing in the formulation,
-collection, or QP is broken. Raising <code>K</code> cannot close the gap at any affordable
-number, which is why the next build is per-timestep data selection
-(<a href="https://arxiv.org/abs/2503.18845">Select-DPC</a>) rather than more anchors.</p>
-<h2 id="context-a-7-dof-arm-is-not-a-unicycle-in-a-specific-way">Context — a 7-DoF arm is not a unicycle, in a specific way<a class="headerlink" href="#context-a-7-dof-arm-is-not-a-unicycle-in-a-specific-way" title="Permanent link">&para;</a></h2>
-<p>Entry <a href="../05-library-switching/">05</a> established the unicycle needs four local
-libraries because its dynamics are bilinear in heading. The Panda needs local
-libraries too, but for a different reason, and the difference decides everything
-downstream.</p>
-<p><strong>Joint 1 is an exact symmetry, not a nonlinearity.</strong> Its axis is vertical and
-gravity is along the same axis, so the joint-space dynamics cannot depend on <code>q₁</code>.
-Driving <code>q₁ = −1.8</code> and <code>q₁ = 0.6</code> with identical commands and de-rotating by
-<code>Rz(Δq₁)</code> agrees to <strong>6.661e-16 m</strong>. The pre-existing <code>azimuth_key</code> in
-<code>panda/deepc_setup.py</code> therefore keys on a quantity that carries no model
-information — the four azimuth libraries differ only by a known rotation. That
-result is what motivated keying on the full configuration instead.</p>
-<p><strong>The state is 14-D and the tip does not observe it.</strong> <code>mjd_transitionFD</code> at the
-50 Hz control rate gives <code>A ∈ ℝ¹⁴ˣ¹⁴</code>, <code>B ∈ ℝ¹⁴ˣ⁷</code> for <code>x = (q, q̇)</code>. Building the
-observability matrix against a tip-only output leaves a <strong>4-dimensional blind
-subspace</strong> — exactly <code>7 − 3</code>, the self-motion manifold, confirming from local
-linear algebra what <code>PandaReachEnv.y_ext</code>'s docstring measured globally from 132
-configuration pairs. Putting <code>q</code> in the output fixes it (<code>cond ≈ 98</code> against
-<code>1e13</code>–<code>1e20</code> for tip-only), which is why the plan's <code>y = [q; …]</code> is right.</p>
-<p>Reproduce: <code>scripts/plot_panda_analysis.py --figure statespace</code>.</p>
-<h2 id="considered">Considered<a class="headerlink" href="#considered" title="Permanent link">&para;</a></h2>
-<h3 id="the-output-the-plans-d_g-vs-the-tip-vector">The output: the plan's <code>d_g</code> vs the tip vector<a class="headerlink" href="#the-output-the-plans-d_g-vs-the-tip-vector" title="Permanent link">&para;</a></h3>
-<p>The plan specifies <code>y = [q; ‖p_ee − p_g‖]</code>. Splitting the §8 prediction error by
-channel showed the scalar distance channel failing 4–6× worse than the joint
-channels could account for:</p>
+<p>Port the unicycle's <code>DeePC → clone → residual</code> pipeline
+(<a href="../07-imitation-learning/">07</a>, <a href="../08-residual-rl/">08</a>, <a href="../09-vanilla-rl/">09</a>)
+to <code>Reacher-v5</code>. Adds <strong><code>ReacherGoal-v0</code></strong> (<code>reacher/env.py</code>), a shared <strong><code>rl/</code></strong>
+package for the system-agnostic RL machinery, and the clone/residual stack in
+<code>reacher/</code>.</p>
+<p>The pipeline works, after one substantive fix: <strong>plain behavioral cloning cannot
+reproduce a DeePC-family controller here, and on-policy imitation (DAgger) can.</strong>
+Seven other diagnoses were proposed and retracted before that one; all are recorded
+below rather than dropped.</p>
+<p>And the control still ties it. <strong>Vanilla RL, with no DeePC anywhere in it, matches
+the full pipeline at 113/120 and is more precise on every distance metric.</strong>
+Journey 09 found the same on the unicycle. That is now two systems.</p>
+<h2 id="the-result">The result<a class="headerlink" href="#the-result" title="Permanent link">&para;</a></h2>
+<p>120 held-out scenarios (<code>--seed 90000</code>, disjoint from every training stream), full
+horizon, early stopping <strong>off</strong>, both RL rows at <strong>200k steps</strong>
+(<code>scripts/eval_reacher_residual.py</code>):</p>
 <table>
 <thead>
 <tr>
-<th>region</th>
-<th>q RMSE</th>
-<th>tip error q alone explains</th>
-<th>actual <code>d_g</code> RMSE</th>
+<th>controller</th>
+<th>reach rate (95% CI)</th>
+<th>best</th>
+<th>final</th>
+<th>best→final</th>
+<th>path/net</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Select-DPC (expert)</td>
+<td>89/120 [66–81%]</td>
+<td>2.9 mm</td>
+<td>6.4 mm</td>
+<td>2.2x</td>
+<td>1.6</td>
+</tr>
+<tr>
+<td>DAgger clone</td>
+<td>82/120 [60–76%]</td>
+<td>5.1 mm</td>
+<td>12.3 mm</td>
+<td>2.4x</td>
+<td>1.7</td>
+</tr>
+<tr>
+<td>clone + warm start</td>
+<td>83/120 [60–77%]</td>
+<td>6.1 mm</td>
+<td>11.8 mm</td>
+<td>1.9x</td>
+<td>1.8</td>
+</tr>
+<tr>
+<td><strong>clone + residual</strong></td>
+<td><strong>113/120 [88–97%]</strong></td>
+<td>3.1 mm</td>
+<td>5.4 mm</td>
+<td>1.8x</td>
+<td>1.6</td>
+</tr>
+<tr>
+<td><strong>vanilla RL</strong></td>
+<td><strong>113/120 [88–97%]</strong></td>
+<td><strong>1.9 mm</strong></td>
+<td><strong>3.2 mm</strong></td>
+<td><strong>1.7x</strong></td>
+<td><strong>1.4</strong></td>
+</tr>
+<tr>
+<td>random torque</td>
+<td>3/120 [1–7%]</td>
+<td>56.5 mm</td>
+<td>181.7 mm</td>
+<td>3.2x</td>
+<td>7.6</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>paired vs the clone</th>
+<th>rescues</th>
+<th>regressions</th>
+<th>closer on</th>
+<th>McNemar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>clone + residual</td>
+<td>36</td>
+<td>5</td>
+<td>79/120</td>
+<td><code>p &lt; 0.001</code></td>
+</tr>
+<tr>
+<td>vanilla RL</td>
+<td>38</td>
+<td>7</td>
+<td>87/120</td>
+<td><code>p &lt; 0.001</code></td>
+</tr>
+</tbody>
+</table>
+<p>Three things follow.</p>
+<ol>
+<li><strong>The pipeline works.</strong> The residual lifts its baseline 82 → 113/120 and
+   <strong>beats the expert it was cloned from</strong> (89/120). Journey 08's arc reproduces
+   on a structurally different system.</li>
+<li><strong>The drift goal is met</strong> — the one thing <a href="../12-select-dpc/">journey 12</a> said
+   would lift every row rather than trade one against another. <code>best→final</code> is
+   1.8x for the residual and 1.7x for vanilla, against the expert's 2.2x and
+   journey 12's 2.1–2.3x band. A policy paid on every step of a full horizon holds
+   position better than a receding-horizon QP with no terminal term.</li>
+<li><strong>And vanilla ties it exactly while being more precise</strong> — 1.9 mm against
+   3.1 mm <code>best</code>, 3.2 against 5.4 mm <code>final</code>, <code>path/net</code> 1.4 against 1.6.</li>
+</ol>
+<p>The honest reading: on this task the pipeline is <strong>sound and unnecessary</strong>. Its one
+surviving advantage is the zero-init floor — a residual starts at its baseline's
+competence where vanilla starts at random — which matters when a bad early policy
+is expensive, and not at all when 200k steps costs nine minutes.</p>
+<h2 id="how-dagger-works-in-this-pipeline">How DAgger works in this pipeline<a class="headerlink" href="#how-dagger-works-in-this-pipeline" title="Permanent link">&para;</a></h2>
+<p>This is the fix that made the clone usable, so it is worth being precise about.</p>
+<h3 id="the-problem-it-solves">The problem it solves<a class="headerlink" href="#the-problem-it-solves" title="Permanent link">&para;</a></h3>
+<p>Behavioral cloning collects its dataset by running the <strong>expert</strong> and recording
+<code>(state, expert action)</code> pairs. The network therefore becomes accurate on <em>states
+the expert visits</em>. But at deployment the <strong>clone</strong> drives: its small errors carry
+it to slightly different states, where there was no training data, so it is worse
+there, which carries it further off. Error compounds — <code>T² · ε</code> in the horizon,
+against DAgger's <code>T · ε</code> (Ross, Gordon &amp; Bagnell 2011).</p>
+<p>Measured directly here, rolling the same start states two ways:</p>
+<table>
+<thead>
+<tr>
+<th>clone-vs-expert disagreement, measured at</th>
+<th>median</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>states the <strong>expert</strong> drives to</td>
+<td>0.1025</td>
+</tr>
+<tr>
+<td>states the <strong>clone</strong> drives to</td>
+<td><strong>0.2815</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>2.75x.</strong> That is the whole diagnosis — and every dataset collected before DAgger
+ran the expert and labelled with the expert, so the clone's own states appeared in
+training data exactly never.</p>
+<h3 id="the-loop">The loop<a class="headerlink" href="#the-loop" title="Permanent link">&para;</a></h3>
+<p>Each round separates <em>who drives</em> from <em>who labels</em>:</p>
+<table>
+<thead>
+<tr>
+<th>round</th>
+<th>drives the episode</th>
+<th>supplies the labels</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>0</td>
-<td>0.024 rad</td>
-<td>12.2 mm</td>
-<td>57.4 mm</td>
+<td>expert</td>
+<td>expert — this is plain BC</td>
 </tr>
 <tr>
 <td>1</td>
-<td>0.020 rad</td>
-<td>10.1 mm</td>
-<td>76.2 mm</td>
+<td>the clone</td>
+<td><strong>expert, queried at the clone's states</strong></td>
 </tr>
 <tr>
 <td>2</td>
-<td>0.021 rad</td>
-<td>10.4 mm</td>
-<td>40.2 mm</td>
+<td>the clone (retrained)</td>
+<td>expert again</td>
 </tr>
 <tr>
 <td>3</td>
-<td>0.021 rad</td>
-<td>10.5 mm</td>
-<td>51.0 mm</td>
+<td>…</td>
+<td>…</td>
 </tr>
 </tbody>
 </table>
-<p>Switched to <code>y = [q; p_ee]</code>. <strong>Honest caveat: this did not deliver what was
-predicted</strong> — the change bought ~10%, not the 5× expected. The extra error was FK
-curvature, which the vector form inherits too. The change was kept on two smaller
-merits that do hold: the 2-norm has a kink exactly at the target where the
-controller finishes, and — the real win — <strong><code>p_ee</code> does not depend on the goal, so
-the libraries are goal-free</strong>. One Hankel build serves every goal, and the per-goal
-retargeting machinery <code>panda/qdes.py</code> used to carry was deleted.</p>
-<p><code>Q = diag(0₇, I₃)</code> keeps the tracking cost identical to tip-only: the joint block
-informs <em>prediction</em> through the <code>Yp</code>/<code>Yf</code> constraints without entering the
-objective — the same trick <code>deepc_setup(output="ext")</code> uses.</p>
-<h3 id="rate-limiting-post-hoc-clip-vs-a-constraint-in-the-qp">Rate limiting: post-hoc clip vs a constraint in the QP<a class="headerlink" href="#rate-limiting-post-hoc-clip-vs-a-constraint-in-the-qp" title="Permanent link">&para;</a></h3>
-<p><code>u_bounds</code> limits <em>where</em> the target may sit, not how far it may jump. Under an
-absolute joint target that gap is fatal — the QP commanded a median
-<strong>1.9–3.1 rad per 20 ms step</strong>, walking straight out of the neighbourhood its
-library was collected in. (The delta interface never had this problem:
-<code>DELTA_MAX = 0.2</code> <em>was</em> a rate limit by construction.)</p>
-<p>Clipping the returned action was tried first and is wrong in principle: the QP
-plans a trajectory premised on a move the plant never makes, so the plan and the
-action disagree from step one. The constraint now lives inside the optimization
-(<code>core/deepc.py</code>, <code>du_max</code>, default <code>None</code> so every unicycle result is unchanged).
-Verified to bind exactly, and the horizon prediction barely degrades — the QP
-re-plans something feasible rather than being throttled.</p>
-<p>A <strong>hard constraint</strong> over <a href="https://arxiv.org/abs/2509.26334">DeePC-GS</a>'s soft
-<code>S‖Δu‖²</code> cost, because <code>test_cluster_lti.py</code> measures the validity envelope as a
-threshold, not a penalty — and a cost cannot guarantee the plan stays inside it.</p>
-<p><code>du_max = 0.02</code> also turns out to be the only setting a real Panda could execute:
-at 50 Hz it is <strong>1.0 rad/s</strong>, under the rated 2.175, while 0.05 → 2.5 rad/s and
-0.10 → 5.0 rad/s are above it.</p>
-<h3 id="more-anchors-vs-dropping-anchors">More anchors vs dropping anchors<a class="headerlink" href="#more-anchors-vs-dropping-anchors" title="Permanent link">&para;</a></h3>
-<p>Deferred to the Outcome — the arithmetic below decides it.</p>
-<h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
-<h3 id="the-clusters-are-not-lti-at-the-radius-they-cover">The clusters are not LTI at the radius they cover<a class="headerlink" href="#the-clusters-are-not-lti-at-the-radius-they-cover" title="Permanent link">&para;</a></h3>
-<p><code>scripts/test_cluster_lti.py</code> splits "LTI" into three separate questions.
-Time-invariance is free (MuJoCo carries no explicit time dependence; measured
-<code>0.00e+00</code>). The other two fail:</p>
-<p><strong>Linearity at a point</strong> — superposition error of the tip response, median:</p>
-<table>
-<thead>
-<tr>
-<th>command amplitude</th>
-<th>anchor 0</th>
-<th>1</th>
-<th>2</th>
-<th>3</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0.05</td>
-<td>24.0%</td>
-<td>30.6%</td>
-<td>14.0%</td>
-<td>33.6%</td>
-</tr>
-<tr>
-<td><strong>0.25</strong> (collection σ)</td>
-<td><strong>52.1%</strong></td>
-<td><strong>61.3%</strong></td>
-<td><strong>53.8%</strong></td>
-<td><strong>58.5%</strong></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Spatial invariance</strong> — does the anchor's own linear map hold <code>r</code> rad away:</p>
-<table>
-<thead>
-<tr>
-<th>radius</th>
-<th>anchor 0</th>
-<th>1</th>
-<th>2</th>
-<th>3</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0.25</td>
-<td>28%</td>
-<td>41%</td>
-<td>30%</td>
-<td>31%</td>
-</tr>
-<tr>
-<td>1.00</td>
-<td>66%</td>
-<td>71%</td>
-<td>64%</td>
-<td>82%</td>
-</tr>
-<tr>
-<td><strong>4.00</strong></td>
-<td><strong>175%</strong></td>
-<td><strong>135%</strong></td>
-<td><strong>127%</strong></td>
-<td><strong>157%</strong></td>
-</tr>
-</tbody>
-</table>
-<p>Measured cluster radii are <strong>4.34, 3.84, 3.73, 4.25 rad</strong> — the bottom row. Above
-100% means the local model is worse than predicting zero.</p>
-<h3 id="the-libraries-themselves-are-excellent-inside-05-rad">The libraries themselves are excellent — inside 0.5 rad<a class="headerlink" href="#the-libraries-themselves-are-excellent-inside-05-rad" title="Permanent link">&para;</a></h3>
-<p><code>scripts/verify_libraries.py</code> is the gate any future library set should pass.
-<code>skill</code> compares against a "the tip does not move" predictor; <code>cos</code> is the
-direction of predicted vs true tip displacement. Full definitions, and what each
-metric is load-bearing for, in <a href="../../reference/metrics/">Reference › Metrics</a>.</p>
-<table>
-<thead>
-<tr>
-<th>radius</th>
-<th>span</th>
-<th>skill</th>
-<th>cos</th>
-<th>cos &gt; 0.5</th>
-<th>cos &lt; 0</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0.00</td>
-<td>0.000</td>
-<td>0.93</td>
-<td>0.98</td>
-<td>100%</td>
-<td>0%</td>
-</tr>
-<tr>
-<td>0.25</td>
-<td>0.000</td>
-<td>0.88</td>
-<td>0.96</td>
-<td>97%</td>
-<td>0%</td>
-</tr>
-<tr>
-<td>0.50</td>
-<td>0.000</td>
-<td>0.72</td>
-<td>0.90</td>
-<td>84%</td>
-<td>3%</td>
-</tr>
-<tr>
-<td>1.00</td>
-<td>0.000</td>
-<td>0.14</td>
-<td>0.85</td>
-<td>66%</td>
-<td>9%</td>
-</tr>
-<tr>
-<td>2.00</td>
-<td>0.000</td>
-<td><strong>−9.93</strong></td>
-<td><strong>−0.03</strong></td>
-<td>31%</td>
-<td><strong>50%</strong></td>
-</tr>
-<tr>
-<td>4.00</td>
-<td>0.000</td>
-<td>−23.64</td>
-<td>0.07</td>
-<td>28%</td>
-<td>44%</td>
-</tr>
-</tbody>
-</table>
-<p>Nothing is wrong with the data. At 2 rad the predictor points the <strong>wrong way half
-the time</strong> — which is why a controller following it does worse than noise.</p>
-<div class="admonition warning">
-<p class="admonition-title">The span test is vacuous here, and that is itself a finding</p>
-<p>Span residual is <code>0.000</code> at every radius, including 4 rad — not because the
-library is good, but because <code>n_cols = 1484</code> against <code>289</code> Hankel rows spans
-the entire space. Any trajectory is representable, so Willems' consistency
-constrains nothing and <code>λ_g</code> alone selects among infinitely many <code>g</code>. DeePC-GS
-deliberately runs 750–1000 columns and reports that slicing improves
-conditioning. <strong>Shorter <code>T</code> is an untested knob</strong> that may help independently
-of anchor radius.</p>
-</div>
-<h3 id="the-gating-experiment">The gating experiment<a class="headerlink" href="#the-gating-experiment" title="Permanent link">&para;</a></h3>
-<p>Every closed-loop episode before this one started 2–4 rad from the nearest anchor
-— the regime above. <code>scripts/test_valid_region_control.py</code> starts at a controlled
-distance instead, with <code>du_max = 0.02</code> and a goal 0.4 rad away:</p>
-<table>
-<thead>
-<tr>
-<th>start dist</th>
-<th></th>
-<th>reached</th>
-<th>median closed</th>
-<th>median path/net</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0.00</td>
-<td>DeePC</td>
-<td><strong>3/3</strong></td>
-<td><strong>87.9%</strong></td>
-<td><strong>1.0</strong></td>
-</tr>
-<tr>
-<td>0.00</td>
-<td>random</td>
-<td>0/3</td>
-<td>22.6%</td>
-<td>5.5</td>
-</tr>
-<tr>
-<td>0.50</td>
-<td>DeePC</td>
-<td>2/3</td>
-<td>84.6%</td>
-<td>1.3</td>
-</tr>
-<tr>
-<td>0.50</td>
-<td>random</td>
-<td>0/3</td>
-<td>13.0%</td>
-<td>7.6</td>
-</tr>
-<tr>
-<td>2.00</td>
-<td>DeePC</td>
-<td>1/3</td>
-<td>3.7%</td>
-<td>53.8</td>
-</tr>
-<tr>
-<td>2.00</td>
-<td>random</td>
-<td>0/3</td>
-<td>0.4%</td>
-<td>136.7</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Path/net = 1.0 is the number that matters</strong> — the tip travels almost exactly the
-distance it needs to. That is steering, not drifting. The same controller started
-2–4 rad from an anchor ran 5–15×.</p>
-<p>The usable radius is bracketed between 0.5 and 2.0 rad by closed-loop outcome,
-agreeing with the open-loop table above. Two independent measurements, one
-boundary.</p>
-<h3 id="the-measurement-discipline-that-was-missing">The measurement discipline that was missing<a class="headerlink" href="#the-measurement-discipline-that-was-missing" title="Permanent link">&para;</a></h3>
-<p>A random-walk control of equal command magnitude was not run until late, and when
-it was, it <strong>beat the unconstrained controller 38.5% to 6.1%</strong>. Every
-interpretation made before that point was against the wrong reference. This repo
-already had the discipline — the env's random-action baseline exists so that "any
-nonzero reach rate is signal, not noise" — and it was not applied to the new
-interface. <strong>Run the random control first on any new interface.</strong></p>
-<h3 id="anchor-selection-the-ik-stage-is-the-load-bearing-step">Anchor selection — the IK stage is the load-bearing step<a class="headerlink" href="#anchor-selection-the-ik-stage-is-the-load-bearing-step" title="Permanent link">&para;</a></h3>
-<p><code>panda/anchors.py</code> samples task-relevant configurations, clusters with k-medoids
-(medoids over means so each anchor is a configuration the robot can actually
-adopt and start collection from), and reports a §5 diversity check.</p>
-<p>Plan §3 samples Cartesian goals then solves IK back to <code>q</code>. The first attempt
-here skipped that, using <code>sample_config</code> — which rejection-samples <em>uniformly</em>
-from the safe box and takes the FK tip as the goal — and argued it was "more
-faithful." <strong>That was wrong, and the direction is the entire point.</strong> IK is
-one-to-many, so a <em>deterministic</em> IK policy collapses a 3-D goal space onto a ~3-D
-manifold. FK from uniform configurations stays uniform.</p>
-<p><code>sample_task_configs(ik=...)</code> now implements the choice. Goals are drawn
-identically in every mode, so <code>ik</code> is the only variable:</p>
-<table>
-<thead>
-<tr>
-<th><code>--ik</code></th>
-<th>silhouette</th>
-<th>effective dimension</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>none</code> (FK-sampled)</td>
-<td>0.133</td>
-<td>5.65 / 7</td>
-</tr>
-<tr>
-<td><strong><code>home</code></strong> (plan §3)</td>
-<td><strong>0.256</strong></td>
-<td><strong>3.00 / 7</strong></td>
-</tr>
-<tr>
-<td><code>previous</code></td>
-<td>0.195</td>
-<td>3.62 / 7</td>
-</tr>
-<tr>
-<td><code>random</code> (null control)</td>
-<td>0.123</td>
-<td>5.73 / 7</td>
-</tr>
-</tbody>
-</table>
-<p><code>home</code> gives <strong>exactly 3.00</strong> — what a deterministic map from a 3-D goal space
-into ℝ⁷ must produce. And the <strong>null control passes</strong>: seeding IK from a random
-valid configuration reproduces the <code>none</code> result, so the concentration comes from
-the policy rather than from the solver quietly biasing toward some pose. That
-check is what makes the 3.00 trustworthy.</p>
-<p>Under <code>ik=none</code>, <code>Q_task</code> matched a bare uniform box draw to within 2%
-(<code>0.230 0.209 0.191 0.166 0.086 0.069 0.050</code> against <code>0.198 ×4, 0.084, 0.073,
-0.053</code>), so k-medoids was clustering a box and every conclusion about cluster
-structure was circular.</p>
-<p>The arithmetic this moves — anchors to cover at the 0.5 rad usable radius scale
-as <code>8^d</code>:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>d = 5.65   (uniform)     -&gt;  ~126,000 anchors
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>d = 3.00   (--ik home)   -&gt;       512
+<p><code>reacher/clone_data.py::dagger_rollout</code> is the whole idea in four lines:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">u_label</span> <span class="o">=</span> <span class="n">expert</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">y_pre</span><span class="p">,</span> <span class="n">y_ref</span><span class="p">)</span>   <span class="c1"># expert answers &quot;what should you do HERE?&quot;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">acts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clip</span><span class="p">(</span><span class="n">u_label</span><span class="p">))</span>           <span class="c1"># -&gt; the training target</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">u_apply</span> <span class="o">=</span> <span class="n">policy</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>          <span class="c1"># the CLONE decides where we actually go</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">u_apply</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Two orders of magnitude: from impossible to ~8.5 hours of collection.</p>
-<div class="admonition note">
-<p class="admonition-title">The seed policy is a design decision, not a solver detail</p>
-<p>It determines which 3-D slice of the configuration space the robot is asked to
-live in. <code>home</code> gives a star around the keyframe; <code>previous</code> gives a
-continuous sheet that wanders off the manifold (3.62); <code>random</code> gives nothing.
-Choose it deliberately.</p>
-</div>
-<p>Joint-space distance <em>is</em> a sound metric once measured over a range that isn't
-saturated — <code>corr(log distance, model difference) = 0.749</code>, 56% of variance. The
-plan's §7 choice holds up; only the cell size is wrong. Silhouette at 0.256 is
-still low, so even under IK this is a <strong>manifold, not separated clusters</strong>: <code>K</code>
-remains a resolution choice rather than something the data hands you.</p>
+<p>The dataset only grows — <code>scripts/run_dagger.py</code> aggregates rather than replaces,
+hence "Dataset Aggregation" — so later rounds keep the expert's distribution while
+adding the student's.</p>
+<h3 id="the-deepc-specific-trap">The DeePC-specific trap<a class="headerlink" href="#the-deepc-specific-trap" title="Permanent link">&para;</a></h3>
+<p><code>DeePC.act</code> slides its past buffer with <strong>the action it computed</strong>
+(<code>core/deepc.py:86-89</code>). Under DAgger that action is <em>not</em> what the plant
+received, so from step 2 onward the expert would be answering questions about a
+trajectory that never happened — and nothing would raise. <code>dagger_rollout</code>
+therefore overwrites <code>expert._u_buf[-1]</code> with the <strong>applied</strong> action after every
+step. Without it the labels are quietly wrong.</p>
+<h3 id="what-it-bought">What it bought<a class="headerlink" href="#what-it-bought" title="Permanent link">&para;</a></h3>
+<p>3 rounds × 100 episodes, expert = memoryless Select-DPC, gate on 40 scenarios:</p>
+<table>
+<thead>
+<tr>
+<th>stage</th>
+<th>rows</th>
+<th>reached</th>
+<th>reach drop</th>
+<th>best</th>
+<th>gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>expert</td>
+<td>—</td>
+<td>30/40</td>
+<td>—</td>
+<td>4.2 mm</td>
+<td>—</td>
+</tr>
+<tr>
+<td>behavioral cloning</td>
+<td>10,000</td>
+<td>22/40</td>
+<td>+20.0 pts</td>
+<td>9.5 mm</td>
+<td><strong>FAIL</strong></td>
+</tr>
+<tr>
+<td>DAgger round 1</td>
+<td>15,000</td>
+<td>19/40</td>
+<td>+27.5 pts</td>
+<td>10.8 mm</td>
+<td>FAIL</td>
+</tr>
+<tr>
+<td>DAgger round 2</td>
+<td>20,000</td>
+<td>26/40</td>
+<td>+10.0 pts</td>
+<td>7.0 mm</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr>
+<td>DAgger round 3</td>
+<td>25,000</td>
+<td><strong>27/40</strong></td>
+<td><strong>+7.5 pts</strong></td>
+<td><strong>5.2 mm</strong></td>
+<td><strong>PASS</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The clone's error on the states it chose for itself fell <strong>0.2815 → 0.2158 →
+0.1454</strong>. Round 1 got <em>worse</em> first: 5,000 rows from a poor policy dilute 10,000 BC
+rows before they correct them.</p>
+<p>A 3-episode smoke test — <strong>150 rows on top of 10,000</strong> — already moved the gate
+from FAIL to PASS. 1.5% more data, collected in the right place, did what tripling
+the expert-driven data could not.</p>
+<h3 id="the-metric-that-misled-and-the-one-that-didnt">The metric that misled, and the one that didn't<a class="headerlink" href="#the-metric-that-misled-and-the-one-that-didnt" title="Permanent link">&para;</a></h3>
+<p>Across those rounds, open-loop error <strong>on the expert's distribution</strong> went
+0.1215 → 0.1281 — slightly <em>worse</em> — while closed-loop performance improved
+sharply. That is the mirror image of the one-hot experiment below, where
+representation improved 2x and the closed loop degraded.</p>
+<p>Both say the same thing: <strong>fit measured on the expert's states does not predict
+behaviour on the student's.</strong> Every earlier intervention — more data, more
+capacity, richer features, a library one-hot — optimised the first while the 2.75x
+was pointing at the second.</p>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p>Journey 12 left Select-DPC working on Reacher and named the drift as the one
+limitation whose fix would lift every row. Select-DPC costs <strong>76.7 ms/step</strong>
+against a 20 ms budget at 50 Hz, so it is 4x too slow to deploy <em>and</em> cannot sit
+inside an RL loop; the clone exists to amortize it into a forward pass.</p>
+<h2 id="considered">Considered<a class="headerlink" href="#considered" title="Permanent link">&para;</a></h2>
+<h3 id="reachergoal-v0-departs-from-stock-reacher-v5-in-three-ways"><code>ReacherGoal-v0</code> departs from stock <code>Reacher-v5</code> in three ways<a class="headerlink" href="#reachergoal-v0-departs-from-stock-reacher-v5-in-three-ways" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Goals are rejection-sampled against the reachable annulus.</strong> At
+  <code>SAFE_MARGIN = 0.02</code> the fingertip attains <code>[0.0291, 0.21]</code> m against a 0.20 m
+  disc, so <strong>2.1%</strong> of stock draws are impossible and score as controller failure.</li>
+<li><strong>The episode never terminates on reach</strong>, so "arrive and hold" and "arrive and
+  leave" are distinguishable — the whole point of measuring drift.</li>
+<li><strong>Dense per-step distance, not squared.</strong> At a 10 mm tolerance on a 210 mm
+  workspace the squared term is ~1e-4 and its gradient vanishes as the tip
+  approaches.</li>
+</ul>
+<p><code>reach_bonus</code> is <strong>1.0</strong>, not the unicycle's 100: without termination the bonus is
+paid on every held step, so it <em>is</em> the station-keeping reward, and at 100 it would
+swamp the distance term ~1000x.</p>
+<h2 id="outcome-what-was-tried-before-dagger">Outcome — what was tried before DAgger<a class="headerlink" href="#outcome-what-was-tried-before-dagger" title="Permanent link">&para;</a></h2>
+<p>All of the following failed, and each excluded something.</p>
+<h3 id="select-dpc-is-recurrent-making-it-memoryless-does-not-help">Select-DPC is recurrent; making it memoryless does not help<a class="headerlink" href="#select-dpc-is-recurrent-making-it-memoryless-does-not-help" title="Permanent link">&para;</a></h3>
+<p><code>SelectDPC.act</code> selects against <code>self._tau_prev</code>, the previous step's prediction,
+so its action depends on the whole episode history. From identical
+<code>(u_ini, y_ini, y_current, goal)</code>, clearing that state moves the action by a median
+<strong>0.2442 — 0.81x the action's own magnitude</strong>, up to the full torque box.</p>
+<p><code>core/selectdpc.py</code> gained <code>carry_prediction=False</code> to remove it. As a <em>controller</em>
+that costs almost nothing — <strong>30/40 against 31/40</strong>, paired coin-flip — a design
+trade the Select-DPC paper does not discuss and worth knowing independently. As a
+<em>fix for cloning</em> it did nothing: the gate still failed at 20.0 points.</p>
+<h3 id="the-library-one-hot-better-representation-worse-closed-loop">The library one-hot: better representation, worse closed loop<a class="headerlink" href="#the-library-one-hot-better-representation-worse-closed-loop" title="Permanent link">&para;</a></h3>
+<p>The unicycle clone that worked was handed a 4-way library one-hot (<code>data/clone.pt</code>
+ships <code>n_lib = 4</code>, those columns protected from standardization). <code>ReacherDeePC</code>
+picks by nearest anchor, so a 30-way one-hot is the faithful port — and it had
+never been run.</p>
+<table>
+<thead>
+<tr>
+<th>clone</th>
+<th>val MSE</th>
+<th>val RMSE / std</th>
+<th>open-loop vs a constant predictor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Select-DPC (carried)</td>
+<td>0.394</td>
+<td>0.631</td>
+<td>23%</td>
+</tr>
+<tr>
+<td>Select-DPC (memoryless)</td>
+<td>0.343</td>
+<td>0.586</td>
+<td>29%</td>
+</tr>
+<tr>
+<td><strong>fixed + one-hot</strong></td>
+<td><strong>0.228</strong></td>
+<td><strong>0.478</strong></td>
+<td><strong>45%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Best representation by a wide margin — and the closed loop got <em>worse</em>, 25/40 →
+15/40. Not mode chattering either: anchor switches per episode were 92 for the
+clone against 84 for the base, a coin flip.</p>
+<h3 id="neither-encoding-horn-works">Neither encoding horn works<a class="headerlink" href="#neither-encoding-horn-works" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>encoding</th>
+<th>dim</th>
+<th>NN distance</th>
+<th>NN label diff</th>
+<th>val error</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DeePC window</td>
+<td>43</td>
+<td>1.78</td>
+<td>0.1466</td>
+<td>0.0962</td>
+</tr>
+<tr>
+<td>state <code>(cos/sin q0, q1, q̇, tip−goal)</code></td>
+<td>7</td>
+<td><strong>0.43</strong></td>
+<td><strong>0.1492</strong></td>
+<td>0.0919</td>
+</tr>
+</tbody>
+</table>
+<p>Compressing to 7-D made the data <strong>4x denser</strong> and moved the neighbour label
+difference not at all. And the labels are not noise: re-solving is deterministic
+(median 0.0000), tightening SCS to <code>eps 1e-9</code> moves the action 0.0041, a 1e-6 state
+perturbation moves it 0.0001.</p>
+<h3 id="the-exclusion-table">The exclusion table<a class="headerlink" href="#the-exclusion-table" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>candidate</th>
+<th>test</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>overfitting</td>
+<td>train vs val</td>
+<td>0.0875 vs 0.0918 — no gap</td>
+</tr>
+<tr>
+<td>capacity</td>
+<td>1024x3 vs 256x256</td>
+<td><strong>worse</strong></td>
+</tr>
+<tr>
+<td>recurrent base</td>
+<td><code>carry_prediction=False</code></td>
+<td>no change</td>
+</tr>
+<tr>
+<td>cold start</td>
+<td>warm-start hybrid</td>
+<td>+2 reaches</td>
+</tr>
+<tr>
+<td>sample count</td>
+<td>200 → 600 episodes</td>
+<td>step-0 error moved 0.0002</td>
+</tr>
+<tr>
+<td>missing velocity</td>
+<td>explicit <code>q̇</code></td>
+<td>4%</td>
+</tr>
+<tr>
+<td>library one-hot</td>
+<td>30-way, faithful port</td>
+<td>representation 2x better, gate worse</td>
+</tr>
+<tr>
+<td><strong>on-policy data</strong></td>
+<td><strong>DAgger</strong></td>
+<td><strong>fixes it</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Every row but the last is an attempt to make the clone better <strong>at the expert's
+states</strong>. That was never the problem.</p>
+<h2 id="retractions">Retractions<a class="headerlink" href="#retractions" title="Permanent link">&para;</a></h2>
+<h3 id="the-evaluation-set-leak">The evaluation-set leak<a class="headerlink" href="#the-evaluation-set-leak" title="Permanent link">&para;</a></h3>
+<p>The first version of this entry reported the residual at 27/40 with 13 rescues.
+<strong>All of it was measured on the training set.</strong> <code>make_reacher_scenarios.py</code> drew
+goal-then-config from <code>default_rng(0)</code>; <code>ReacherGoalEnv.reset</code> draws the same order
+from <code>self.np_random</code> seeded 0; SB3 seeds once and auto-resets <strong>unseeded</strong>.
+Verified: evaluation scenario <em>i</em> was training episode <em>i</em>, identity mapping,
+across all 40.</p>
+<p>Nothing in the suite could see it — shapes, reachability and <code>need</code> were all
+correct. Only provenance was wrong. Fixed by moving the generator to a disjoint
+seed namespace, recording the seed in the npz, and adding
+<code>test_scenarios_are_held_out_from_the_training_stream</code>, which walks the seed-0
+stream exactly as SB3 does and asserts no frozen scenario appears in it.</p>
+<h3 id="eight-diagnoses-of-the-clone-failure">Eight diagnoses of the clone failure<a class="headerlink" href="#eight-diagnoses-of-the-clone-failure" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Selection discontinuity.</strong> Real (error 3.8x higher on churning steps,
+   <code>corr(error, action jump) = +0.73</code>) but not binding — removing the churn made
+   the gate <em>worse</em>.</li>
+<li><strong>Compounding error, first attempt.</strong> The measurement was invalid: it
+   referenced training rows against their own temporal neighbours, which measures
+   adjacency within an episode, not distributional support.</li>
+<li><strong>Under-sampled cold start.</strong> Refuted by a pre-registered prediction: 3x the
+   starts moved step-0 error by 0.0002.</li>
+<li><strong>Noise floor at step 0.</strong> Withdrawn — a deterministic target has none, and the
+   comparison was a pairwise difference against a single-label deviation.</li>
+<li><strong>Carried recurrent state.</strong> The 0.2442 contrast is real but overstates what
+   the data contains; the memoryless clone fit no better.</li>
+<li><strong>Feature-space sparsity.</strong> Refuted — 4x denser encoding, identical label
+   spread.</li>
+<li><strong>Mode chattering under the one-hot.</strong> Refuted — 1.10x switch ratio.</li>
+<li><strong>A reward misaligned with the reach criterion.</strong> Proposed when the residual
+   <em>harmed</em> the clone at 50k (82 → 65, <code>p = 0.037</code>). Refuted by the 200k control:
+   it was <strong>under-training</strong>, and at 200k the residual improves the clone
+   (82 → 113, <code>p &lt; 0.001</code>).</li>
+</ol>
+<p>Retraction 2 deserves a note. The <em>correct</em> version of that measurement — the
+2.75x on-policy/off-policy gap — was in hand early. It was dismissed because the
+feature-space <em>distance</em> ratio was only 1.13x. Distance was the wrong test; error
+on the policy's own distribution was the right one, and it had already been
+measured.</p>
+<h3 id="other-withdrawn-claims">Other withdrawn claims<a class="headerlink" href="#other-withdrawn-claims" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Two claims of "reproducing" journey 12.</strong> 159/200 is 79.5%, not 80.0%, and
+  <code>scripts/eval_reacher_scenarios.py:131</code> applies no reachability filter, so ~2.1%
+  of journey 12's goals were impossible. Consistent with, not identical to.</li>
+<li><strong>"The drift is not the QP's fault."</strong> At 50k, vanilla drifted 1.9x with no QP
+  anywhere, which looked like it falsified journey 12's mechanism. At 200k both RL
+  rows beat the expert's drift (1.7–1.8x against 2.2x), which is what journey 12
+  predicted a fix would look like. The 50k reading is withdrawn.</li>
+<li><strong>A test that could never fail.</strong> <code>test_never_terminates_on_reach</code> set the goal
+  60 mm from the held tip against a 10 mm tolerance, so <code>reached</code> never fired.
+  Fixed to 5 mm with an <code>ever_reached</code> assertion, verified by injecting the
+  regression it was blind to.</li>
+</ul>
 <h2 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>n = 3 per cell</strong> in the gating experiment, n = 8 in the rate sweep, one goal
-  scale, one seed. Effects are large and were predicted rather than discovered,
-  but none of this is a confirmation run.</li>
-<li>Reaching real task goals needs 1–4 rad of travel. These episodes used 0.4 rad,
-  so the arm never had to leave the valid bubble. <strong>Whole-task reach rate under
-  this controller is unmeasured</strong>, and the coverage gap says it will be poor.</li>
-<li><code>panda/qdes.py</code>'s <code>predict()</code> uses an ℓ2 solve while <code>core/deepc.py</code> uses ℓ1, so
-  §8 prediction numbers are an upper bound on what the controller experiences.</li>
-<li>Clustering uses goal configurations only; configurations the arm <em>passes
-  through</em> mid-episode get no anchor.</li>
+<li><strong>One seed per policy</strong>, one <code>residual_frac</code>, one <code>reach_bonus</code>. None swept.</li>
+<li><strong>The DAgger clone imitates the <em>memoryless</em> expert</strong>, so the <code>Select-DPC</code> row is
+  built with <code>carry_prediction=False</code> to match. Comparing it against the carried
+  variant would score the clone against a controller it never imitated.</li>
+<li>Wilson intervals on the two 113/120 rows overlap almost entirely; the paired
+  McNemar tests carry the claims, not the point estimates.</li>
+<li><code>path/net</code> for the <code>random</code> row is a median over 118, not 120: two scenarios made
+  no progress, so <code>eff</code> is NaN there by design.</li>
+<li><strong>The invariant tests skip on a clean checkout.</strong> <code>data/</code> is gitignored, so the
+  bit-for-bit zero-residual test and both zero-init tests <code>pytest.skip</code> elsewhere
+  and the suite still reports green.</li>
+<li>Observation normalization in <code>ResidualSelectEnv</code> is min-max against declared
+  bounds and the live channels are compressed ~18x relative to the widest; untested
+  as a factor now that the residual works.</li>
 </ul>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ol>
-<li>~~<strong>The IK stage</strong>~~ — done; <code>--ik home</code> gives <code>d = 3.00</code>. The pipeline has
-   been re-run on IK anchors (<code>data/panda_anchors_k4_ik.npz</code>).</li>
-<li><strong>Select-DPC</strong> — per-timestep column selection, no cells, effective radius
-   always ~0. Reuses collection, output and the QP; replaces <code>build_libraries</code> +
-   <code>assign</code>. Worth prototyping the <em>selection rule</em> against
-   <code>verify_libraries.py</code> before building it: if pooled-column selection gives
-   skill ~0.9 at arbitrary configurations the approach works, and if it degrades
-   like the fixed libraries the real gap is collection coverage, which is a
-   different project.</li>
-<li><strong>Shorter <code>T</code></strong> — cheap, untested, and the span result says the Hankel is 5.1×
-   over-parameterized.</li>
-<li><strong>Whole-task reach rate</strong> under <code>du_max = 0.02</code> on the 78-scenario set. Never
-   measured; every full evaluation predates the rate limit. Expected poor for
-   coverage reasons, but it is the reference number future changes compare
-   against, and plan §9 asks for it.</li>
+<li><strong>Sweep DAgger rounds and episodes-per-round.</strong> Three rounds of 100 was the
+   first thing tried and it worked; the knee is unmeasured, and a 3-episode smoke
+   test already moved the gate.</li>
+<li><strong>Re-run the residual on the one-hot fixed-anchor clone.</strong> DAgger and the
+   one-hot were never combined — the one-hot gave the best representation, DAgger
+   fixes the distribution, and they address different halves of the problem.</li>
+<li><strong>Decide whether the pipeline earns its complexity.</strong> Two systems now show
+   vanilla RL matching it. The zero-init floor is the remaining argument, and it is
+   worth measuring rather than asserting: compare early-training reach rates, where
+   a residual should be far ahead.</li>
+<li><strong>The Panda still needs on-policy collection</strong> (<a href="../12-select-dpc/">12</a> item 4).
+   <code>rl/</code> is now the shared package that would serve it, and DAgger is exactly the
+   on-policy mechanism that entry asked for.</li>
 </ol>
 
 
@@ -2394,7 +2679,7 @@ remains a resolution choice rather than something the data hands you.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../10-sample-efficiency/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 10. Sample efficiency + SAC">
+          <a href="../12-select-dpc/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 12. Select-DPC">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2404,27 +2689,11 @@ remains a resolution choice rather than something the data hands you.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                10. Sample efficiency + SAC
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="../12-select-dpc/" class="md-footer__link md-footer__link--next" aria-label="Next: 12. Select-DPC">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
                 12. Select-DPC
               </div>
             </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
           </a>
+        
         
       </nav>
     
