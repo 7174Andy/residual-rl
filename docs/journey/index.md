@@ -17,7 +17,7 @@ Entries are roughly chronological, but each one stands alone — you can read th
 | [10](10-sample-efficiency.md)    | Sample efficiency on the deployed policy — prior × optimizer interact |
 | [11](11-panda-anchors.md)        | Panda anchors — the controller works, the libraries don't reach   |
 | [12](12-select-dpc.md)           | Select-DPC — and a 2-DoF arm to test it on                        |
-| [13](13-reacher-residual.md)     | Residual RL on Reacher — and three wrong diagnoses               |
+| [13](13-reacher-residual.md)     | Residual RL on Reacher — DAgger fixes the clone, 400k settles it |
 
 ## Conventions
 

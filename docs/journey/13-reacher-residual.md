@@ -1,4 +1,4 @@
-# 13. Residual RL on Reacher — DAgger fixes the clone, and vanilla still ties
+# 13. Residual RL on Reacher — DAgger fixes the clone, 400k settles the verdict
 
 ## Decision
 
@@ -13,51 +13,161 @@ reproduce a DeePC-family controller here, and on-policy imitation (DAgger) can.*
 Seven other diagnoses were proposed and retracted before that one; all are recorded
 below rather than dropped.
 
-And the control still ties it. **Vanilla RL, with no DeePC anywhere in it, matches
-the full pipeline at 113/120 and is more precise on every distance metric.**
-Journey 09 found the same on the unicycle. That is now two systems.
+And the control still wins. The first evaluation stopped both RL arms at 200k
+steps, where their training curves had visibly not plateaued, so both were
+retrained to **400k** (~20 minutes each) and re-evaluated. At the plateau:
+**vanilla RL, with no DeePC anywhere in it, reaches 120/120 against the full
+pipeline's 117/120 and out-holds it in absolute terms.** Journey 09 found the
+same on the unicycle. That is now two systems, measured at convergence — the
+pipeline is **sound and unnecessary** on this task. Its surviving advantage is
+the head start, now measured on deployed checkpoints: the residual dominates
+vanilla at every budget up to ~125k steps and vanilla overtakes at ~150k — but
+the "zero-init floor" is **not a floor** (see the crossover section).
 
 ## The result
 
 120 held-out scenarios (`--seed 90000`, disjoint from every training stream), full
-horizon, early stopping **off**, both RL rows at **200k steps**
-(`scripts/eval_reacher_residual.py`):
+horizon, early stopping **off** (`scripts/eval_reacher_residual.py`). Every row
+below was evaluated under the same tree — see "The eval-drift catch". Figure:
+`docs/reference/reacher_residual_rl.png` (`scripts/plot_reacher_residual_rl.py`);
+the per-scenario CSV records are gitignored like all CSVs — regenerate them
+with `scripts/eval_reacher_residual.py` (~13 min).
 
-| controller | reach rate (95% CI) | best | final | best→final | path/net |
-| --- | --- | --- | --- | --- | --- |
-| Select-DPC (expert) | 89/120 [66–81%] | 2.9 mm | 6.4 mm | 2.2x | 1.6 |
-| DAgger clone | 82/120 [60–76%] | 5.1 mm | 12.3 mm | 2.4x | 1.7 |
-| clone + warm start | 83/120 [60–77%] | 6.1 mm | 11.8 mm | 1.9x | 1.8 |
-| **clone + residual** | **113/120 [88–97%]** | 3.1 mm | 5.4 mm | 1.8x | 1.6 |
-| **vanilla RL** | **113/120 [88–97%]** | **1.9 mm** | **3.2 mm** | **1.7x** | **1.4** |
-| random torque | 3/120 [1–7%] | 56.5 mm | 181.7 mm | 3.2x | 7.6 |
+| controller | reach @200k | reach @400k | best | final | best→final | path/net |
+| --- | --- | --- | --- | --- | --- | --- |
+| Select-DPC (expert) | 96/120 [72–86%] | — | 2.8 mm | 6.5 mm | 2.3x | 1.5 |
+| DAgger clone | 82/120 [60–76%] | — | 5.1 mm | 12.3 mm | 2.4x | 1.7 |
+| clone + warm start | 83/120 [60–77%] | — | 5.3 mm | 12.9 mm | 2.4x | 1.8 |
+| **clone + residual** | 113/120 | **117/120 [93–99%]** | 2.0 mm | 2.8 mm | **1.4x** | 1.5 |
+| **vanilla RL** | 113/120 | **120/120 [97–100%]** | **1.1 mm** | **1.7 mm** | 1.6x | **1.4** |
+| random torque | 3/120 [1–7%] | — | 56.5 mm | 181.7 mm | 3.2x | 7.6 |
+
+(`best`/`final`/drift columns are the 400k values for the RL rows; at 200k they
+were residual 3.1 → 5.4 mm at 1.8x, vanilla 1.9 → 3.2 mm at 1.7x.)
+
+Paired against the clone (the residual's own baseline), at 400k:
 
 | paired vs the clone | rescues | regressions | closer on | McNemar |
 | --- | --- | --- | --- | --- |
-| clone + residual | 36 | 5 | 79/120 | `p < 0.001` |
-| vanilla RL | 38 | 7 | 87/120 | `p < 0.001` |
+| clone + residual | 38 | 3 | 94/120 | `p < 0.001` |
+| vanilla RL | 38 | 0 | 105/120 | `p < 0.001` |
 
 Three things follow.
 
-1. **The pipeline works.** The residual lifts its baseline 82 → 113/120 and
-   **beats the expert it was cloned from** (89/120). Journey 08's arc reproduces
+1. **The pipeline works.** The residual lifts its baseline 82 → 117/120 and
+   **beats the expert it was cloned from** (96/120). Journey 08's arc reproduces
    on a structurally different system.
 2. **The drift goal is met** — the one thing [journey 12](12-select-dpc.md) said
    would lift every row rather than trade one against another. `best→final` is
-   1.8x for the residual and 1.7x for vanilla, against the expert's 2.2x and
-   journey 12's 2.1–2.3x band. A policy paid on every step of a full horizon holds
-   position better than a receding-horizon QP with no terminal term.
-3. **And vanilla ties it exactly while being more precise** — 1.9 mm against
-   3.1 mm `best`, 3.2 against 5.4 mm `final`, `path/net` 1.4 against 1.6.
+   1.4x for the residual against the expert's 2.3x and journey 12's 2.1–2.3x
+   band. A policy paid on every step of a full horizon holds position better
+   than a receding-horizon QP with no terminal term.
+3. **And vanilla wins outright** — perfect reach, 1.1 against 2.0 mm `best`,
+   1.7 against 2.8 mm `final`, `path/net` 1.4 against 1.5.
 
-The honest reading: on this task the pipeline is **sound and unnecessary**. Its one
-surviving advantage is the zero-init floor — a residual starts at its baseline's
-competence where vanilla starts at random — which matters when a bad early policy
-is expensive, and not at all when 200k steps costs nine minutes.
+Doubling training bought both arms real precision (the residual's drift fell
+1.8x → 1.4x; vanilla halved both distance medians), and the training curves say
+why 200k was short: vanilla's return plateaus only around ~280k, and the
+residual is still creeping at 400k.
 
-## How DAgger works in this pipeline
+### The eval-drift catch
+
+The first 200k evaluation was recorded before later working-tree changes, and
+its CSV is **not comparable** to any fresh run: under the current tree the
+deterministic Select-DPC row scores **96/120 where that CSV recorded 89/120** —
+same controller, same frozen scenarios. Two consecutive reruns agree with each
+other (96/120 twice), and the 200k RL rows reproduced exactly (113/120 both
+arms), so the table above is internally consistent.
+
+The rule this buys: **never compare eval CSVs written under different code
+states.** Re-running the older policies under current code costs ~13 minutes
+(the QP rows dominate; the RL rows are milliseconds per episode) and turns an
+apples-to-oranges table into a real one.
+
+### Why vanilla's training return is higher — the reward decomposed
+
+Vanilla's training return sits above the residual's from ~200k on, which reads
+as a contradiction next to the residual's best-in-table drift ratio.
+`scripts/decompose_reacher_returns.py` rolls both 400k policies over the 120
+scenarios and splits
+`return = −Σ dist + 1.0·(steps in tolerance) − 1e-3·Σ|u|²`:
+
+| | return | Σ dist | in-tol steps (of 50) | first reach | ctrl cost |
+| --- | --- | --- | --- | --- | --- |
+| residual 400k | 33.5 | 1.52 | 35.0 | step 13 | 0.012 |
+| vanilla 400k | **38.1** | **1.37** | **39.5** | step 12 | 0.010 |
+
+**Almost the entire 4.6-point gap is the station-keeping bonus** (4.5 more
+in-tolerance steps; the distance integral adds ~0.15 and control cost is
+noise). Paired per scenario, vanilla holds inside tolerance longer on
+**75/120** scenarios against the residual's 37/120.
+
+That also corrects a natural misreading of the drift column. The residual's
+1.4x against vanilla's 1.6x is a **ratio to its own `best`**, and its `best` is
+worse (2.0 vs 1.1 mm) — the denominator flatters it. In absolute terms vanilla
+is closer at best, closer at the end, and inside the tolerance ball more of the
+time. What the residual's 1.4x honestly claims is narrower: it fixed the drift
+pathology it inherited (clone 2.4x → 1.4x), which was journey 12's target. It
+does not claim the best station-keeper on the board.
+
+Mechanically the gap is structural, not a training artifact: the residual is
+anchored to the clone's steering, so it inherits a less direct approach
+(path/net 1.5 vs 1.4) and parks ~1 mm further from center, which on knife-edge
+scenarios means popping out of the 10 mm ball more often — each pop a lost
+bonus step.
+
+### The crossover, measured
+
+Both 400k runs saved a checkpoint every 25k steps, so the sample-efficiency
+claim can be read off deployed policies instead of training curves:
+`scripts/sweep_reacher_checkpoints.py` evaluates every checkpoint greedily on
+the 120 frozen scenarios (figure: `docs/reference/reacher_crossover.png`; the
+sweep CSV is gitignored and regenerates in ~10 min).
+
+| steps | residual | vanilla | | steps | residual | vanilla |
+| --- | --- | --- | --- | --- | --- | --- |
+| 25k | **51**/120 | 5/120 | | 150k | 107/120 | **112**/120 |
+| 50k | **66**/120 | 29/120 | | 200k | 113/120 | 114/120 |
+| 75k | **97**/120 | 36/120 | | 275k | 117/120 | **120**/120 |
+| 100k | **98**/120 | 87/120 | | 400k | 117/120 | **120**/120 |
+
+The figure's panel C plots the per-checkpoint difference directly: **+51 pp at
+its widest (75k)**, sign flip between 125k and 150k, and never outside ±8 pp
+after that.
+
+Three measured claims replace the asserted one:
+
+1. **The head start is worth ~130–150k steps.** The residual dominates at every
+   checkpoint through 125k (97 vs 36 at 75k is the widest gap); vanilla
+   overtakes at 150k and the two are inside each other's intervals after.
+   Vanilla needs ~100k steps to catch the frozen clone (82/120) and ~125–150k
+   to reach expert level. Precision tells the same story: the residual's
+   median final distance is under the 10 mm tolerance by 75k, vanilla's by
+   ~110k, and vanilla is the more precise arm from ~150k on.
+2. **The zero-init "floor" is not a floor.** At 25k the residual scores
+   51/120 — far *below* the clone it wraps — and only recovers the clone's
+   level around 75k. Early SAC exploration degrades the base before improving
+   it (the same effect as retraction 8's 50k reading: 66/120 here against
+   65/120 then). A deployment that counts on "never worse than the baseline"
+   during training does not get it from this setup; what it gets is "far
+   better than learning from scratch."
+3. **The zero-training point is the clone itself** — the pipeline's real
+   pitch is that it starts at 82/120 having spent zero environment steps,
+   where vanilla starts at random. The honest statement of the advantage is
+   therefore budget-shaped: below ~150k environment steps the pipeline's best
+   policy wins; above, vanilla does.
+
+## How DAgger solves the imitation-learning problem
 
 This is the fix that made the clone usable, so it is worth being precise about.
+
+The problem in one sentence: the clone was trained to answer *"what does the
+expert do at the states the expert visits?"*, but at deployment it has to
+answer *"what would the expert do at the states **I** visit?"* — and those are
+different states, because the clone's own small errors steer it somewhere the
+expert never went. The fix in one sentence: let the **student drive**, query
+the expert for labels **at the student's states**, and retrain on the union —
+so the training distribution becomes the deployment distribution.
 
 ### The problem it solves
 
@@ -77,7 +187,9 @@ Measured directly here, rolling the same start states two ways:
 
 **2.75x.** That is the whole diagnosis — and every dataset collected before DAgger
 ran the expert and labelled with the expert, so the clone's own states appeared in
-training data exactly never.
+training data exactly never. No amount of extra expert-driven data can fix that,
+because more of it lands on the same wrong distribution — which is why every
+off-policy intervention in the exclusion table below failed.
 
 ### The loop
 
@@ -167,6 +279,14 @@ inside an RL loop; the clone exists to amortize it into a forward pass.
 `reach_bonus` is **1.0**, not the unicycle's 100: without termination the bonus is
 paid on every held step, so it *is* the station-keeping reward, and at 100 it would
 swamp the distance term ~1000x.
+
+### On the 400k extension
+
+- **Continuing the 200k checkpoints instead of retraining.** The train scripts
+  build a fresh model per run; adding resume for a 20-minute saving wasn't
+  worth the code. The 400k runs are fresh same-seed runs, not continuations.
+- **Comparing against the original 200k CSV as-is.** Rejected once the
+  Select-DPC row moved 89 → 96; that difference is code drift, not learning.
 
 ## Outcome — what was tried before DAgger
 
@@ -281,8 +401,9 @@ measured.
   of journey 12's goals were impossible. Consistent with, not identical to.
 - **"The drift is not the QP's fault."** At 50k, vanilla drifted 1.9x with no QP
   anywhere, which looked like it falsified journey 12's mechanism. At 200k both RL
-  rows beat the expert's drift (1.7–1.8x against 2.2x), which is what journey 12
-  predicted a fix would look like. The 50k reading is withdrawn.
+  rows beat the expert's drift, and at 400k the residual holds 1.4x against the
+  expert's 2.3x — which is what journey 12 predicted a fix would look like. The
+  50k reading is withdrawn.
 - **A test that could never fail.** `test_never_terminates_on_reach` set the goal
   60 mm from the held tip against a 10 mm tolerance, so `reached` never fired.
   Fixed to 5 mm with an `ever_reached` assertion, verified by injecting the
@@ -290,33 +411,45 @@ measured.
 
 ## Caveats
 
-- **One seed per policy**, one `residual_frac`, one `reach_bonus`. None swept.
+- **One seed per policy**, one `residual_frac`, one `reach_bonus`. None swept, and
+  the 200k → 400k deltas ride on single runs. The paired McNemar tests carry the
+  claims, not the point estimates.
 - **The DAgger clone imitates the *memoryless* expert**, so the `Select-DPC` row is
   built with `carry_prediction=False` to match. Comparing it against the carried
   variant would score the clone against a controller it never imitated.
-- Wilson intervals on the two 113/120 rows overlap almost entirely; the paired
-  McNemar tests carry the claims, not the point estimates.
+- The Wilson intervals of 117/120 and 120/120 overlap; "vanilla wins reach" is a
+  3-scenario difference. "Vanilla holds longer" (75 vs 37 paired) and the distance
+  medians are the load-bearing comparisons.
+- The crossover sweep is one training run per arm sliced at 16 checkpoints, not
+  16 independent runs — adjacent points share history, so the curve's noise
+  (residual oscillating 110–120 after 200k, vanilla's 119 blip at 300k) is
+  autocorrelated, and the ~150k crossover point carries single-seed
+  uncertainty.
 - `path/net` for the `random` row is a median over 118, not 120: two scenarios made
   no progress, so `eff` is NaN there by design.
 - **The invariant tests skip on a clean checkout.** `data/` is gitignored, so the
   bit-for-bit zero-residual test and both zero-init tests `pytest.skip` elsewhere
-  and the suite still reports green.
+  and the suite still reports green. The training monitors behind the return
+  figure live there too; both 400k runs saved 25k-step checkpoints
+  (`data/reacher_res_ckpt_400k/`, `data/reacher_van_ckpt_400k/`).
 - Observation normalization in `ResidualSelectEnv` is min-max against declared
   bounds and the live channels are compressed ~18x relative to the widest; untested
   as a factor now that the residual works.
 
 ## Next
 
-1. **Sweep DAgger rounds and episodes-per-round.** Three rounds of 100 was the
+1. **Close the verdict with a written decision.** The crossover is measured:
+   the pipeline wins below ~150k environment steps and loses above. Either
+   retire it to "use when interaction is expensive or unsafe" — with the
+   caveat that early residual training dips below the frozen clone, so the
+   safe deployment during that window is the clone itself — or drop it from
+   the Panda plan entirely.
+2. **Sweep DAgger rounds and episodes-per-round.** Three rounds of 100 was the
    first thing tried and it worked; the knee is unmeasured, and a 3-episode smoke
    test already moved the gate.
-2. **Re-run the residual on the one-hot fixed-anchor clone.** DAgger and the
+3. **Re-run the residual on the one-hot fixed-anchor clone.** DAgger and the
    one-hot were never combined — the one-hot gave the best representation, DAgger
    fixes the distribution, and they address different halves of the problem.
-3. **Decide whether the pipeline earns its complexity.** Two systems now show
-   vanilla RL matching it. The zero-init floor is the remaining argument, and it is
-   worth measuring rather than asserting: compare early-training reach rates, where
-   a residual should be far ahead.
 4. **The Panda still needs on-policy collection** ([12](12-select-dpc.md) item 4).
    `rl/` is now the shared package that would serve it, and DAgger is exactly the
    on-policy mechanism that entry asked for.
