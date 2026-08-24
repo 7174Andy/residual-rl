@@ -93,7 +93,8 @@ class SelectDPC(DeePC):
     """
 
     def __init__(self, bank: dict, *args, n_cols: int = 300, n_max: int = 3,
-                 tol: float = 1e-3, scale: np.ndarray | None = None, **kwargs):
+                 tol: float = 1e-3, scale: np.ndarray | None = None,
+                 carry_prediction: bool = True, **kwargs):
         total = bank["Up"].shape[1]
         if not 1 <= n_cols <= total:
             raise ValueError(f"n_cols must be in [1, {total}]; got {n_cols}")
@@ -104,6 +105,21 @@ class SelectDPC(DeePC):
         self.n_max = int(n_max)
         self.tol = float(tol)
         self.scale = scale
+        # Algorithm 1 selects against the PREVIOUS step's prediction, which makes
+        # the controller recurrent: its action depends on the whole episode
+        # history, not on the last T_ini steps. That is fine for control and fatal
+        # for behavioral cloning -- measured, from identical
+        # `(u_ini, y_ini, y_current, y_ref)` the carried state moves the action by
+        # a median 0.244, which is 0.81x the action's own magnitude and up to the
+        # full width of the input box. No feedforward clone over that window can
+        # fit a label that its inputs do not determine.
+        #
+        # `carry_prediction=False` clears it each step, so `act` becomes a pure
+        # function of the past window and the reference. Costs about one reach in
+        # forty on Reacher (30/40 against 31/40, paired coin-flip) -- consistent
+        # with journey 12's finding that n_max=1's gain comes from SELECTING the
+        # right data rather than from Algorithm 1's iteration.
+        self.carry_prediction = bool(carry_prediction)
         self._tau_prev: np.ndarray | None = None
         # Diagnostics: how many iterations ran, and how concentrated the pick was.
         self.last_iters: int = 0
@@ -130,6 +146,8 @@ class SelectDPC(DeePC):
 
     def act(self, y_current: np.ndarray, y_ref: np.ndarray) -> np.ndarray:
         y_current = np.asarray(y_current, dtype=np.float64)
+        if not self.carry_prediction:
+            self._tau_prev = None
         tau = self._tau_prev if self._tau_prev is not None else self._warm_tau(y_current)
         u_buf, y_buf = self._u_buf.copy(), self._y_buf.copy()
     

@@ -25,7 +25,8 @@ import numpy as np
 from core.deepc import DeePC
 from core.hankel import build_hankel
 from reacher.model import (
-    NQ_ARM, config_distance, fingertip, frame_skip, set_state, step_torque, wrap,
+    NQ_ARM, config_distance, fingertip, frame_skip, safe_box, set_state,
+    step_torque, wrap,
 )
 
 OU_THETA = 0.85
@@ -48,6 +49,20 @@ def outputs(q_traj: np.ndarray, tip_traj: np.ndarray) -> np.ndarray:
 def y_ref_for(goal: np.ndarray) -> np.ndarray:
     """`y_ref = [0, 0, gx, gy]`. The joint block is unweighted, so its value is free."""
     return np.concatenate([np.zeros(NQ_ARM), np.asarray(goal, dtype=np.float64)[:2]])
+
+
+def anchor_grid(model, n0: int, n1: int) -> np.ndarray:
+    """Anchors on a (q0, q1) grid.
+
+    A grid, not k-medoids: in 2-D a uniform grid is near-optimal for worst-case
+    coverage, and the Panda work established there is no cluster structure to
+    discover anyway (silhouette flat at 0.23-0.28 for every K). `q0` is periodic,
+    so its samples exclude the duplicate endpoint.
+    """
+    lo, hi = safe_box(model)
+    q0 = np.linspace(-np.pi, np.pi, n0, endpoint=False)
+    q1 = np.linspace(lo[1], hi[1], n1)
+    return np.array([[a, b] for a in q0 for b in q1])
 
 
 def collect_anchor(model, data, anchor, T: int, rng, theta: float = OU_THETA,
