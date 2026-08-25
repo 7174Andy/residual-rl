@@ -82,7 +82,11 @@ def main() -> None:
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--scenarios", default="data/reacher_scenarios_v1.npz")
     p.add_argument("--clone", default="data/dagger_clone_r3.pt")
-    p.add_argument("--residual", default="data/reacher_residual_dagger_200k.zip")
+    p.add_argument("--residual",
+                   default="data/reacher_ckpt_seeds/resf2_s0/ckpt_200000_steps.zip")
+    p.add_argument("--residual-frac", type=float, default=2.0,
+                   help="eval-env authority; must match the frac the residual "
+                        "checkpoint was trained with (journey 13's are 2.0)")
     p.add_argument("--vanilla", default="data/reacher_vanilla_200k.zip")
     p.add_argument("--algo", default="sac")
     p.add_argument("--episodes", type=int, default=120)
@@ -122,7 +126,8 @@ def main() -> None:
         rows[label] = [run_episode(env, pol, q0, g) for q0, g in eps]
     env.close()
 
-    res_env = ResidualSelectEnv(clone_path=args.clone)
+    res_env = ResidualSelectEnv(clone_path=args.clone,
+                                residual_frac=args.residual_frac)
     res_model = load_policy(args.residual, algo=args.algo, device="cpu")
     rows["clone + residual"] = [_rollout_residual(res_env, res_model, q0, g)
                                 for q0, g in eps]

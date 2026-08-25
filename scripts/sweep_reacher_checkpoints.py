@@ -100,7 +100,8 @@ def sweep(args) -> tuple[dict, int]:
                 1e3 * float(np.median([x["final"] for x in rows])))
 
     agg = defaultdict(list)
-    res_env = ResidualSelectEnv(clone_path=args.clone)
+    res_env = ResidualSelectEnv(clone_path=args.clone,
+                                residual_frac=args.residual_frac)
     for steps, path in checkpoints(args.residual_ckpts):
         model = load_policy(path, algo=args.algo, device="cpu")
         agg["residual"].append((steps, *agg_of(eval_residual(res_env, model,
@@ -121,9 +122,13 @@ def main() -> None:
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--scenarios", default="data/reacher_scenarios_v1.npz")
     p.add_argument("--clone", default="data/dagger_clone_r3.pt")
-    p.add_argument("--residual-ckpts", default="data/reacher_res_ckpt_400k")
+    p.add_argument("--residual-ckpts",
+                   default="data/reacher_ckpt_seeds/resf2_s0")
     p.add_argument("--vanilla-ckpts", default="data/reacher_van_ckpt_400k")
     p.add_argument("--algo", default="sac")
+    p.add_argument("--residual-frac", type=float, default=2.0,
+                   help="eval-env authority; must match the frac the residual "
+                        "checkpoints were trained with (journey 13's are 2.0)")
     p.add_argument("--reference-csv",
                    default="docs/reference/reacher_residual_200k_rerun.csv",
                    help="eval CSV supplying the flat Select-DPC / "
