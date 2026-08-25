@@ -15,6 +15,7 @@ dependencies = [
     "pygame>=2.6.1",
     "robot-descriptions>=3.1.0",
     "stable-baselines3>=2.9.0",
+    "tensorboard>=2.21.0",
     "torch>=2.12.0",
     "wandb>=0.28.2",
 ]

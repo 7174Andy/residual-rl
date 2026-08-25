@@ -71,12 +71,13 @@ def main() -> None:
 
     import wandb
 
-    def upload_monitor(run, mon):
+    def upload_monitor(run, mon, prefix):
         steps = 0
         for ep in episodes(mon):
             steps += int(float(ep["l"]))
-            run.log({"episode_return": float(ep["r"]),
-                     "episode_length": int(float(ep["l"]))}, step=steps)
+            run.log({f"{prefix}/episode_return": float(ep["r"]),
+                     f"{prefix}/episode_length": int(float(ep["l"]))},
+                    step=steps)
         return steps
 
     if "unicycle" in args.systems:
@@ -87,7 +88,7 @@ def main() -> None:
             run = wandb.init(project=args.project, name=name, tags=tags,
                              group="unicycle-sweeps-backfill", reinit=True,
                              config={"source": "backfill", "monitor": mon})
-            steps = upload_monitor(run, mon)
+            steps = upload_monitor(run, mon, "unicycle")
             run.finish()
             print(f"backfilled {name}: {steps} steps")
         if os.path.exists(UNICYCLE_SWEEP_CSV):
@@ -112,11 +113,7 @@ def main() -> None:
         run = wandb.init(project=args.project, name=name, tags=tags,
                          group="reacher-5seed-backfill", reinit=True,
                          config={"source": "backfill", "monitor": mon})
-        steps = 0
-        for ep in episodes(mon):
-            steps += int(float(ep["l"]))
-            run.log({"episode_return": float(ep["r"]),
-                     "episode_length": int(float(ep["l"]))}, step=steps)
+        steps = upload_monitor(run, mon, "reacher")
         if sweep and os.path.exists(sweep):
             with open(sweep) as f:
                 next(f)

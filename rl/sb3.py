@@ -16,12 +16,18 @@ from torch import nn
 _ALGOS = {"td3": TD3, "sac": SAC}
 
 
-def build_model(algo: str, venv, learning_rate, device, seed, verbose, action_noise_sigma):
-    """Construct the SB3 model. TD3 gets Gaussian action noise; SAC explores via entropy."""
+def build_model(algo: str, venv, learning_rate, device, seed, verbose, action_noise_sigma,
+                tensorboard_log: str | None = None):
+    """Construct the SB3 model. TD3 gets Gaussian action noise; SAC explores via entropy.
+
+    ``tensorboard_log`` makes SB3 write its internal scalars (losses, entropy
+    coef) to tensorboard — set it when a W&B run has ``sync_tensorboard=True``.
+    """
     Algo = _ALGOS[algo]
     kwargs = dict(
         policy="MlpPolicy", env=venv, learning_rate=learning_rate,
         policy_kwargs=dict(net_arch=[256, 256]), device=device, seed=seed, verbose=verbose,
+        tensorboard_log=tensorboard_log,
     )
     if algo == "td3":
         n_actions = int(venv.action_space.shape[0])

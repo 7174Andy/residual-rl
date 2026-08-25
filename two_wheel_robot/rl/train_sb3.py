@@ -94,16 +94,17 @@ def train_residual(
                    config={"algo": algo, "steps": total_timesteps, "seed": seed,
                            "residual_frac": residual_frac, "lr": learning_rate,
                            "noise_sigma": action_noise_sigma},
-                   tags=["unicycle", "residual", algo])
+                   tags=["unicycle", "residual", algo], sync_tensorboard=True)
     venv = make_residual_env(clone_path, libraries_path, residual_frac, device=device,
                              monitor_path=monitor_path)
     model = build_model(algo, venv, learning_rate, device, seed, verbose,
-                         action_noise_sigma)
+                         action_noise_sigma,
+                         tensorboard_log="data/tb" if run else None)
     zero_init_actor(model)
     try:
         model.learn(total_timesteps=total_timesteps, progress_bar=False,
                     callback=callbacks(ckpt_cb(checkpoint_dir, checkpoint_freq),
-                                       sb3_callback(run)))
+                                       sb3_callback(run, prefix="unicycle")))
         model.save(out_path)
     finally:
         venv.close()
@@ -137,14 +138,15 @@ def train_vanilla(
     run = init_run(wandb_project, name=out_path.rsplit("/", 1)[-1],
                    config={"algo": algo, "steps": total_timesteps, "seed": seed,
                            "lr": learning_rate, "noise_sigma": action_noise_sigma},
-                   tags=["unicycle", "vanilla", algo])
+                   tags=["unicycle", "vanilla", algo], sync_tensorboard=True)
     venv = make_vanilla_env(libraries_path, monitor_path=monitor_path)
     model = build_model(algo, venv, learning_rate, device, seed, verbose,
-                         action_noise_sigma)
+                         action_noise_sigma,
+                         tensorboard_log="data/tb" if run else None)
     try:
         model.learn(total_timesteps=total_timesteps, progress_bar=False,
                     callback=callbacks(ckpt_cb(checkpoint_dir, checkpoint_freq),
-                                       sb3_callback(run)))
+                                       sb3_callback(run, prefix="unicycle")))
         model.save(out_path)
     finally:
         venv.close()

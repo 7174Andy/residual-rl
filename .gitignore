@@ -21,3 +21,6 @@ docs/superpowers
 
 # CSV files for plotting
 *.csv
+
+# WandB
+wandb/

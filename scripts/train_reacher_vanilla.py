@@ -42,16 +42,18 @@ def main() -> None:
 
     algo = check_algo(args.algo)
     run = init_run(args.wandb_project, name=os.path.basename(args.out),
-                   config=vars(args), tags=["reacher", "vanilla", algo])
+                   config=vars(args), tags=["reacher", "vanilla", algo],
+                   sync_tensorboard=True)
     venv = DummyVecEnv([lambda: Monitor(gym.make("ReacherGoal-v0"),
                                         filename=args.monitor)])
     model = build_model(algo, venv, args.lr, args.device, args.seed, 1,
-                        args.action_noise_sigma)
+                        args.action_noise_sigma,
+                        tensorboard_log="data/tb" if run else None)
     try:
         model.learn(total_timesteps=args.steps, progress_bar=False,
                     callback=callbacks(
                         ckpt_cb(args.checkpoint_dir, args.checkpoint_freq),
-                        sb3_callback(run)))
+                        sb3_callback(run, prefix="reacher")))
         model.save(args.out)
     finally:
         venv.close()
