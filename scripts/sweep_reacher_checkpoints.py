@@ -133,6 +133,8 @@ def main() -> None:
                    default="docs/reference/reacher_residual_200k_rerun.csv",
                    help="eval CSV supplying the flat Select-DPC / "
                         "clone reference lines")
+    p.add_argument("--wandb-project", default=None,
+                   help="log the sweep table + figure to Weights & Biases")
     p.add_argument("--from-csv", default=None,
                    help="redraw the figure from a previous run's sweep CSV "
                         "instead of re-evaluating the checkpoints")
@@ -254,6 +256,20 @@ def main() -> None:
                 for steps_, k, b, f in agg[arm]:
                     fh.write(f"{arm},{steps_},{k},{n},{b:.2f},{f:.2f}\n")
         print(f"wrote {out_csv}")
+
+    if args.wandb_project:
+        from rl.wb import finish, init_run, log_image, log_table
+        run = init_run(args.wandb_project,
+                       name=os.path.basename(args.out).replace(".png", ""),
+                       config=vars(args), tags=["reacher", "sweep"])
+        log_table(run, "checkpoint_sweep",
+                  ["arm", "steps", "reached", "n", "best_med_mm",
+                   "final_med_mm"],
+                  [[arm, s_, k_, n, b_, f_]
+                   for arm in ("residual", "vanilla")
+                   for s_, k_, b_, f_ in agg[arm]])
+        log_image(run, "crossover", args.out)
+        finish(run)
 
 
 if __name__ == "__main__":

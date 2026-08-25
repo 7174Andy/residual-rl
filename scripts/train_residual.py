@@ -27,6 +27,8 @@ def main() -> int:
                    help="also snapshot the policy every --checkpoint-freq steps "
                         "(feed to scripts/sweep_checkpoints.py)")
     p.add_argument("--checkpoint-freq", type=int, default=25_000)
+    p.add_argument("--wandb-project", default=None,
+                   help="log this run to Weights & Biases (opt-in)")
     args = p.parse_args()
 
     train_residual(
@@ -35,6 +37,7 @@ def main() -> int:
         action_noise_sigma=args.noise_sigma, learning_rate=args.lr,
         device=args.device, seed=args.seed, verbose=1, monitor_path=args.monitor_out,
         checkpoint_dir=args.checkpoint_dir, checkpoint_freq=args.checkpoint_freq,
+        wandb_project=args.wandb_project,
     )
     print(f"saved -> {args.out}")
     return 0

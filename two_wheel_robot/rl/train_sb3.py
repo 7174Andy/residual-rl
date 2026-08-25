@@ -14,6 +14,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 from rl.sb3 import build_model, check_algo, ckpt_cb, load_policy, zero_init_actor
+from rl.wb import callbacks, finish, init_run, sb3_callback
 from two_wheel_robot.rl.deepc_setup import DEFAULT_LIBRARIES, canonical_action_bounds
 from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
 from two_wheel_robot.rl.wrappers import vanilla_rl_env
@@ -78,6 +79,7 @@ def train_residual(
     monitor_path: str | None = None,
     checkpoint_dir: str | None = None,
     checkpoint_freq: int = 25_000,
+    wandb_project: str | None = None,
 ):
     """Train and save the RL residual (algo='td3' default, 'sac' fallback). Returns the model.
 
@@ -85,8 +87,14 @@ def train_residual(
     ``<monitor_path>.monitor.csv`` for the training-return plot.
     ``checkpoint_dir`` (optional): also snapshot the policy every ``checkpoint_freq``
     steps, for the reach-rate-vs-steps sweep.
+    ``wandb_project`` (optional): stream per-episode returns to Weights & Biases.
     """
     algo = check_algo(algo)
+    run = init_run(wandb_project, name=out_path.rsplit("/", 1)[-1],
+                   config={"algo": algo, "steps": total_timesteps, "seed": seed,
+                           "residual_frac": residual_frac, "lr": learning_rate,
+                           "noise_sigma": action_noise_sigma},
+                   tags=["unicycle", "residual", algo])
     venv = make_residual_env(clone_path, libraries_path, residual_frac, device=device,
                              monitor_path=monitor_path)
     model = build_model(algo, venv, learning_rate, device, seed, verbose,
@@ -94,10 +102,12 @@ def train_residual(
     zero_init_actor(model)
     try:
         model.learn(total_timesteps=total_timesteps, progress_bar=False,
-                    callback=ckpt_cb(checkpoint_dir, checkpoint_freq))
+                    callback=callbacks(ckpt_cb(checkpoint_dir, checkpoint_freq),
+                                       sb3_callback(run)))
         model.save(out_path)
     finally:
         venv.close()
+        finish(run)
     return model
 
 
@@ -114,6 +124,7 @@ def train_vanilla(
     monitor_path: str | None = None,
     checkpoint_dir: str | None = None,
     checkpoint_freq: int = 25_000,
+    wandb_project: str | None = None,
 ):
     """Train the from-scratch RL baseline (no DeePC, no clone). Returns the model.
 
@@ -123,13 +134,19 @@ def train_vanilla(
     actor has nothing to stay close to.
     """
     algo = check_algo(algo)
+    run = init_run(wandb_project, name=out_path.rsplit("/", 1)[-1],
+                   config={"algo": algo, "steps": total_timesteps, "seed": seed,
+                           "lr": learning_rate, "noise_sigma": action_noise_sigma},
+                   tags=["unicycle", "vanilla", algo])
     venv = make_vanilla_env(libraries_path, monitor_path=monitor_path)
     model = build_model(algo, venv, learning_rate, device, seed, verbose,
                          action_noise_sigma)
     try:
         model.learn(total_timesteps=total_timesteps, progress_bar=False,
-                    callback=ckpt_cb(checkpoint_dir, checkpoint_freq))
+                    callback=callbacks(ckpt_cb(checkpoint_dir, checkpoint_freq),
+                                       sb3_callback(run)))
         model.save(out_path)
     finally:
         venv.close()
+        finish(run)
     return model

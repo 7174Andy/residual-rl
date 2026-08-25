@@ -91,6 +91,8 @@ def main() -> None:
     p.add_argument("--algo", default="sac")
     p.add_argument("--episodes", type=int, default=120)
     p.add_argument("--out", default="docs/reference/reacher_residual.png")
+    p.add_argument("--wandb-project", default=None,
+                   help="log the results table + figure to Weights & Biases")
     p.add_argument("--memoryless", action="store_true",
                    help="build the Select-DPC row with carry_prediction=False. "
                         "MUST match the expert the clone was trained against, or "
@@ -225,6 +227,20 @@ def main() -> None:
                          f"{x['final']:.5f},{x['path']:.5f},{x['eff']:.4f},"
                          f"{int(x['reached'])}\n")
     print(f"wrote {csv}")
+
+    if args.wandb_project:
+        from rl.wb import finish, init_run, log_image, log_table
+        run = init_run(args.wandb_project,
+                       name=os.path.basename(args.out).replace(".png", ""),
+                       config=vars(args), tags=["reacher", "eval"])
+        log_table(run, "results",
+                  ["controller", "reached", "n", "best_med_mm", "final_med_mm"],
+                  [[label, sum(x["reached"] for x in rows[label]), len(rows[label]),
+                    1e3 * float(np.median([x["best"] for x in rows[label]])),
+                    1e3 * float(np.median([x["final"] for x in rows[label]]))]
+                   for label in order])
+        log_image(run, "figure", args.out)
+        finish(run)
 
 
 if __name__ == "__main__":

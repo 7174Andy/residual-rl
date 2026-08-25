@@ -12,6 +12,7 @@ No zero-init: a from-scratch actor has no baseline to stay close to.
 from __future__ import annotations
 
 import argparse
+import os
 
 import gymnasium as gym
 from stable_baselines3.common.monitor import Monitor
@@ -19,6 +20,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 
 import reacher  # noqa: F401  registers the Gym ID
 from rl.sb3 import build_model, check_algo, ckpt_cb
+from rl.wb import callbacks, finish, init_run, sb3_callback
 
 
 def main() -> None:
@@ -34,19 +36,26 @@ def main() -> None:
     p.add_argument("--checkpoint-freq", type=int, default=25_000)
     p.add_argument("--device", default="cpu")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--wandb-project", default=None,
+                   help="log this run to Weights & Biases (opt-in)")
     args = p.parse_args()
 
     algo = check_algo(args.algo)
+    run = init_run(args.wandb_project, name=os.path.basename(args.out),
+                   config=vars(args), tags=["reacher", "vanilla", algo])
     venv = DummyVecEnv([lambda: Monitor(gym.make("ReacherGoal-v0"),
                                         filename=args.monitor)])
     model = build_model(algo, venv, args.lr, args.device, args.seed, 1,
                         args.action_noise_sigma)
     try:
         model.learn(total_timesteps=args.steps, progress_bar=False,
-                    callback=ckpt_cb(args.checkpoint_dir, args.checkpoint_freq))
+                    callback=callbacks(
+                        ckpt_cb(args.checkpoint_dir, args.checkpoint_freq),
+                        sb3_callback(run)))
         model.save(args.out)
     finally:
         venv.close()
+        finish(run)
     print(f"wrote {args.out}")
 
 

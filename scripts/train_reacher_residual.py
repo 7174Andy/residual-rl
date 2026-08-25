@@ -11,12 +11,14 @@ and `tests/test_reacher_residual_env.py` pins that invariant.
 from __future__ import annotations
 
 import argparse
+import os
 
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 from reacher.residual_env import ResidualSelectEnv
 from rl.sb3 import build_model, check_algo, ckpt_cb, zero_init_actor
+from rl.wb import callbacks, finish, init_run, sb3_callback
 
 
 def main() -> None:
@@ -34,9 +36,13 @@ def main() -> None:
     p.add_argument("--checkpoint-freq", type=int, default=25_000)
     p.add_argument("--device", default="cpu")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--wandb-project", default=None,
+                   help="log this run to Weights & Biases (opt-in)")
     args = p.parse_args()
 
     algo = check_algo(args.algo)
+    run = init_run(args.wandb_project, name=os.path.basename(args.out),
+                   config=vars(args), tags=["reacher", "residual", algo])
 
     def _factory():
         return Monitor(
@@ -50,10 +56,13 @@ def main() -> None:
     zero_init_actor(model)
     try:
         model.learn(total_timesteps=args.steps, progress_bar=False,
-                    callback=ckpt_cb(args.checkpoint_dir, args.checkpoint_freq))
+                    callback=callbacks(
+                        ckpt_cb(args.checkpoint_dir, args.checkpoint_freq),
+                        sb3_callback(run)))
         model.save(args.out)
     finally:
         venv.close()
+        finish(run)
     print(f"wrote {args.out}")
 
 

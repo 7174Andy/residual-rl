@@ -1,0 +1,77 @@
+"""One-off: upload this week's reacher runs to Weights & Biases.
+
+Each training run becomes a W&B run: the Monitor CSV supplies the per-episode
+return curve (x = cumulative env steps), and the matching checkpoint-sweep CSV
+(when one exists) is attached as a table. Requires `wandb login` first; set
+WANDB_MODE=offline to smoke-test without an account (sync later).
+
+    uv run python scripts/backfill_wandb.py --project two-wheel-exp
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import os
+
+D = "data/reacher_ckpt_seeds"
+
+# (run name, monitor csv, sweep csv or None, sweep arm filter, tags)
+MANIFEST = [
+    *[(f"res_f1_s{i}", f"{D}/res_s{i}.monitor.csv",
+       f"{D}/reacher_crossover_s{i}.csv", "residual",
+       ["reacher", "residual", "frac1.0", f"seed{i}"]) for i in (1, 2, 3, 4)],
+    *[(f"van_s{i}", f"{D}/van_s{i}.monitor.csv",
+       f"{D}/reacher_crossover_s{i}.csv", "vanilla",
+       ["reacher", "vanilla", f"seed{i}"]) for i in (1, 2, 3, 4)],
+    *[(f"res_f2_s{i}", f"{D}/resf2_s{i}.monitor.csv",
+       f"{D}/resf2_s{i}.csv", "residual_f2",
+       ["reacher", "residual", "frac2.0", f"seed{i}"]) for i in range(5)],
+    ("res_f1_s0", "data/reacher_residual_400k.monitor.csv", None, None,
+     ["reacher", "residual", "frac1.0", "seed0"]),
+    ("van_s0", "data/reacher_vanilla_400k.monitor.csv",
+     "docs/reference/reacher_crossover.csv", "vanilla",
+     ["reacher", "vanilla", "seed0"]),
+]
+
+
+def episodes(monitor_csv):
+    with open(monitor_csv) as f:
+        next(f)  # json meta line
+        yield from csv.DictReader(f)
+
+
+def main() -> None:
+    p = argparse.ArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--project", default="two-wheel-exp")
+    args = p.parse_args()
+
+    import wandb
+
+    for name, mon, sweep, arm, tags in MANIFEST:
+        if not os.path.exists(mon):
+            print(f"skip {name}: {mon} missing")
+            continue
+        run = wandb.init(project=args.project, name=name, tags=tags,
+                         group="reacher-5seed-backfill", reinit=True,
+                         config={"source": "backfill", "monitor": mon})
+        steps = 0
+        for ep in episodes(mon):
+            steps += int(float(ep["l"]))
+            run.log({"episode_return": float(ep["r"]),
+                     "episode_length": int(float(ep["l"]))}, step=steps)
+        if sweep and os.path.exists(sweep):
+            with open(sweep) as f:
+                next(f)
+                rows = [[r["steps"], r["reached"], r["n"], r["best_med_mm"],
+                         r["final_med_mm"]]
+                        for r in csv.DictReader(f) if r["arm"] == arm]
+            run.log({"checkpoint_sweep": wandb.Table(
+                columns=["steps", "reached", "n", "best_med_mm",
+                         "final_med_mm"], data=rows)})
+        run.finish()
+        print(f"backfilled {name}: {steps} steps")
+
+
+if __name__ == "__main__":
+    main()
