@@ -30,9 +30,15 @@ def sb3_callback(run):
             for info in self.locals.get("infos", []):
                 ep = info.get("episode")
                 if ep:
-                    run.log({"episode_return": float(ep["r"]),
-                             "episode_length": int(ep["l"])},
-                            step=self.num_timesteps)
+                    row = {"episode_return": float(ep["r"]),
+                           "episode_length": int(ep["l"])}
+                    # end-of-episode task metrics both envs expose in info
+                    dist = info.get("dist", info.get("distance"))
+                    if dist is not None:
+                        row["final_dist"] = float(dist)
+                    if "reached" in info:
+                        row["reached"] = int(bool(info["reached"]))
+                    run.log(row, step=self.num_timesteps)
             return True
 
     return _WB()
