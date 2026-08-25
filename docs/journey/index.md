@@ -18,6 +18,7 @@ Entries are roughly chronological, but each one stands alone — you can read th
 | [11](11-panda-anchors.md)        | Panda anchors — the controller works, the libraries don't reach   |
 | [12](12-select-dpc.md)           | Select-DPC — and a 2-DoF arm to test it on                        |
 | [13](13-reacher-residual.md)     | Residual RL on Reacher — DAgger fixes the clone, 400k settles it |
+| [14](14-clone-coverage.md)       | Clone coverage, measured — BC's failure follows the data, not the system |
 
 ## Conventions
 

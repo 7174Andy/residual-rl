@@ -74,6 +74,12 @@ actually goes", so the set is mixed:
 | on-policy  | 15,023 | 42.9 % | the distribution the clone will actually see        |
 | degenerate | 4,976  | 14.2 % | frozen/constant-past stall states (the hard regime) |
 
+("on-policy" here means the *expert's* closed loop drives — DeePC-visited
+states, not clone-visited ones. [Journey 14](14-clone-coverage.md) later
+measured this mix as the load-bearing choice: trained on the expert-rollout
+slice alone, the same clone fails exactly like the reacher's pre-DAgger BC
+clone — disagreement 2.68x higher on its own states, closed loop 16/78.)
+
 The **degenerate** slice is deliberately over-represented: it is the `v`-collapse
 regime from [06](06-stop-at-goal.md), where the QP target is hardest to reproduce and
 where the downstream RL will do its work — so the clone must at least see it. Labels

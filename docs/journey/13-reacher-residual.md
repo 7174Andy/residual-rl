@@ -218,6 +218,12 @@ training data exactly never. No amount of extra expert-driven data can fix that,
 because more of it lands on the same wrong distribution — which is why every
 off-policy intervention in the exclusion table below failed.
 
+([Journey 14](14-clone-coverage.md) later reproduced this signature on the
+*unicycle* by ablation: trained on expert-rollout data alone, its clone's
+ratio is 2.68x and the closed loop halves — the failure follows the data,
+not the system. The unicycle's original clone escaped only because journey
+07's dataset mixed in broad synthetic coverage.)
+
 ### The loop
 
 Each round separates *who drives* from *who labels*:
