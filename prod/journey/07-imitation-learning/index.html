@@ -1944,6 +1944,11 @@ actually goes", so the set is mixed:</p>
 </tr>
 </tbody>
 </table>
+<p>("on-policy" here means the <em>expert's</em> closed loop drives — DeePC-visited
+states, not clone-visited ones. <a href="../14-clone-coverage/">Journey 14</a> later
+measured this mix as the load-bearing choice: trained on the expert-rollout
+slice alone, the same clone fails exactly like the reacher's pre-DAgger BC
+clone — disagreement 2.68x higher on its own states, closed loop 16/78.)</p>
 <p>The <strong>degenerate</strong> slice is deliberately over-represented: it is the <code>v</code>-collapse
 regime from <a href="../06-stop-at-goal/">06</a>, where the QP target is hardest to reproduce and
 where the downstream RL will do its work — so the clone must at least see it. Labels

@@ -2581,6 +2581,11 @@ ran the expert and labelled with the expert, so the clone's own states appeared 
 training data exactly never. No amount of extra expert-driven data can fix that,
 because more of it lands on the same wrong distribution — which is why every
 off-policy intervention in the exclusion table below failed.</p>
+<p>(<a href="../14-clone-coverage/">Journey 14</a> later reproduced this signature on the
+<em>unicycle</em> by ablation: trained on expert-rollout data alone, its clone's
+ratio is 2.68x and the closed loop halves — the failure follows the data,
+not the system. The unicycle's original clone escaped only because journey
+07's dataset mixed in broad synthetic coverage.)</p>
 <h3 id="the-loop">The loop<a class="headerlink" href="#the-loop" title="Permanent link">&para;</a></h3>
 <p>Each round separates <em>who drives</em> from <em>who labels</em>:</p>
 <table>
