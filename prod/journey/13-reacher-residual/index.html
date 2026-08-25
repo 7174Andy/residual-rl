@@ -2242,12 +2242,20 @@ below rather than dropped.</p>
 steps, where their training curves had visibly not plateaued, so both were
 retrained to <strong>400k</strong> (~20 minutes each) and re-evaluated. At the plateau:
 <strong>vanilla RL, with no DeePC anywhere in it, reaches 120/120 against the full
-pipeline's 117/120 and out-holds it in absolute terms.</strong> Journey 09 found the
-same on the unicycle. That is now two systems, measured at convergence — the
-pipeline is <strong>sound and unnecessary</strong> on this task. Its surviving advantage is
-the head start, now measured on deployed checkpoints: the residual dominates
-vanilla at every budget up to ~125k steps and vanilla overtakes at ~150k — but
-the "zero-init floor" is <strong>not a floor</strong> (see the crossover section).</p>
+pipeline's 119/120 and is the more precise arm (1.7 vs 2.4 mm final).</strong>
+Journey 09 found the same on the unicycle. That is now two systems, measured
+at convergence — the pipeline is <strong>sound and unnecessary</strong> on this task. Its
+surviving advantage is the head start, now measured on deployed checkpoints:
+the residual dominates vanilla at every budget through ~100k steps and the
+5-seed mean crossing sits between 125k and 150k — but the "zero-init floor"
+is <strong>not a floor</strong> (see the crossover section).</p>
+<p>All residual numbers in this entry are the <strong><code>--residual-frac 2.0</code></strong> retrain
+(2026-08-24). The original frac-1.0 runs were re-collected after a 5-seed
+control showed the narrower authority cost the residual reach and precision
+on every seed (400k pooled: 578/600 at 3.13 mm against frac 2.0's 589/600 at
+2.51 mm) — the unicycle's dead-zone lesson, measured again here. The frac-1.0
+numbers survive only in git history; the conclusions below did not flip with
+the fix, they narrowed.</p>
 <h2 id="the-result">The result<a class="headerlink" href="#the-result" title="Permanent link">&para;</a></h2>
 <p>120 held-out scenarios (<code>--seed 90000</code>, disjoint from every training stream), full
 horizon, early stopping <strong>off</strong> (<code>scripts/eval_reacher_residual.py</code>). Every row
@@ -2297,12 +2305,12 @@ with <code>scripts/eval_reacher_residual.py</code> (~13 min).</p>
 </tr>
 <tr>
 <td><strong>clone + residual</strong></td>
-<td>113/120</td>
-<td><strong>117/120 [93–99%]</strong></td>
-<td>2.0 mm</td>
-<td>2.8 mm</td>
+<td>117/120</td>
+<td><strong>119/120 [95–100%]</strong></td>
+<td>1.7 mm</td>
+<td>2.4 mm</td>
 <td><strong>1.4x</strong></td>
-<td>1.5</td>
+<td><strong>1.4</strong></td>
 </tr>
 <tr>
 <td><strong>vanilla RL</strong></td>
@@ -2325,7 +2333,7 @@ with <code>scripts/eval_reacher_residual.py</code> (~13 min).</p>
 </tbody>
 </table>
 <p>(<code>best</code>/<code>final</code>/drift columns are the 400k values for the RL rows; at 200k they
-were residual 3.1 → 5.4 mm at 1.8x, vanilla 1.9 → 3.2 mm at 1.7x.)</p>
+were residual 2.8 → 4.7 mm at 1.7x, vanilla 1.9 → 3.2 mm at 1.7x.)</p>
 <p>Paired against the clone (the residual's own baseline), at 400k:</p>
 <table>
 <thead>
@@ -2340,9 +2348,9 @@ were residual 3.1 → 5.4 mm at 1.8x, vanilla 1.9 → 3.2 mm at 1.7x.)</p>
 <tbody>
 <tr>
 <td>clone + residual</td>
-<td>38</td>
-<td>3</td>
-<td>94/120</td>
+<td>37</td>
+<td>0</td>
+<td>95/120</td>
 <td><code>p &lt; 0.001</code></td>
 </tr>
 <tr>
@@ -2356,7 +2364,7 @@ were residual 3.1 → 5.4 mm at 1.8x, vanilla 1.9 → 3.2 mm at 1.7x.)</p>
 </table>
 <p>Three things follow.</p>
 <ol>
-<li><strong>The pipeline works.</strong> The residual lifts its baseline 82 → 117/120 and
+<li><strong>The pipeline works.</strong> The residual lifts its baseline 82 → 119/120 and
    <strong>beats the expert it was cloned from</strong> (96/120). Journey 08's arc reproduces
    on a structurally different system.</li>
 <li><strong>The drift goal is met</strong> — the one thing <a href="../12-select-dpc/">journey 12</a> said
@@ -2364,11 +2372,11 @@ were residual 3.1 → 5.4 mm at 1.8x, vanilla 1.9 → 3.2 mm at 1.7x.)</p>
    1.4x for the residual against the expert's 2.3x and journey 12's 2.1–2.3x
    band. A policy paid on every step of a full horizon holds position better
    than a receding-horizon QP with no terminal term.</li>
-<li><strong>And vanilla wins outright</strong> — perfect reach, 1.1 against 2.0 mm <code>best</code>,
-   1.7 against 2.8 mm <code>final</code>, <code>path/net</code> 1.4 against 1.5.</li>
+<li><strong>And vanilla still wins, now narrowly</strong> — perfect reach, 1.1 against
+   1.7 mm <code>best</code>, 1.7 against 2.4 mm <code>final</code>, <code>path/net</code> tied at 1.4.</li>
 </ol>
 <p>Doubling training bought both arms real precision (the residual's drift fell
-1.8x → 1.4x; vanilla halved both distance medians), and the training curves say
+1.7x → 1.4x; vanilla halved both distance medians), and the training curves say
 why 200k was short: vanilla's return plateaus only around ~280k, and the
 residual is still creeping at 400k.</p>
 <h3 id="the-eval-drift-catch">The eval-drift catch<a class="headerlink" href="#the-eval-drift-catch" title="Permanent link">&para;</a></h3>
@@ -2376,8 +2384,9 @@ residual is still creeping at 400k.</p>
 its CSV is <strong>not comparable</strong> to any fresh run: under the current tree the
 deterministic Select-DPC row scores <strong>96/120 where that CSV recorded 89/120</strong> —
 same controller, same frozen scenarios. Two consecutive reruns agree with each
-other (96/120 twice), and the 200k RL rows reproduced exactly (113/120 both
-arms), so the table above is internally consistent.</p>
+other (96/120 twice), and the 200k RL rows of the frac-1.0 era reproduced
+exactly (113/120 both arms at the time), so the table above is internally
+consistent.</p>
 <p>The rule this buys: <strong>never compare eval CSVs written under different code
 states.</strong> Re-running the older policies under current code costs ~13 minutes
 (the QP rows dominate; the RL rows are milliseconds per episode) and turns an
@@ -2402,38 +2411,39 @@ scenarios and splits
 <tbody>
 <tr>
 <td>residual 400k</td>
-<td>33.5</td>
-<td>1.52</td>
-<td>35.0</td>
-<td>step 13</td>
-<td>0.012</td>
+<td>37.3</td>
+<td><strong>1.35</strong></td>
+<td>38.6</td>
+<td>step 12</td>
+<td>0.017</td>
 </tr>
 <tr>
 <td>vanilla 400k</td>
 <td><strong>38.1</strong></td>
-<td><strong>1.37</strong></td>
+<td>1.37</td>
 <td><strong>39.5</strong></td>
 <td>step 12</td>
 <td>0.010</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Almost the entire 4.6-point gap is the station-keeping bonus</strong> (4.5 more
-in-tolerance steps; the distance integral adds ~0.15 and control cost is
-noise). Paired per scenario, vanilla holds inside tolerance longer on
-<strong>75/120</strong> scenarios against the residual's 37/120.</p>
-<p>That also corrects a natural misreading of the drift column. The residual's
-1.4x against vanilla's 1.6x is a <strong>ratio to its own <code>best</code></strong>, and its <code>best</code> is
-worse (2.0 vs 1.1 mm) — the denominator flatters it. In absolute terms vanilla
-is closer at best, closer at the end, and inside the tolerance ball more of the
-time. What the residual's 1.4x honestly claims is narrower: it fixed the drift
-pathology it inherited (clone 2.4x → 1.4x), which was journey 12's target. It
-does not claim the best station-keeper on the board.</p>
-<p>Mechanically the gap is structural, not a training artifact: the residual is
-anchored to the clone's steering, so it inherits a less direct approach
-(path/net 1.5 vs 1.4) and parks ~1 mm further from center, which on knife-edge
-scenarios means popping out of the 10 mm ball more often — each pop a lost
-bonus step.</p>
+<p><strong>The gap is 0.8 points and it is the station-keeping bonus</strong> (0.9 more
+in-tolerance steps; the distance integral now favors the <em>residual</em> by 0.02,
+and the residual pays ~0.007 more control cost). Paired per scenario, holding
+is a tie: the residual holds longer on 47/120 against vanilla's 43/120, with
+30 tied — the frac-1.0 run's 75-vs-37 deficit was the parameterization, not
+the pipeline.</p>
+<p>That still corrects a natural misreading of the drift column. The residual's
+1.4x against vanilla's 1.6x is a <strong>ratio to its own <code>best</code></strong>, and its <code>best</code>
+is worse (1.7 vs 1.1 mm) — the denominator flatters it. In absolute terms
+vanilla is closer at best and closer at the end. What the residual's 1.4x
+honestly claims is narrower: it fixed the drift pathology it inherited
+(clone 2.4x → 1.4x), which was journey 12's target.</p>
+<p>What remains of the gap is small and structural: the residual is anchored to
+the clone's steering and parks ~0.7 mm further from center, which on
+knife-edge scenarios costs the occasional bonus step. The frac-1.0 version of
+this section read the same mechanism at 3x the size; widening the residual's
+authority shrank it without changing its sign.</p>
 <h3 id="the-crossover-measured">The crossover, measured<a class="headerlink" href="#the-crossover-measured" title="Permanent link">&para;</a></h3>
 <p>Both 400k runs saved a checkpoint every 25k steps, so the sample-efficiency
 claim can be read off deployed policies instead of training curves:
@@ -2455,80 +2465,81 @@ sweep CSV is gitignored and regenerates in ~10 min).</p>
 <tbody>
 <tr>
 <td>25k</td>
-<td><strong>51</strong>/120</td>
+<td><strong>44</strong>/120</td>
 <td>5/120</td>
 <td></td>
 <td>150k</td>
-<td>107/120</td>
-<td><strong>112</strong>/120</td>
+<td><strong>113</strong>/120</td>
+<td>112/120</td>
 </tr>
 <tr>
 <td>50k</td>
-<td><strong>66</strong>/120</td>
+<td><strong>80</strong>/120</td>
 <td>29/120</td>
 <td></td>
 <td>200k</td>
-<td>113/120</td>
+<td><strong>117</strong>/120</td>
 <td>114/120</td>
 </tr>
 <tr>
 <td>75k</td>
-<td><strong>97</strong>/120</td>
+<td><strong>102</strong>/120</td>
 <td>36/120</td>
 <td></td>
 <td>275k</td>
-<td>117/120</td>
+<td>113/120</td>
 <td><strong>120</strong>/120</td>
 </tr>
 <tr>
 <td>100k</td>
-<td><strong>98</strong>/120</td>
+<td><strong>95</strong>/120</td>
 <td>87/120</td>
 <td></td>
 <td>400k</td>
-<td>117/120</td>
+<td>119/120</td>
 <td><strong>120</strong>/120</td>
 </tr>
 </tbody>
 </table>
-<p>The figure's panel C plots the per-checkpoint difference directly: <strong>+51 pp at
-its widest (75k)</strong>, sign flip between 125k and 150k, and never outside ±8 pp
-after that.</p>
+<p>The figure's panel C plots the per-checkpoint difference directly: <strong>+55 pp at
+its widest (75k)</strong>, a dead tie at 125k, the first vanilla lead at 175k, and
+never outside ±6 pp after that — this seed ends at −0.8 pp (119 vs 120).</p>
 <p>Rerun across <strong>five training seeds</strong> per arm (seeds 1–4 added 2026-08-24;
 checkpoints and per-seed sweep CSVs in <code>data/reacher_ckpt_seeds/</code>, figure
 <code>docs/reference/reacher_crossover_seeds.png</code> via
 <code>scripts/plot_reacher_crossover_seeds.py</code>; CSVs are gitignored repo-wide), the
 crossover survives but its location does not. The residual leads on 5/5 seeds
-at 25k and 50k (pooled +29 and +34 pp over 600 episodes) and vanilla leads on
-5/5 seeds from 325k on — but the first checkpoint where vanilla catches the
-residual is <strong>75k / 100k / 125k / 150k / 225k</strong> depending on seed (this run's
-150k is the median draw). The pooled mean difference crosses zero between
-125k and 150k, so "~150k" survives only as the average; the claims below are
-restated against the seed range.</p>
+at 25k and 50k (pooled +25 and +43 pp over 600 episodes) and vanilla leads on
+5/5 seeds only from 375k on (pooled 600 vs 583, then 599 vs 589 at 400k) —
+but the first checkpoint where vanilla catches the residual is
+<strong>75k / 100k / 125k / 125k / 375k</strong> depending on seed. The pooled mean
+difference crosses zero between 125k and 150k, so "~150k" survives only as
+the average; the claims below are stated against the seed range.</p>
 <p>Three measured claims replace the asserted one:</p>
 <ol>
-<li><strong>The head start is worth ~150k steps on average — 75k–225k by seed.</strong> On
-   this seed the residual dominates at every checkpoint through 125k (97 vs 36
-   at 75k is the widest gap); vanilla overtakes at 150k and the two are inside
-   each other's intervals after.
+<li><strong>The head start is worth ~125–150k steps on average — 75k–375k by seed.</strong>
+   On this seed the residual dominates at every checkpoint through 100k
+   (102 vs 36 at 75k is the widest gap); the two are inside each other's
+   intervals from 125k on.
    Vanilla needs ~100k steps to catch the frozen clone (82/120) and ~125–150k
-   to reach expert level. Precision tells the same story: the residual's
-   median final distance is under the 10 mm tolerance by 75k, vanilla's by
-   ~110k, and vanilla is the more precise arm from ~150k on.</li>
+   to reach expert level. Precision separates them where reach cannot: the
+   residual's median final distance is under the 10 mm tolerance by 50k,
+   vanilla's by ~110k, and vanilla is the more precise arm from ~150k on
+   (3.3 vs 5.2 mm there, 2.0 vs 2.5 mm at 400k, medians over 5 seeds).</li>
 <li><strong>The zero-init "floor" is not a floor.</strong> At 25k the residual scores
-   51/120 — far <em>below</em> the clone it wraps — and only recovers the clone's
-   level around 75k. Early SAC exploration degrades the base before improving
-   it (the same effect as retraction 8's 50k reading: 66/120 here against
-   65/120 then). A deployment that counts on "never worse than the baseline"
-   during training does not get it from this setup; what it gets is "far
-   better than learning from scratch."</li>
+   44/120 — far <em>below</em> the clone it wraps — and only recovers the clone's
+   level around 75k (the frac-1.0 run read 51/120 at 25k; wider authority
+   digs the early hole slightly deeper). Early SAC exploration degrades the
+   base before improving it. A deployment that counts on "never worse than
+   the baseline" during training does not get it from this setup; what it
+   gets is "far better than learning from scratch."</li>
 <li><strong>The zero-training point is the clone itself</strong> — the pipeline's real
    pitch is that it starts at 82/120 having spent zero environment steps,
    where vanilla starts at random. The honest statement of the advantage is
-   therefore budget-shaped, with the five-seed bands: below ~75k environment
-   steps the pipeline's best policy wins on every seed; above ~325k vanilla
-   does on every seed; in between the winner is seed-dependent (mean crossing
-   ~150k).</li>
+   therefore budget-shaped, with the five-seed bands: below ~50k environment
+   steps the pipeline's best policy wins on every seed (4/5 at 75k); above
+   ~375k vanilla does on every seed, by 1–4 scenarios; in between the winner
+   is seed-dependent (mean crossing ~125–150k).</li>
 </ol>
 <h2 id="how-dagger-solves-the-imitation-learning-problem">How DAgger solves the imitation-learning problem<a class="headerlink" href="#how-dagger-solves-the-imitation-learning-problem" title="Permanent link">&para;</a></h2>
 <p>This is the fix that made the clone usable, so it is worth being precise about.</p>
@@ -2910,28 +2921,35 @@ measured.</p>
 </ul>
 <h2 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>One seed per policy</strong>, one <code>residual_frac</code>, one <code>reach_bonus</code>. None swept, and
-  the 200k → 400k deltas ride on single runs. The paired McNemar tests carry the
-  claims, not the point estimates.</li>
+<li><strong>The headline table is one seed per policy</strong> (seed 0), one <code>reach_bonus</code>.
+  <code>residual_frac</code> IS swept now — 1.0 vs 2.0, 5 seeds each, and 2.0 wins on
+  every seed, which is why this entry reports it — but the 200k → 400k deltas
+  still ride on single runs. The paired McNemar tests and the 5-seed pooled
+  counts carry the claims, not the point estimates.</li>
 <li><strong>The DAgger clone imitates the <em>memoryless</em> expert</strong>, so the <code>Select-DPC</code> row is
   built with <code>carry_prediction=False</code> to match. Comparing it against the carried
   variant would score the clone against a controller it never imitated.</li>
-<li>The Wilson intervals of 117/120 and 120/120 overlap; "vanilla wins reach" is a
-  3-scenario difference. "Vanilla holds longer" (75 vs 37 paired) and the distance
-  medians are the load-bearing comparisons.</li>
+<li>The Wilson intervals of 119/120 and 120/120 overlap; "vanilla wins reach" is
+  a 1-scenario difference on this seed. The load-bearing comparisons are the
+  distance medians (1.7 vs 2.4 mm final) and the 5-seed pooled reach
+  (599 vs 589/600), where vanilla leads on every seed at 375k–400k.</li>
 <li>The crossover sweep is one training run per arm sliced at 16 checkpoints, not
   16 independent runs — adjacent points share history, so the curve's noise
-  (residual oscillating 110–120 after 200k, vanilla's 119 blip at 300k) is
-  autocorrelated. The single-seed uncertainty on the ~150k crossing was later
-  measured with four more seeds per arm: first catch-up ranges 75k–225k
+  (residual oscillating 106–119 after 175k, vanilla's 119 blip at 300k) is
+  autocorrelated. The single-seed uncertainty on the crossing was measured
+  with four more seeds per arm: first catch-up ranges 75k–375k
   (<code>docs/reference/reacher_crossover_seeds.png</code>).</li>
 <li><code>path/net</code> for the <code>random</code> row is a median over 118, not 120: two scenarios made
   no progress, so <code>eff</code> is NaN there by design.</li>
 <li><strong>The invariant tests skip on a clean checkout.</strong> <code>data/</code> is gitignored, so the
   bit-for-bit zero-residual test and both zero-init tests <code>pytest.skip</code> elsewhere
   and the suite still reports green. The training monitors behind the return
-  figure live there too; both 400k runs saved 25k-step checkpoints
-  (<code>data/reacher_res_ckpt_400k/</code>, <code>data/reacher_van_ckpt_400k/</code>).</li>
+  figure live there too; every 400k run saved 25k-step checkpoints — the
+  frac-2.0 residual seeds in <code>data/reacher_ckpt_seeds/resf2_s{0..4}/</code>, the
+  vanilla seeds in <code>data/reacher_van_ckpt_400k/</code> (seed 0) and
+  <code>data/reacher_ckpt_seeds/van_s{1..4}/</code>, and the superseded frac-1.0
+  residual runs in <code>data/reacher_res_ckpt_400k/</code> and
+  <code>data/reacher_ckpt_seeds/res_s{1..4}/</code>.</li>
 <li>Observation normalization in <code>ResidualSelectEnv</code> is min-max against declared
   bounds and the live channels are compressed ~18x relative to the widest; untested
   as a factor now that the residual works.</li>
@@ -2939,7 +2957,8 @@ measured.</p>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>Close the verdict with a written decision.</strong> The crossover is measured:
-   the pipeline wins below ~150k environment steps and loses above. Either
+   the pipeline wins below ~50k environment steps on every seed and loses
+   above ~375k on every seed, with seed luck in between. Either
    retire it to "use when interaction is expensive or unsafe" — with the
    caveat that early residual training dips below the frozen clone, so the
    safe deployment during that window is the clone itself — or drop it from
