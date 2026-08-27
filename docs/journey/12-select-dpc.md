@@ -104,8 +104,8 @@ controller that arrives and leaves shows the two numbers separating:
 <table>
 <tr><th>30 fixed anchors — miss</th><th>Select-DPC (`n_max=1`) — reach</th></tr>
 <tr>
-<td><video controls loop muted playsinline width="330"><source src="../reference/videos/reacher-fixed-rescue.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="330"><source src="../reference/videos/reacher-select-rescue.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../../reference/videos/reacher-fixed-rescue.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../../reference/videos/reacher-select-rescue.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
 </tr>
 </table>
 
@@ -158,8 +158,8 @@ the failure the reach rate hides:
 <table>
 <tr><th>30 fixed anchors</th><th>Select-DPC (`n_max=1`)</th></tr>
 <tr>
-<td><video controls loop muted playsinline width="330"><source src="../reference/videos/reacher-fixed-drift.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
-<td><video controls loop muted playsinline width="330"><source src="../reference/videos/reacher-select-drift.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../../reference/videos/reacher-fixed-drift.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../../reference/videos/reacher-select-drift.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
 </tr>
 </table>
 
