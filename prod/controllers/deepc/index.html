@@ -906,6 +906,67 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#signals-the-control-input-u-and-the-output-y" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signals — the control input u and the output y
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Signals — the control input u and the output y">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#u-the-control-input-dimension-m_u" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        u — the control input, dimension m_u
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#y-the-output-dimension-p_y" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        y — the output, dimension p_y
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-each-system-plugs-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What each system plugs in
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-qp-solved-every-step" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1730,6 +1791,67 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#signals-the-control-input-u-and-the-output-y" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signals — the control input u and the output y
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Signals — the control input u and the output y">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#u-the-control-input-dimension-m_u" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        u — the control input, dimension m_u
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#y-the-output-dimension-p_y" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        y — the output, dimension p_y
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-each-system-plugs-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What each system plugs in
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-qp-solved-every-step" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1895,6 +2017,129 @@
 
 <h1 id="deepc">DeePC<a class="headerlink" href="#deepc" title="Permanent link">&para;</a></h1>
 <p>The <code>DeePC</code> controller implements the regularized hybrid form from <a href="https://arxiv.org/abs/2603.07395">arXiv:2603.07395</a>, built on the original DeePC framework from <a href="https://arxiv.org/abs/1811.05890">arXiv:1811.05890</a>.</p>
+<h2 id="signals-the-control-input-u-and-the-output-y">Signals — the control input <code>u</code> and the output <code>y</code><a class="headerlink" href="#signals-the-control-input-u-and-the-output-y" title="Permanent link">&para;</a></h2>
+<p><code>core.deepc.DeePC</code> is system-agnostic: it never sees a state, a goal, or an env. It sees two time series, <code>u</code> and <code>y</code>, and its entire model of the plant is the offline data compiled into the Hankel matrices. Everything below is what those two symbols mean.</p>
+<h3 id="u-the-control-input-dimension-m_u"><code>u</code> — the control input, dimension <code>m_u</code><a class="headerlink" href="#u-the-control-input-dimension-m_u" title="Permanent link">&para;</a></h3>
+<p><code>act()</code> returns <code>u_t</code> of shape <code>(m_u,)</code>. It is the <strong>first block</strong> of the <code>N</code>-step plan <code>U_f g</code>; the remaining <code>N − 1</code> blocks are computed and then discarded, and the QP is re-solved next step. Receding horizon — plan <code>N</code>, apply one.</p>
+<p><code>m_u</code> is never declared. It is derived as <code>Up.shape[0] // T_ini</code> from the first library, and every other library must agree, since they share one set of Hankel parameters. <code>R</code> must then be <code>(m_u, m_u)</code> or construction raises.</p>
+<p>Two bounds act on <code>u</code>, and they are not the same thing:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>what it limits</th>
+<th>default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>u_bounds</code></td>
+<td><strong>where</strong> <code>u</code> may sit — applied to all <code>N</code> steps of the plan, then re-clipped on return, since solver tolerance can leave sub-microscopic violations</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>du_max</code></td>
+<td><strong>how far <code>u</code> may move in one step</strong>, against the last applied input</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+<p>Omitting <code>du_max</code> is harmless when <code>u</code> is a velocity, and not harmless when <code>u</code> is an absolute position target: measured on <code>PandaReach-v0</code>, the QP asked for a median <strong>1.9–3.1 rad of movement per 20 ms step</strong>, far outside the neighbourhood its library was collected in, making every command an extrapolation of a locally-valid model.</p>
+<div class="admonition warning">
+<p class="admonition-title"><code>u</code> must be the plant's <em>true</em> input, not the command you issued</p>
+<p>Where the plant clips or transforms a command, identifying on the pre-transform signal mislabels every affected sample. On <code>PandaReach-v0</code> the safe-box clip fires on <strong>24–48 % of steps</strong> under excitation, and the repo carries <strong>two incompatible <code>u</code> conventions</strong> because of it:</p>
+<table>
+<thead>
+<tr>
+<th>path</th>
+<th><code>u</code> is</th>
+<th>reaches the plant via</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>anchor/Hankel DeePC (<code>panda/deepc_setup.py</code>)</td>
+<td>the <strong>delta</strong> <code>Δq ∈ [−0.2, 0.2]⁷</code></td>
+<td><code>env.step(u)</code> → <code>ctrl = clip(q + u, box)</code></td>
+</tr>
+<tr>
+<td>Select-DPC (<code>panda/selectdpc.py</code>, <code>panda/qdes.py</code>)</td>
+<td>the <strong>absolute target</strong> <code>q_des</code></td>
+<td><code>step_qdes</code> → <code>ctrl = clip(q_des, box)</code>, never through <code>env.step()</code></td>
+</tr>
+</tbody>
+</table>
+<p>Both hardcode the key <code>u_i</code> in the collection payload with opposite units — a ~0.2 rad delta against an absolute angle spanning the whole safe box — so one flat dict cannot serve both. <code>panda/task_bank.py::for_select_dpc</code> exists solely to re-key for the second; read its module docstring before feeding either consumer a payload.</p>
+</div>
+<h3 id="y-the-output-dimension-p_y"><code>y</code> — the output, dimension <code>p_y</code><a class="headerlink" href="#y-the-output-dimension-p_y" title="Permanent link">&para;</a></h3>
+<p><code>act(y_current, y_ref)</code> takes <code>y_current</code> of shape <code>(p_y,)</code>, with <code>p_y = Yp.shape[0] // T_ini</code> derived the same way as <code>m_u</code>. <code>Q</code> must be <code>(p_y, p_y)</code>.</p>
+<p><code>y</code> does <strong>three separate jobs</strong>, worth keeping apart because a component can do some and not others:</p>
+<ol>
+<li><strong>Selects the library.</strong> <code>_select_index_for</code> keys on <code>y[heading_index]</code> (default index 2), or on <code>key_fn(y)</code> when the keying quantity is a <em>function</em> of <code>y</code> rather than a component of it — under <code>key_fn</code> the key need not appear in <code>y</code> at all.</li>
+<li><strong>Updates the past buffer.</strong> After the solve, <code>y_current</code> is appended to <code>y_buf</code>, becoming part of the next step's <code>y_ini</code> in the soft constraint <code>Y_p g + \sigma_y = y_{\text{ini}}</code>.</li>
+<li><strong>Is what gets tracked</strong>, through <code>\lVert Y_f g - y_{\text{ref}} \rVert^2_{\bar Q}</code>.</li>
+</ol>
+<p><strong>Job 3 is optional per component.</strong> Zeroing a block of <code>Q</code> keeps that block doing jobs 1 and 2 — informing prediction through the <code>Y_p</code>/<code>Y_f</code> constraints — while removing it from the objective. Both non-unicycle systems use this deliberately: the Reacher's <code>Q = diag(0, 0, 1, 1)</code> tracks the fingertip while the joint block makes the state observable, and the Panda's <code>Q = diag(I₃, 0₇)</code> makes the 10-D extended output's tracking cost <em>numerically identical</em> to the tip-only case.</p>
+<p>It is also why <code>y</code> carries the tip/fingertip <strong>position</strong> rather than a scalar goal-distance: that keeps the libraries <strong>goal-free</strong>, so one Hankel build serves every target and the goal enters only through <code>y_ref</code>.</p>
+<p><code>y_ref</code> is either <code>(p_y,)</code>, broadcast across the <code>N</code>-step horizon, or <code>(N, p_y)</code> for a per-step reference.</p>
+<h3 id="alignment">Alignment<a class="headerlink" href="#alignment" title="Permanent link">&para;</a></h3>
+<p><code>y_t</code> is recorded <strong>before</strong> <code>u_t</code> is applied, so <code>y_{t+1}</code> is the response to <code>u_t</code>. Every collection in this repo uses that convention. A library built the other way is off by one step, and nothing downstream catches it — the QP will happily solve a wrong model.</p>
+<h3 id="what-each-system-plugs-in">What each system plugs in<a class="headerlink" href="#what-each-system-plugs-in" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>TwoWheelGoal-v0</code></th>
+<th><code>PandaReach-v0</code> (<code>output="ext"</code>)</th>
+<th>Reacher-v5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>u</code></td>
+<td><code>(v, w)</code> velocities, <code>m_u = 2</code></td>
+<td><code>Δq</code> delta, <code>m_u = 7</code></td>
+<td><code>τ</code> torque, <code>m_u = 2</code></td>
+</tr>
+<tr>
+<td><code>u_bounds</code></td>
+<td><code>v ∈ [0, 20]</code>, <code>w ∈ [±π/2]</code></td>
+<td><code>±0.2</code> per joint</td>
+<td><code>±1</code> per joint</td>
+</tr>
+<tr>
+<td><code>y</code></td>
+<td><code>(x, y, δ)</code>, <code>p_y = 3</code> — <strong>is</strong> the full state</td>
+<td><code>(tip, q_norm)</code>, <code>p_y = 10</code></td>
+<td><code>[q; fingertip]</code>, <code>p_y = 4</code></td>
+</tr>
+<tr>
+<td><code>Q</code></td>
+<td><code>diag(1, 1, 2)</code></td>
+<td><code>diag(I₃, 0₇)</code></td>
+<td><code>diag(0, 0, 1, 1)</code></td>
+</tr>
+<tr>
+<td><code>R</code></td>
+<td><code>1.3e-3 · I₂</code></td>
+<td><code>1.0e-2 · I₇</code></td>
+<td><code>1.0e-3 · I₂</code></td>
+</tr>
+<tr>
+<td>Library key</td>
+<td><code>y[2]</code>, the heading</td>
+<td><code>key_fn</code> = tip azimuth <code>atan2(y[1], y[0])</code></td>
+<td>overridden: wrapped <code>config_distance</code> on <code>y[:2]</code></td>
+</tr>
+<tr>
+<td><code>du_max</code></td>
+<td><code>None</code> — <code>u</code> is a velocity</td>
+<td><code>None</code> in the canonical builder</td>
+<td><code>None</code> — torque is natively bounded</td>
+</tr>
+</tbody>
+</table>
+<p>The unicycle is the only one of the three whose <code>y</code> observes the whole state; that asymmetry, not nonlinearity, is the main structural difference between the systems. See the <a href="../../reference/reacher/">Reacher reference</a> and <code>panda/env.py</code> for the measurements behind it.</p>
 <h2 id="the-qp-solved-every-step">The QP solved every step<a class="headerlink" href="#the-qp-solved-every-step" title="Permanent link">&para;</a></h2>
 <div class="arithmatex">\[
 \min_{g,\ \sigma_y} \quad \lVert Y_f g - y_{\text{ref}} \rVert^2_{\bar Q} + \lVert U_f g \rVert^2_{\bar R} + \lambda_g \lVert g \rVert_1 + \lambda_y \lVert \sigma_y \rVert^2_2
