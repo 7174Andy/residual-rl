@@ -2049,6 +2049,18 @@ spacing is 0.52 rad, the Panda's nearest data is 1.98 rad away.</p>
 <p>Paired against fixed anchors on best distance: <code>n_max=1</code> closer on <strong>70/120</strong>
 (+0.8 mm median), <code>n_max=3</code> on <strong>78/120</strong> (+1.9 mm). The Wilson intervals overlap
 slightly, so the paired tests carry the claim, not the point estimates.</p>
+<p>A scenario fixed anchors miss and <code>n_max=1</code> reaches, both controllers on the same
+episode, early stopping <strong>off</strong> (<code>scripts/record_reacher_compare.py</code>, 30-episode
+scan, <code>--seed 0</code>). The readout carries current <em>and</em> best-so-far distance, so a
+controller that arrives and leaves shows the two numbers separating:</p>
+<table>
+<tr><th>30 fixed anchors — miss</th><th>Select-DPC (`n_max=1`) — reach</th></tr>
+<tr>
+<td><video controls loop muted playsinline width="330"><source src="../reference/videos/reacher-fixed-rescue.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../reference/videos/reacher-select-rescue.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+</table>
+
 <h3 id="iterating-buys-nothing-and-past-n_max3-it-hurts">Iterating buys nothing — and past <code>n_max=3</code> it hurts<a class="headerlink" href="#iterating-buys-nothing-and-past-n_max3-it-hurts" title="Permanent link">&para;</a></h3>
 <p><code>scripts/sweep_select_dpc.py</code>, 20 episodes:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>n_max        1      2      3      5      8      (fixed anchors: 11/20, 331.9 ms)
@@ -2080,6 +2092,16 @@ and nothing rewarding station-keeping once tracking is nearly satisfied over the
 horizon. <code>docs/journey/06-stop-at-goal.md</code> records the unicycle hitting this.</p>
 <p>Consequence: <strong>every reach-rate number in this project flatters its controller</strong> —
 they touch the target and leave.</p>
+<p>The scenario with the largest best-vs-final gap in that scan, both controllers —
+the failure the reach rate hides:</p>
+<table>
+<tr><th>30 fixed anchors</th><th>Select-DPC (`n_max=1`)</th></tr>
+<tr>
+<td><video controls loop muted playsinline width="330"><source src="../reference/videos/reacher-fixed-drift.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../reference/videos/reacher-select-drift.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+</table>
+
 <h3 id="the-panda-coverage-confirmed-from-a-fourth-direction">The Panda: coverage confirmed, from a fourth direction<a class="headerlink" href="#the-panda-coverage-confirmed-from-a-fourth-direction" title="Permanent link">&para;</a></h3>
 <p><code>scripts/run_select_dpc.py</code>, gate on 40 held-out configurations drawn as the env
 draws them:</p>
