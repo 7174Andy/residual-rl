@@ -447,6 +447,73 @@ A 3-episode smoke test — **150 rows on top of 10,000** — already moved the g
 from FAIL to PASS. 1.5% more data, collected in the right place, did what tripling
 the expert-driven data could not.
 
+### What it looks like
+
+Both arms below are the *same* network trained the same way; the only difference
+is where the training states came from — round 0 rolls the **expert** and labels
+with it (the collection every dataset in this repo used before this entry), round
+3 adds 15,000 rows rolled by the **clone** and labelled by the expert. On the
+frozen 120 the two arms split **66/120 → 82/120**, with 30 scenarios DAgger
+rescues and 14 it loses (`scripts/record_reacher_dagger.py`, early stopping off,
+full 50-step horizon).
+
+<div style="overflow-x:auto">
+<table>
+<tr><th></th><th>BC clone — expert-driven data only</th><th>DAgger clone — round 3</th></tr>
+<tr>
+<td><b>#30</b><br><small>rescue: a 338 mm reach the BC clone never starts</small></td>
+<td><video controls loop muted playsinline width="300"><source src="../videos/reacher-dagger-rescue-ep30-bc.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="300"><source src="../videos/reacher-dagger-rescue-ep30-dagger.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr>
+<td></td>
+<td><small>157.9 → 194.7 mm</small></td>
+<td><small><b>6.4 → 22.1 mm</b></small></td>
+</tr>
+<tr>
+<td><b>#16</b><br><small>both reach; the BC clone arrives and then leaves</small></td>
+<td><video controls loop muted playsinline width="300"><source src="../videos/reacher-dagger-hold-ep16-bc.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="300"><source src="../videos/reacher-dagger-hold-ep16-dagger.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr>
+<td></td>
+<td><small>3.6 → 66.1 mm (18x drift)</small></td>
+<td><small><b>0.5 → 2.4 mm</b></small></td>
+</tr>
+<tr>
+<td><b>#4</b><br><small>regression: BC reaches, DAgger does not — 14 of 120 go this way</small></td>
+<td><video controls loop muted playsinline width="300"><source src="../videos/reacher-dagger-regress-ep4-bc.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="300"><source src="../videos/reacher-dagger-regress-ep4-dagger.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr>
+<td></td>
+<td><small><b>5.3 → 33.6 mm</b></small></td>
+<td><small>36.1 → 164.5 mm</small></td>
+</tr>
+<tr>
+<td><b>#8</b><br><small>neither reaches, and DAgger is the worse of the two</small></td>
+<td><video controls loop muted playsinline width="300"><source src="../videos/reacher-dagger-neither-ep8-bc.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="300"><source src="../videos/reacher-dagger-neither-ep8-dagger.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr>
+<td></td>
+<td><small>12.1 → 14.2 mm</small></td>
+<td><small>147.7 → 329.9 mm</small></td>
+</tr>
+</table>
+</div>
+
+The last two rows are the honest half of the +16: DAgger moves the *distribution*
+of failures, it does not monotonically dominate. #4 is the same scenario the
+residual section opens with — the clone flying off to 164.5 mm there is the
+**DAgger** clone, and the pre-DAgger one happens to handle it. The gate is a
+paired count over the whole set, and 30 rescues against 14 losses is what it is
+measuring.
+
+```bash
+uv run python scripts/record_reacher_dagger.py --scan 120
+```
+
 ### The metric that misled, and the one that didn't
 
 Across those rounds, open-loop error **on the expert's distribution** went

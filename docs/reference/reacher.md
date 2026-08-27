@@ -476,6 +476,7 @@ All defaults are baked into `argparse`; there are no config files.
 | `scripts/train_reacher_vanilla.py` | SAC from scratch on the bare env — the control arm | `--steps 200000` `--algo sac` `--lr 3e-4` `--seed 0` |
 | `scripts/train_reacher_residual.py` | zero-init SAC residual over the frozen clone | `--clone data/dagger_clone_r3.pt` `--residual-frac 1.0` (**pass `2.0`** — see above) `--steps 200000` |
 | `scripts/eval_reacher_residual.py` | the 5-row table + figure: Select-DPC, clone, clone+residual, vanilla, on 120 shared scenarios | `--episodes 120` `--residual-frac 2.0` `--algo sac` |
+| `scripts/record_reacher_dagger.py` | paired BC-vs-DAgger clone clips on the frozen 120, full horizon, picked by outcome: `rescue` / `both` / `bc_drift` / `regression` / `neither` | `--scan 120` `--bc-clone data/reacher_clone_ml.pt` `--dagger-clone data/dagger_clone_r3.pt` `--episode 4` `--out-dir videos/reacher_dagger` |
 | `scripts/record_reacher_residual.py` | four-arm clips, full horizon, picked by outcome from a scan: `rescue` / `both_succeed` / `widest_drift` plus the residual's own `residual_miss` and `residual_widest_drift` | `--scan 120` `--residual-frac 2.0` `--n-miss 3` `--only residual_miss` `--out-dir videos/reacher_residual_frac2` |
 
 Typical first run:
