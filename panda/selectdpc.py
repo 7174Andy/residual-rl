@@ -42,8 +42,35 @@ __all__ = ["SelectDPC", "select_predict", "panda_bank", "make_select_controller"
 
 
 def panda_bank(payload: dict, T_ini: int, N: int, stride: int = 1) -> dict:
-    """Pool a `panda/qdes.py` collection payload into a Select-DPC bank."""
+    """Pool a `panda/qdes.py` collection payload into a Select-DPC bank.
+
+    `u_i` here must be an ABSOLUTE `q_des` target (`panda/qdes.py::collect_anchor`'s
+    schema) -- `panda/deepc_setup.py`'s pipeline hardcodes the same `u_i` name for
+    a DELTA (`env.step()`'s action), and the two are not interchangeable (see
+    `panda/task_bank.py`'s module docstring for the full story -- a real
+    integration bug this guard exists to catch on the disk-loading path, where
+    `--libs some_delta_payload.npz` would otherwise silently corrupt every
+    Willems regression built from it). `panda.task_bank.for_select_dpc`
+    converts a delta-schema payload to this one.
+    """
     n = int(payload["anchors"].shape[0])
+    u0, q0 = np.asarray(payload["u_0"]), np.asarray(payload["q_0"])
+    # A delta (env.step()'s action, |.| <= delta_max = 0.2 rad) stays tiny even
+    # while q ranges over the whole safe box (single joints span >1 rad, e.g.
+    # joint 1's +-2.318); an absolute q_des tracks q and so shares its range.
+    # 0.25/1.0 are round numbers a bit past/under those two facts -- not a
+    # precise boundary, just enough margin that neither real schema misfires
+    # (checked against data/panda_uniform_libs.npz, data/panda_anchors_k4_libs.npz,
+    # and panda.task_bank.for_select_dpc's own output).
+    if np.abs(u0).max() <= 0.25 and np.abs(q0).max() > 1.0:
+        raise ValueError(
+            "payload['u_0'] looks like a DELTA (max|u_0| <= 0.25) while "
+            "payload['q_0'] spans radians (max|q_0| > 1.0) -- this looks like "
+            "a panda/task_bank.py::collect_task_bank payload (u_i = "
+            "env.step()'s delta action), not a panda/qdes.py::collect_anchor "
+            "payload (u_i = absolute q_des) that panda_bank requires. Convert "
+            "it first with panda.task_bank.for_select_dpc(payload)."
+        )
     u_list = [payload[f"u_{i}"] for i in range(n)]
     y_list = [outputs(payload[f"q_{i}"], payload[f"tip_{i}"]) for i in range(n)]
     return trajectory_bank(u_list, y_list, T_ini, N, stride=stride)

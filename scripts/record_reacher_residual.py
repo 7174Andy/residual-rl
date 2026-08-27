@@ -9,9 +9,20 @@ visible as the two numbers separating.
 Scenarios are chosen by what they demonstrate rather than by index -- a case the
 residual rescues from the clone, one where all four succeed, and the widest
 best->final gap -- because a random scenario mostly shows four arms doing the same
-thing.
+thing. Two more are keyed on the RESIDUAL's outcomes rather than the clone's:
+`residual_miss` (never inside tolerance) and `residual_widest_drift` (inside,
+then out again -- the failure the reach rate scores as a success). Both need
+`--scan 120` to be sure of finding any; the headline arm misses 3 of 120.
+
+`--residual-frac` must match the frac the checkpoint was trained with. The
+default pair is the superseded frac-1.0 run; journey 13's headline arm is
+`data/reacher_ckpt_seeds/resf2_s0/ckpt_200000_steps.zip` at 2.0.
 
     uv run python scripts/record_reacher_residual.py
+    uv run python scripts/record_reacher_residual.py --scan 120 \
+        --residual data/reacher_ckpt_seeds/resf2_s0/ckpt_200000_steps.zip \
+        --residual-frac 2.0 --n-miss 3 --only residual_miss,residual_widest_drift \
+        --out-dir videos/reacher_residual_frac2
 """
 from __future__ import annotations
 
@@ -123,12 +134,24 @@ def main() -> None:
     p.add_argument("--scenarios", default="data/reacher_scenarios_v1.npz")
     p.add_argument("--clone", default="data/dagger_clone_r3.pt")
     p.add_argument("--residual", default="data/reacher_residual_dagger_200k.zip")
+    p.add_argument("--residual-frac", type=float, default=1.0,
+                   help="eval-env authority; must match the frac the checkpoint "
+                        "was trained with (journey 13's headline runs are 2.0)")
     p.add_argument("--vanilla", default="data/reacher_vanilla_200k.zip")
     p.add_argument("--scan", type=int, default=40)
     p.add_argument("--tol", type=float, default=0.01)
     p.add_argument("--fps", type=int, default=12)
     p.add_argument("--size", type=int, default=720)
     p.add_argument("--out-dir", default="videos/reacher_residual")
+    p.add_argument("--n-miss", type=int, default=2,
+                   help="how many residual-misses-tolerance scenarios to render")
+    p.add_argument("--only", default="",
+                   help="comma-separated substrings of scenario names to render "
+                        "(default: all)")
+    p.add_argument("--episode", type=int, default=None,
+                   help="render this scenario index only and skip the scan. For "
+                        "a checkpoint ladder, where the same episode has to be "
+                        "held fixed while the policies change.")
     args = p.parse_args()
 
     with np.load(args.scenarios) as z:
@@ -140,45 +163,64 @@ def main() -> None:
     res_model = load_policy(args.residual, algo="sac", device="cpu")
     van_model = load_policy(args.vanilla, algo="sac", device="cpu")
 
-    # --- scan headless to pick scenarios worth watching ---------------------
     from reacher.residual_env import ResidualSelectEnv
-    scan = gym.make("ReacherGoal-v0")
-    clone_r = [run_episode(scan, ClonePolicy(predictor), q, g) for q, g in eps]
-    scan.close()
-    rese = ResidualSelectEnv(clone_path=args.clone)
-    res_r = []
-    for q, g in eps:
-        o, i = rese.reset(seed=0, options={"qpos": q, "goal": g})
-        need = float(i["dist"])
-        best = need
-        for _ in range(rese.base.max_steps):
-            a, _ = res_model.predict(o, deterministic=True)
-            o, _rw, _t, tr, i = rese.step(a)
-            best = min(best, float(i["dist"]))
-            if tr:
-                break
-        res_r.append({"best": best, "final": float(i["dist"]),
-                      "reached": best < args.tol})
-    rese.close()
 
-    rescue = [i for i in range(len(eps))
-              if res_r[i]["reached"] and not clone_r[i]["reached"]]
-    both = [i for i in range(len(eps))
-            if res_r[i]["reached"] and clone_r[i]["reached"]]
-    drift = max(range(len(eps)),
-                key=lambda i: clone_r[i]["final"] - clone_r[i]["best"])
-    picks = []
-    if rescue:
-        picks.append((rescue[0], "rescue"))
-    if both:
-        picks.append((both[0], "both_succeed"))
-    picks.append((drift, "widest_drift"))
-    print(f"scanned {len(eps)}: {len(rescue)} residual rescues, {len(both)} both, "
-          f"widest clone drift at #{drift}")
+    if args.episode is not None:
+        picks = [(args.episode, f"ep{args.episode}")]
+    else:
+        # --- scan headless to pick scenarios worth watching ---------------------
+        scan = gym.make("ReacherGoal-v0")
+        clone_r = [run_episode(scan, ClonePolicy(predictor), q, g) for q, g in eps]
+        scan.close()
+        rese = ResidualSelectEnv(clone_path=args.clone,
+                                 residual_frac=args.residual_frac)
+        res_r = []
+        for q, g in eps:
+            o, i = rese.reset(seed=0, options={"qpos": q, "goal": g})
+            need = float(i["dist"])
+            best = need
+            for _ in range(rese.base.max_steps):
+                a, _ = res_model.predict(o, deterministic=True)
+                o, _rw, _t, tr, i = rese.step(a)
+                best = min(best, float(i["dist"]))
+                if tr:
+                    break
+            res_r.append({"best": best, "final": float(i["dist"]),
+                          "reached": best < args.tol})
+        rese.close()
+
+        rescue = [i for i in range(len(eps))
+                  if res_r[i]["reached"] and not clone_r[i]["reached"]]
+        both = [i for i in range(len(eps))
+                if res_r[i]["reached"] and clone_r[i]["reached"]]
+        drift = max(range(len(eps)),
+                    key=lambda i: clone_r[i]["final"] - clone_r[i]["best"])
+        # The residual's own two failure modes: never inside tolerance at all
+        # (rare -- 117/120 at 200k), and the softer one the reach rate hides,
+        # arriving and then leaving. Keyed on res_r, not clone_r.
+        miss = [i for i in range(len(eps)) if not res_r[i]["reached"]]
+        res_drift = max(range(len(eps)),
+                        key=lambda i: res_r[i]["final"] - res_r[i]["best"])
+        picks = []
+        if rescue:
+            picks.append((rescue[0], "rescue"))
+        if both:
+            picks.append((both[0], "both_succeed"))
+        picks.append((drift, "widest_drift"))
+        for i in miss[:args.n_miss]:
+            picks.append((i, f"residual_miss_ep{i}"))
+        picks.append((res_drift, "residual_widest_drift"))
+        print(f"scanned {len(eps)}: {len(rescue)} residual rescues, {len(both)} both, "
+              f"widest clone drift at #{drift}; residual misses tol on "
+              f"{len(miss)} ({miss[:10]}), widest residual drift at #{res_drift}")
+        if args.only:
+            keep = args.only.split(",")
+            picks = [(i, why) for i, why in picks if any(k in why for k in keep)]
 
     os.makedirs(args.out_dir, exist_ok=True)
     env = gym.make("ReacherGoal-v0", render_mode="rgb_array", render_size=args.size)
-    rese = ResidualSelectEnv(clone_path=args.clone)
+    rese = ResidualSelectEnv(clone_path=args.clone,
+                             residual_frac=args.residual_frac)
     rese.env = gym.make("ReacherGoal-v0", render_mode="rgb_array",
                         render_size=args.size)
     rese.base = rese.env.unwrapped

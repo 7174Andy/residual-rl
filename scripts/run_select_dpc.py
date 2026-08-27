@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import time
 
 import mujoco
 import numpy as np
@@ -130,18 +131,22 @@ def episode(model, data, q0, goal, args, ctrl=None, rand_amp=None, oracle=False)
         ctrl.reset(np.concatenate([q0, t0]), u_initial=q0)
         yref = y_ref_for(goal, model.nq)
     rw = np.random.default_rng(int(abs(q0[0]) * 1e6) % 2**31)
-    best, path, prev, its = need, 0.0, t0.copy(), []
+    best, path, prev, its, step_ms = need, 0.0, t0.copy(), [], []
     prev_target = np.asarray(q0, dtype=np.float64).copy()
+    n_steps = 0
     for _t in range(args.steps):
+        n_steps = _t + 1
         q = np.asarray(data.qpos).copy()
         if oracle:
             u = oracle_step(model, data, goal, tip, args.du_max, prev_target)
             prev_target = u.copy()
         elif ctrl is not None:
+            _t0 = time.perf_counter()
             try:
                 u = ctrl.act(np.concatenate([q, data.site_xpos[tip]]), yref)
             except RuntimeError:
                 break
+            step_ms.append((time.perf_counter() - _t0) * 1000.0)
             its.append(getattr(ctrl, "last_iters", 1))
         else:
             u = q + rw.uniform(-rand_amp, rand_amp, model.nq)
@@ -154,7 +159,9 @@ def episode(model, data, q0, goal, args, ctrl=None, rand_amp=None, oracle=False)
     net = need - best
     return {"reached": best < args.tol, "closed": 100.0 * net / need,
             "final": best, "eff": path / net if net > 1e-4 else float("nan"),
-            "iters": float(np.mean(its)) if its else 1.0}
+            "iters": float(np.mean(its)) if its else 1.0,
+            "steps": n_steps,
+            "mean_step_ms": float(np.mean(step_ms)) if step_ms else float("nan")}
 
 
 # --- scenario-level parallelism -------------------------------------------------
@@ -310,6 +317,13 @@ def main() -> None:
                    help="PD servo gain multiplier; MUST match the gains --libs "
                         "was collected at")
     p.add_argument("--seed", type=int, default=11)
+    p.add_argument("--wandb-project", default=None,
+                   help="opt-in W&B project; unset = no wandb import at all")
+    p.add_argument("--wandb-name", default=None,
+                   help="run name; defaults to select_dpc_<libs stem>")
+    p.add_argument("--wandb-group", default="expert_panda")
+    p.add_argument("--wandb-tags", default="panda,expert",
+                   help="comma-separated tag list")
     args = p.parse_args()
     if args.jobs <= 0:
         args.jobs = max(1, min(10, (os.cpu_count() or 2) - 2))
@@ -340,6 +354,12 @@ def main() -> None:
     print(f"  median distance to nearest fixed anchor: {np.median(g['dist']):.2f} rad")
     print(f"  Select-DPC drew from {np.median(g['ntraj']):.0f} distinct trajectories "
           f"(of {len(anchors)})")
+    # gate-only: `libs` (K anchor libraries), `bank` (the pooled Select-DPC
+    # bank) and `payload` (the raw npz) are never referenced again -- for a
+    # 20k-anchor bank this is several GB. Freed here, before the worker pool
+    # spawns its own per-process copies of `bank`/`payload` from `--libs`.
+    # `anchors` survives (used in `labels` below; it's tiny, (n, 7) floats).
+    del libs, bank, payload
     if args.gate_only:
         return
 
@@ -382,6 +402,29 @@ def main() -> None:
               f"{np.median([r['final'] for r in res]) * 1e3:>11.1f} mm"
               f"{np.nanmedian([r['eff'] for r in res]):>10.1f}"
               f"{np.mean([r['iters'] for r in res]):>8.2f}", flush=True)
+
+    if args.wandb_project:
+        from pathlib import Path
+
+        from rl.wb import finish, init_run, log_table
+
+        name = args.wandb_name or f"select_dpc_{Path(args.libs).stem}"
+        tags = [t for t in args.wandb_tags.split(",") if t]
+        run = init_run(args.wandb_project, name=name, group=args.wandb_group,
+                       tags=tags, config=vars(args))
+        for row in rows:
+            res = out[row]
+            log_table(run, f"{row}_scenarios",
+                      ["scenario_id", "reached", "steps", "closed_pct",
+                       "final_dist_m", "path_over_net", "iters", "mean_step_ms"],
+                      [(i, bool(r["reached"]), r["steps"], r["closed"],
+                        r["final"], r["eff"], r["iters"], r["mean_step_ms"])
+                       for i, r in enumerate(res)])
+            if run is not None:
+                run.summary[f"{row}_reach_k"] = sum(r["reached"] for r in res)
+                run.summary[f"{row}_reach_n"] = len(res)
+                run.summary[f"{row}_reach"] = sum(r["reached"] for r in res) / len(res)
+        finish(run)
 
 
 if __name__ == "__main__":

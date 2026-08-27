@@ -114,6 +114,10 @@ def main() -> None:
                          "'ext' (10-D tip+normalized q; needs a v1+ libraries file)")
     ap.add_argument("--no-record", action="store_true",
                     help="do not append to data/panda_results.csv")
+    ap.add_argument("--method", default=None,
+                    help="override the CSV method label for --mode eval "
+                         "(default: None -> derive from --output/--libraries "
+                         "via method_name(), the current behavior)")
     args = ap.parse_args()
 
     scen = sc.load()
@@ -154,7 +158,7 @@ def main() -> None:
           f"lambda_g={args.lambda_g:.1e} lambda_y={args.lambda_y:.1e} "
           f"output={args.output!r}\n")
     # Distinct method per (output map, library version) -- see `method_name`.
-    method = method_name(args.output, args.libraries)
+    method = args.method if args.method is not None else method_name(args.output, args.libraries)
     print(f"recording as method {method!r}")
     # Resume: `append_results` does not dedupe, so re-running an interrupted arm
     # would leave two rows per scenario under one (method, scenario_id) key and
