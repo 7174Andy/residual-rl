@@ -1557,6 +1557,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#the-four-arms-on-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The four arms, on video
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#the-eval-drift-catch" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1658,6 +1669,17 @@
   
     <nav class="md-nav" aria-label="The result">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-four-arms-on-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The four arms, on video
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#the-eval-drift-catch" class="md-nav__link">
@@ -1869,6 +1891,52 @@ were residual 2.8 → 4.7 mm at 1.7x, vanilla 1.9 → 3.2 mm at 1.7x.)</p>
 1.7x → 1.4x; vanilla halved both distance medians), and the training curves say
 why 200k was short: vanilla's return plateaus only around ~280k, and the
 residual is still creeping at 400k.</p>
+<h3 id="the-four-arms-on-video">The four arms, on video<a class="headerlink" href="#the-four-arms-on-video" title="Permanent link">&para;</a></h3>
+<p>Claims 1 and 2 above are the two that a table states and a clip shows. Both
+scenarios below are from the frozen 120, picked by outcome rather than by index
+(<code>scripts/record_reacher_residual.py</code>), and both run the <strong>full 50-step horizon
+with early stopping off</strong> — so a controller that arrives and then leaves shows up
+as the readout's <code>now</code> and <code>best</code> numbers separating. RL arms are at 200k.</p>
+<p><strong>Claim 1, the residual beating the expert it was cloned from.</strong> Scenario #4, a
+341 mm reach — the longest kind in the set. The QP expert stops 45 mm out, the
+clone of that expert flies off to 164 mm, and the residual over that same clone
+lands and holds at 6 mm:</p>
+<div style="overflow-x:auto">
+<table>
+<tr><th>Select-DPC (expert)</th><th>DAgger clone</th><th>clone + residual</th><th>vanilla RL</th></tr>
+<tr>
+<td><video controls loop muted playsinline width="200"><source src="../videos/reacher-rescue-ep4-expert.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="200"><source src="../videos/reacher-rescue-ep4-clone.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="200"><source src="../videos/reacher-rescue-ep4-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="200"><source src="../videos/reacher-rescue-ep4-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr>
+<td><small>24.7 → 45.0 mm</small></td>
+<td><small>36.1 → 164.5 mm</small></td>
+<td><small><b>5.4 → 6.0 mm</b></small></td>
+<td><small>3.3 → 3.6 mm</small></td>
+</tr>
+</table>
+</div>
+
+<p><strong>Claim 2, the drift fix, on a scenario both arms reach.</strong> Scenario #1: the clone
+touches 1.8 mm and then leaves, ending 11.1 mm out — <em>outside</em> the 10 mm ring it
+had already been inside. The residual over it touches 1.1 mm and stays at 2.2 mm.
+This is the <code>best→final</code> column as a picture:</p>
+<div style="overflow-x:auto">
+<table>
+<tr><th>DAgger clone — arrives, then leaves</th><th>clone + residual — arrives, holds</th></tr>
+<tr>
+<td><video controls loop muted playsinline width="330"><source src="../videos/reacher-hold-ep1-clone.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../videos/reacher-hold-ep1-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr>
+<td><small>1.8 → 11.1 mm (drifts back outside tolerance)</small></td>
+<td><small><b>1.1 → 2.2 mm</b></small></td>
+</tr>
+</table>
+</div>
+
 <h3 id="the-eval-drift-catch">The eval-drift catch<a class="headerlink" href="#the-eval-drift-catch" title="Permanent link">&para;</a></h3>
 <p>The first 200k evaluation was recorded before later working-tree changes, and
 its CSV is <strong>not comparable</strong> to any fresh run: under the current tree the
@@ -1999,6 +2067,7 @@ clone it wraps. And <strong>#52 is a 0.7 mm loss</strong> scored as a flat zero.
 leaves, ending 34.7 mm out — 6.1x on this episode, where the table's median
 distances give 1.4x. It costs no reach because vanilla misses #111 outright
 (18.1 mm, never inside), which is what a 113/120 arm looks like at 200k.</p>
+<div style="overflow-x:auto">
 <table>
 <tr><th></th><th>DAgger clone</th><th>clone + residual</th><th>vanilla RL</th></tr>
 <tr>
@@ -2026,6 +2095,7 @@ distances give 1.4x. It costs no reach because vanilla misses #111 outright
 <td><video controls loop muted playsinline width="240"><source src="../videos/reacher-drift-ep111-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
 </tr>
 </table>
+</div>
 
 <p>Clips run the full 50-step horizon with early stopping <strong>off</strong>, so "arrive and
 leave" reads as the readout's <code>now</code> and <code>best</code> separating. The Select-DPC column
@@ -2135,6 +2205,45 @@ the average; the claims below are stated against the seed range.</p>
    ~375k vanilla does on every seed, by 1–4 scenarios; in between the winner
    is seed-dependent (mean crossing ~125–150k).</li>
 </ol>
+<h3 id="the-head-start-on-one-episode">The head start, on one episode<a class="headerlink" href="#the-head-start-on-one-episode" title="Permanent link">&para;</a></h3>
+<p>The same scenario #4 as above, held fixed while only the training budget changes
+(<code>--episode 4</code>, seed 0, <code>best → final</code> under each clip). This is the sweep table
+as a picture: the residual is useful at 75k where vanilla is still 21 mm short,
+and by 400k the ordering has reversed.</p>
+<div style="overflow-x:auto">
+<table>
+<tr><th>budget</th><th>clone + residual</th><th>vanilla RL</th></tr>
+<tr>
+<td><b>25k</b><br><small>residual below the clone it wraps; vanilla barely leaves its start</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-025k-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small>30.8 → 43.1 mm</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-025k-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small>87.1 → 88.5 mm</small></td>
+</tr>
+<tr>
+<td><b>75k</b><br><small>the widest gap on the sweep — 102/120 against 36/120</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-075k-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small><b>2.8 → 3.6 mm</b></small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-075k-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small>21.7 → 21.8 mm</small></td>
+</tr>
+<tr>
+<td><b>200k</b><br><small>both reach; vanilla is already the tighter of the two</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-200k-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small><b>5.4 → 6.0 mm</b></small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-200k-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small><b>3.3 → 3.6 mm</b></small></td>
+</tr>
+<tr>
+<td><b>400k</b><br><small>plateau — vanilla is the more precise arm</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-400k-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small><b>2.0 → 2.2 mm</b></small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-400k-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small><b>0.3 → 1.2 mm</b></small></td>
+</tr>
+</table>
+</div>
+
+<p>One episode is an illustration, not evidence — the 5-seed sweep above is the
+evidence, and it is what the seed-dependent crossover (75k–375k) is measured
+from. Reproduce any row with:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/record_reacher_residual.py<span class="w"> </span>--episode<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>--residual<span class="w"> </span>data/reacher_ckpt_seeds/resf2_s0/ckpt_75000_steps.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--vanilla<span class="w"> </span>data/reacher_van_ckpt_400k/ckpt_75000_steps.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>--out-dir<span class="w"> </span>videos/reacher_ladder/75000
+</span></code></pre></div>
 <h2 id="how-dagger-solves-the-imitation-learning-problem">How DAgger solves the imitation-learning problem<a class="headerlink" href="#how-dagger-solves-the-imitation-learning-problem" title="Permanent link">&para;</a></h2>
 <p>This is the fix that made the clone usable, so it is worth being precise about.</p>
 <p>The problem in one sentence: the clone was trained to answer <em>"what does the
@@ -2214,10 +2323,10 @@ not the system. The unicycle's original clone escaped only because journey
 </tbody>
 </table>
 <p><code>reacher/clone_data.py::dagger_rollout</code> is the whole idea in four lines:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">u_label</span> <span class="o">=</span> <span class="n">expert</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">y_pre</span><span class="p">,</span> <span class="n">y_ref</span><span class="p">)</span>   <span class="c1"># expert answers &quot;what should you do HERE?&quot;</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">acts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clip</span><span class="p">(</span><span class="n">u_label</span><span class="p">))</span>           <span class="c1"># -&gt; the training target</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">u_apply</span> <span class="o">=</span> <span class="n">policy</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>          <span class="c1"># the CLONE decides where we actually go</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">u_apply</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">u_label</span> <span class="o">=</span> <span class="n">expert</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">y_pre</span><span class="p">,</span> <span class="n">y_ref</span><span class="p">)</span>   <span class="c1"># expert answers &quot;what should you do HERE?&quot;</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">acts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clip</span><span class="p">(</span><span class="n">u_label</span><span class="p">))</span>           <span class="c1"># -&gt; the training target</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">u_apply</span> <span class="o">=</span> <span class="n">policy</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>          <span class="c1"># the CLONE decides where we actually go</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">u_apply</span><span class="p">)</span>
 </span></code></pre></div>
 <p>The dataset only grows — <code>scripts/run_dagger.py</code> aggregates rather than replaces,
 hence "Dataset Aggregation" — so later rounds keep the expert's distribution while
