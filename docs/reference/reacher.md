@@ -9,11 +9,11 @@ locally invertible and nothing is hidden from the output. That is the property
 `PandaReach-v0` lacks, and it is why a local-library DeePC that fails on the Panda
 succeeds here at a data budget of tens of trajectories rather than ~10⁵.
 
-## There is no `Reacher` Gym env in this repo
+## Two layers: a bare MuJoCo module, and a Gym env on top
 
-Unlike `TwoWheelGoal-v0` and `PandaReach-v0`, nothing here is registered with
-Gymnasium. `reacher/model.py` compiles Gymnasium's own bundled `reacher.xml` and
-drives it through the MuJoCo bindings directly:
+The classical controllers never touch Gymnasium. `reacher/model.py` compiles
+Gymnasium's own bundled `reacher.xml` and drives it through the MuJoCo bindings
+directly:
 
 ```python
 from reacher.model import load_model, sample_config, sample_goal, set_state, step_torque, frame_skip
@@ -28,11 +28,17 @@ set_state(model, data, q, goal)     # writes qpos[0:2] AND qpos[2:4]
 ctrl = step_torque(model, data, u, fs)
 ```
 
-There is no observation vector, no reward function and no `step()` returning
-`terminated` — episodes are driven by the scripts, which own their own reach
-criterion (`--tol`, default 10 mm) and step budget (`--steps`, default 50, the
-`Reacher-v5` horizon). The package is a control-oriented layer over the model, not
-an RL env.
+That module has no observation vector, no reward function and no `step()`
+returning `terminated` — episodes are driven by the scripts, which own their own
+reach criterion (`--tol`, default 10 mm) and step budget (`--steps`, default 50,
+the `Reacher-v5` horizon). It is a control-oriented layer over the model, not an
+RL env.
+
+`reacher/env.py` adds the RL-facing layer on top: Gym ID **`ReacherGoal-v0`**,
+registered on `import reacher`, with `max_episode_steps=None` because the env
+truncates itself. It is additive — DeePC and Select-DPC still go through
+`reacher/model.py`, and no classical number moved when it landed. Its signals are
+in [RL interface](#rl-interface-reachergoal-v0) below.
 
 ## Quick orientation
 
@@ -100,25 +106,98 @@ the fingertip block would remove that 6× redundancy. Untried.
 
 ## DeePC interface
 
-`reacher/deepc_setup.py`. Signals:
+`reacher/deepc_setup.py`. Signals — what `u` and `y` mean to the controller in
+general is [the DeePC signals section](../controllers/deepc.md#signals-the-control-input-u-and-the-output-y);
+this is what Reacher plugs in:
 
 | | |
 |---|---|
-| `u` | `τ ∈ [−1, 1]²` — the actuator input, a genuine torque |
+| `u` | `τ ∈ [−1, 1]²` — the actuator input, a genuine torque, and **the identical signal** the RL policies emit as their action |
 | `y` | `[q; fingertip] ∈ ℝ⁴` — `outputs(q_traj, tip_traj)` |
 | `y_ref` | `[0, 0, gx, gy]` — `y_ref_for(goal)`; the joint block is unweighted, so its value is free |
 | `Q` | `diag(0, 0, 1, 1)` — tracking cost is **fingertip-only** |
 | `R` | `1.0e-3 · I₂` |
 
-The `y` shape follows the Panda's `y = [q; p_ee]` for the same two measured
-reasons: the joint block makes the state observable through the `Yp`/`Yf`
-constraints, and putting the *fingertip* (rather than a scalar goal-distance) in
-`y` keeps the libraries **goal-free** — one Hankel build serves every target, with
-the goal entering only through `y_ref`.
+### `u` — 2-D joint torque, `m_u = 2`
 
-`R` means something different here than on the Panda. Under a position servo,
-`uᵀRu` penalized distance from `q = 0`; under direct torque it penalizes genuine
-control effort.
+`u = (τ₀, τ₁) ∈ [−1, 1]²`, one component per arm joint, written straight into
+`data.ctrl` by `step_torque`.
+
+- **It is a genuine torque.** `gaintype=FIXED`, `biastype=NONE`, `gear=200`, so the
+  applied joint torque is `200·u` N·m. Nothing sits between the controller's number
+  and the plant. Contrast the Panda, where `u` is a delta into a PD position servo
+  and the plant's true input is the post-clip `ctrl` — the distinction that forces
+  two `u` conventions there and none here.
+- **It is the identical signal the RL policies emit.** `ReacherGoal-v0`'s action
+  space is the same `[−1, 1]²`, so a QP solve and a policy forward pass are
+  interchangeable at the plant boundary. That is what makes the clone, the residual
+  and DeePC comparable at all — see [RL interface](#rl-interface-reachergoal-v0).
+- `u_bounds = (−1, +1)` per joint, matching the actuator's own `ctrlrange`.
+  `step_torque` clips to the same box, so the QP bound and the plant agree rather
+  than the bound adding a restriction.
+- **`du_max` is `None`, and nothing is missing.** A torque may jump between steps
+  without leaving the region its library describes, and the box is native. The Panda
+  needs a rate limit precisely because its `u` is an absolute position target.
+- `R = 1.0e-3 · I₂` therefore penalizes **genuine control effort**. Under the
+  Panda's position servo the same `uᵀRu` penalized distance from `q = 0` — same
+  formula, different meaning, because `u` is a different kind of object there.
+
+### `y` — 4-D, joints stacked on fingertip, `p_y = 4`
+
+`y = [q₀, q₁, tip_x, tip_y]` = `outputs(q_traj, tip_traj)`: two radians followed by
+two metres.
+
+| block | components | units | what it does |
+|---|---|---|---|
+| `y[0:2]` | `q₀, q₁` | rad | keys the library, informs prediction — **not tracked** |
+| `y[2:4]` | `tip_x, tip_y` | m | tracked against the goal |
+
+The controller's [three jobs for `y`](../controllers/deepc.md#signals-the-control-input-u-and-the-output-y)
+land on different blocks here:
+
+1. **Library selection reads `y[0:2]` only.** `ReacherDeePC._select_index_for`
+   overrides the base class, which keys on a scalar and picks the nearest anchor
+   *on a circle* — right for a heading, wrong for a 2-D configuration. It uses
+   `config_distance`, which **wraps** the first component, since `joint0` is
+   unlimited.
+2. **The past buffer takes all four.** At `T_ini = 5`, `u_ini` is `(5, 2)` and
+   `y_ini` is `(5, 4)`.
+3. **Tracking sees `y[2:4]` only**, because `Q = diag(0, 0, 1, 1)`.
+
+`y_ref = [0, 0, gₓ, g_y]`. The joint block's value is arbitrary and never read, its
+weight being zero — the zeros are a placeholder, **not a target pose**. Only the tip
+block carries the goal.
+
+Two consequences of putting the *fingertip* in `y` rather than a scalar
+goal-distance:
+
+- The libraries are **goal-free**, so one Hankel build serves every target and the
+  goal enters only through `y_ref`.
+- The joint block makes the state observable through the `Yp`/`Yf` constraints. On a
+  2-link arm `q → tip` is already generically invertible, so this earns less here
+  than on the Panda where it was measured; it costs nothing and keeps both setups the
+  same shape.
+
+### Shapes at the defaults
+
+`T_ini = 5`, `N = 12`, `T = 1200` samples per anchor, so `L = T_ini + N = 17` and
+`n_cols = T − L + 1 = 1184`:
+
+| | | |
+|---|---|---|
+| `Up` | `(T_ini·m_u, n_cols)` | `(10, 1184)` |
+| `Uf` | `(N·m_u, n_cols)` | `(24, 1184)` |
+| `Yp` | `(T_ini·p_y, n_cols)` | `(20, 1184)` |
+| `Yf` | `(N·p_y, n_cols)` | `(48, 1184)` |
+
+The default `6 × 5` grid gives 30 anchors, hence 30 such libraries. All share
+`n_cols`, since they take turns filling one cached QP's parameters.
+
+!!! note "`τ` means two things in this document"
+    Above, `u = τ` is the joint torque. Under [Select-DPC](#select-dpc) below, `τ`
+    is the paper's stacked *trajectory* vector that column selection scores
+    against. Different objects; the collision comes from the two papers, not from
+    this repo.
 
 ### Excitation carries a restoring term, and it is not optional
 
@@ -183,6 +262,93 @@ as-is. The Panda's `τ` under-weights its tip block ~10×.
 
 Two design parameters, easy to conflate: `n_cols` (the paper's `N_cols`, columns
 selected per solve, held at 300 throughout) and `n_max` (the iteration cap).
+
+## RL interface — `ReacherGoal-v0`
+
+`reacher/env.py`. Two RL arms consume it — `scripts/train_reacher_vanilla.py` and
+`scripts/train_reacher_residual.py` — and **they do not see the same observation
+vector.** The *why* is [journey 13](../journey/13-reacher-residual.md); this is the
+contract.
+
+### The env itself
+
+| | |
+|---|---|
+| Observation | `[cos q (2), sin q (2), qvel (2), tip − goal (2)] ∈ ℝ⁸`, bounds `[±1, ±1, ±50, ±0.5]` |
+| Action | `τ ∈ [−1, 1]²` — the same actuator input DeePC drives, so a policy and a QP command the identical plant |
+| Reward | `−‖tip − goal‖ − 1e-3·τᵀτ + 1.0·[dist < 0.01]`, dense and **unsquared** |
+| Horizon | `max_steps = 50`; `terminated` is **always False**, only `truncated` fires |
+| `goal_tolerance` | `0.01` m |
+
+Three things the observation's shape encodes:
+
+- **Angles enter as `cos`/`sin`, never raw.** `joint0` is unlimited and wraps, so a
+  raw angle is discontinuous at ±π and the policy would see a cliff there — the
+  same fact that forces `config_distance` on the DeePC side.
+- **`qvel`'s ±50 bound is an observation box, not a physical limit.** Torque ×
+  `gear = 200` exceeds it transiently, so `build_obs` **clips** into the box rather
+  than the box being widened; an observation outside its declared space silently
+  breaks SB3's normalization and gymnasium's checker.
+- **The goal enters only as `tip − goal`.** No absolute target coordinates, so the
+  policy is invariant to where in the workspace the episode happens — the analogue
+  of the unicycle's body-frame observation.
+
+**The observation is not `y`.** `y = [q; fingertip] ∈ ℝ⁴` stays exactly as
+`deepc_setup` defines it and is exposed as a property, so a Select-DPC buffer and
+this env's measurement remain the same object. The 8-D vector above is the policy
+input and nothing else reads it.
+
+**Neither arm is a POMDP.** The reward is a function of the applied torque and the
+post-step distance, both visible to the agent. Contrast the unicycle
+([journey 09](../journey/09-vanilla-rl.md)), whose `Q₂₂δ²` term is in absolute
+world heading while `δ` appears nowhere in the body-frame observation — up to 19.7
+reward per step unexplainable from the agent's view.
+
+### Vanilla — the env, unwrapped
+
+SAC on `gym.make("ReacherGoal-v0")` with only a `Monitor` around it. **No
+`RescaleObservation`, no `VecNormalize`**: the policy consumes the raw 8-D vector
+with `qvel` at its native scale. Evaluation feeds `env.unwrapped.build_obs()`, the
+same raw vector, so training and evaluation agree with each other.
+
+They do *not* agree with the residual arm, which normalizes. On the unicycle both
+arms were min-max scaled alike (journey 09); here they are not, and that is an
+uncontrolled difference between the two arms rather than a measured choice —
+journey 13's caveat about the residual's ~18× channel compression is the same
+issue seen from the other side.
+
+### Residual — `u_base` appended, everything normalized
+
+`reacher/residual_env.py::ResidualSelectEnv` wraps the same inner env around a
+frozen clone of the base controller.
+
+| | |
+|---|---|
+| Observation | the inner 8 **plus the clone's `u_base` (2)** = `ℝ¹⁰`, min-max mapped to `[−1, 1]` |
+| Action | `a_res ∈ [−1, 1]²` — a **correction**, not a torque |
+| Applied | `u = clip(u_base + residual_frac · half_range · a_res, −1, 1)`, `half_range = 1.0` |
+
+`half_range` is 1.0 because the torque box is already `[−1, 1]`, so `residual_frac`
+reads directly as the fraction of full authority the policy may add. Normalization
+is against the declared bounds, not running statistics — nothing to persist, and
+the zero-residual invariant survives it.
+
+Two consequences worth knowing:
+
+- **The residual sees history only through `u_base`.** The clone's features come
+  from a `T_ini = 5` buffer of `(applied u, pre-step y)`; the residual policy's own
+  observation is memoryless. The buffer slide uses exactly the labelling the clone
+  was trained under, so a zero residual reproduces the clone's closed loop
+  bit-for-bit, and `zero_init_actor` zeroes the actor's mean head so training
+  *starts* there.
+- **The `residual_frac` defaults disagree between training and evaluation.**
+  `train_reacher_residual.py` still defaults to `1.0`, while
+  `eval_reacher_residual.py` and `sweep_reacher_checkpoints.py` default to `2.0`.
+  Every residual number in journey 13 is a **`--residual-frac 2.0`** run, so pass
+  it explicitly when training or the policy learns against half the authority it is
+  later evaluated with. Frac 1.0 loses to 2.0 on every seed (400k pooled: 578/600
+  at 3.13 mm against 589/600 at 2.51 mm) — the unicycle's dead-zone lesson,
+  measured again here.
 
 ## Measured results
 
@@ -307,6 +473,10 @@ All defaults are baked into `argparse`; there are no config files.
 | `scripts/record_reacher_video.py` | DeePC vs random torque on the same episodes; supplies the camera, lights and tolerance ring the XML lacks | `--scan 20` `--fps 25` `--size 720 720` `--out-dir videos/reacher` |
 | `scripts/record_reacher_compare.py` | paired fixed-vs-Select clips, full horizon, showing `rescue` / `drift` / `both` / `neither` | `--scan 30` `--out-dir videos/reacher_compare` |
 | `scripts/plot_reacher_results.py` | renders `reacher_results.png` from `reacher_results.csv` (transcribed, not recomputed — the closed-loop rows cost ~15 min of QP each) | `--out docs/reference/reacher_results.png` |
+| `scripts/train_reacher_vanilla.py` | SAC from scratch on the bare env — the control arm | `--steps 200000` `--algo sac` `--lr 3e-4` `--seed 0` |
+| `scripts/train_reacher_residual.py` | zero-init SAC residual over the frozen clone | `--clone data/dagger_clone_r3.pt` `--residual-frac 1.0` (**pass `2.0`** — see above) `--steps 200000` |
+| `scripts/eval_reacher_residual.py` | the 5-row table + figure: Select-DPC, clone, clone+residual, vanilla, on 120 shared scenarios | `--episodes 120` `--residual-frac 2.0` `--algo sac` |
+| `scripts/record_reacher_residual.py` | four-arm clips, full horizon, picked by outcome from a scan: `rescue` / `both_succeed` / `widest_drift` plus the residual's own `residual_miss` and `residual_widest_drift` | `--scan 120` `--residual-frac 2.0` `--n-miss 3` `--only residual_miss` `--out-dir videos/reacher_residual_frac2` |
 
 Typical first run:
 

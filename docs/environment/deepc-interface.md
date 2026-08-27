@@ -15,6 +15,8 @@ The env exposes a fixed set of accessors that DeePC (and any other data-driven p
 
 `y` and `y_ref` are dim 3 — the paper's choice — so the behavioral predictor sees heading even though `Q[2, 2] = 0` keeps it out of the runtime cost.
 
+This table is `TwoWheelGoal-v0`-specific. `u` and `y` are *derived* per system from the Hankel matrices, not fixed by the controller — `PandaReach-v0` and Reacher-v5 plug in different shapes and a different library key. For what the two symbols mean in general, and what each system supplies, see [the DeePC signals section](../controllers/deepc.md#signals-the-control-input-u-and-the-output-y).
+
 ## What's *not* in this interface
 
 - No past-trajectory buffer. DeePC manages its own.

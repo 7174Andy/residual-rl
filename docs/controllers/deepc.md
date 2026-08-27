@@ -2,6 +2,69 @@
 
 The `DeePC` controller implements the regularized hybrid form from [arXiv:2603.07395](https://arxiv.org/abs/2603.07395), built on the original DeePC framework from [arXiv:1811.05890](https://arxiv.org/abs/1811.05890).
 
+## Signals — the control input `u` and the output `y`
+
+`core.deepc.DeePC` is system-agnostic: it never sees a state, a goal, or an env. It sees two time series, `u` and `y`, and its entire model of the plant is the offline data compiled into the Hankel matrices. Everything below is what those two symbols mean.
+
+### `u` — the control input, dimension `m_u`
+
+`act()` returns `u_t` of shape `(m_u,)`. It is the **first block** of the `N`-step plan `U_f g`; the remaining `N − 1` blocks are computed and then discarded, and the QP is re-solved next step. Receding horizon — plan `N`, apply one.
+
+`m_u` is never declared. It is derived as `Up.shape[0] // T_ini` from the first library, and every other library must agree, since they share one set of Hankel parameters. `R` must then be `(m_u, m_u)` or construction raises.
+
+Two bounds act on `u`, and they are not the same thing:
+
+| | what it limits | default |
+|---|---|---|
+| `u_bounds` | **where** `u` may sit — applied to all `N` steps of the plan, then re-clipped on return, since solver tolerance can leave sub-microscopic violations | `None` |
+| `du_max` | **how far `u` may move in one step**, against the last applied input | `None` |
+
+Omitting `du_max` is harmless when `u` is a velocity, and not harmless when `u` is an absolute position target: measured on `PandaReach-v0`, the QP asked for a median **1.9–3.1 rad of movement per 20 ms step**, far outside the neighbourhood its library was collected in, making every command an extrapolation of a locally-valid model.
+
+!!! warning "`u` must be the plant's *true* input, not the command you issued"
+    Where the plant clips or transforms a command, identifying on the pre-transform signal mislabels every affected sample. On `PandaReach-v0` the safe-box clip fires on **24–48 % of steps** under excitation, and the repo carries **two incompatible `u` conventions** because of it:
+
+    | path | `u` is | reaches the plant via |
+    |---|---|---|
+    | anchor/Hankel DeePC (`panda/deepc_setup.py`) | the **delta** `Δq ∈ [−0.2, 0.2]⁷` | `env.step(u)` → `ctrl = clip(q + u, box)` |
+    | Select-DPC (`panda/selectdpc.py`, `panda/qdes.py`) | the **absolute target** `q_des` | `step_qdes` → `ctrl = clip(q_des, box)`, never through `env.step()` |
+
+    Both hardcode the key `u_i` in the collection payload with opposite units — a ~0.2 rad delta against an absolute angle spanning the whole safe box — so one flat dict cannot serve both. `panda/task_bank.py::for_select_dpc` exists solely to re-key for the second; read its module docstring before feeding either consumer a payload.
+
+### `y` — the output, dimension `p_y`
+
+`act(y_current, y_ref)` takes `y_current` of shape `(p_y,)`, with `p_y = Yp.shape[0] // T_ini` derived the same way as `m_u`. `Q` must be `(p_y, p_y)`.
+
+`y` does **three separate jobs**, worth keeping apart because a component can do some and not others:
+
+1. **Selects the library.** `_select_index_for` keys on `y[heading_index]` (default index 2), or on `key_fn(y)` when the keying quantity is a *function* of `y` rather than a component of it — under `key_fn` the key need not appear in `y` at all.
+2. **Updates the past buffer.** After the solve, `y_current` is appended to `y_buf`, becoming part of the next step's `y_ini` in the soft constraint `Y_p g + \sigma_y = y_{\text{ini}}`.
+3. **Is what gets tracked**, through `\lVert Y_f g - y_{\text{ref}} \rVert^2_{\bar Q}`.
+
+**Job 3 is optional per component.** Zeroing a block of `Q` keeps that block doing jobs 1 and 2 — informing prediction through the `Y_p`/`Y_f` constraints — while removing it from the objective. Both non-unicycle systems use this deliberately: the Reacher's `Q = diag(0, 0, 1, 1)` tracks the fingertip while the joint block makes the state observable, and the Panda's `Q = diag(I₃, 0₇)` makes the 10-D extended output's tracking cost *numerically identical* to the tip-only case.
+
+It is also why `y` carries the tip/fingertip **position** rather than a scalar goal-distance: that keeps the libraries **goal-free**, so one Hankel build serves every target and the goal enters only through `y_ref`.
+
+`y_ref` is either `(p_y,)`, broadcast across the `N`-step horizon, or `(N, p_y)` for a per-step reference.
+
+### Alignment
+
+`y_t` is recorded **before** `u_t` is applied, so `y_{t+1}` is the response to `u_t`. Every collection in this repo uses that convention. A library built the other way is off by one step, and nothing downstream catches it — the QP will happily solve a wrong model.
+
+### What each system plugs in
+
+| | `TwoWheelGoal-v0` | `PandaReach-v0` (`output="ext"`) | Reacher-v5 |
+|---|---|---|---|
+| `u` | `(v, w)` velocities, `m_u = 2` | `Δq` delta, `m_u = 7` | `τ` torque, `m_u = 2` |
+| `u_bounds` | `v ∈ [0, 20]`, `w ∈ [±π/2]` | `±0.2` per joint | `±1` per joint |
+| `y` | `(x, y, δ)`, `p_y = 3` — **is** the full state | `(tip, q_norm)`, `p_y = 10` | `[q; fingertip]`, `p_y = 4` |
+| `Q` | `diag(1, 1, 2)` | `diag(I₃, 0₇)` | `diag(0, 0, 1, 1)` |
+| `R` | `1.3e-3 · I₂` | `1.0e-2 · I₇` | `1.0e-3 · I₂` |
+| Library key | `y[2]`, the heading | `key_fn` = tip azimuth `atan2(y[1], y[0])` | overridden: wrapped `config_distance` on `y[:2]` |
+| `du_max` | `None` — `u` is a velocity | `None` in the canonical builder | `None` — torque is natively bounded |
+
+The unicycle is the only one of the three whose `y` observes the whole state; that asymmetry, not nonlinearity, is the main structural difference between the systems. See the [Reacher reference](../reference/reacher.md) and `panda/env.py` for the measurements behind it.
+
 ## The QP solved every step
 
 $$

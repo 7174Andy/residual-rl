@@ -127,6 +127,80 @@ knife-edge scenarios costs the occasional bonus step. The frac-1.0 version of
 this section read the same mechanism at 3x the size; widening the residual's
 authority shrank it without changing its sign.
 
+### The three it misses
+
+Which scenarios the residual fails is a scan, not a sample: the recorder scores
+all 120 with the deployed policy and picks by outcome
+(`scripts/record_reacher_residual.py --scan 120 --n-miss 3`). Both RL arms below
+are their **200k** checkpoints — the `reach @200k` column above (117/120 and
+113/120), not the 400k plateau where vanilla is perfect. The misses are **#0,
+#52 and #93**, and the widest best→final gap the residual still owns is **#111**,
+which the reach rate scores as a success.
+
+| scenario | start | Select-DPC | DAgger clone | clone + residual | vanilla RL |
+| --- | --- | --- | --- | --- | --- |
+| #0 | 58 mm | 3.0 → 3.1 | 5.4 → 14.1 | **16.7 → 16.9** | 4.2 → 5.5 |
+| #52 | 57 mm | 0.8 → 22.0 | 4.6 → 13.7 | **10.7 → 24.0** | 5.6 → 5.7 |
+| #93 | 182 mm | 2.8 → 3.3 | 10.9 → 27.9 | **22.8 → 24.4** | 8.8 → 8.8 |
+| #111 | 198 mm | 0.7 → 1.5 | 1.4 → 1.9 | **5.7 → 34.7** | 18.1 → 18.1 |
+
+(`best → final` in mm, 10 mm tolerance, seed 0. Bold is the arm under test.)
+
+Two things here that the aggregate rows cannot show. **The base is already
+outside or on the edge in all three misses** — the clone's best is 5.4 / 4.6 /
+10.9 mm and its final is outside tolerance in every one, so the residual is
+correcting a trajectory that arrived badly; on #0 it ends *further* out than the
+clone it wraps. And **#52 is a 0.7 mm loss** scored as a flat zero.
+
+#111 is the residual's own worst case rather than an inherited one: expert and
+clone both park (1.5 and 1.9 mm final) while the residual arrives at 5.7 mm and
+leaves, ending 34.7 mm out — 6.1x on this episode, where the table's median
+distances give 1.4x. It costs no reach because vanilla misses #111 outright
+(18.1 mm, never inside), which is what a 113/120 arm looks like at 200k.
+
+<table>
+<tr><th></th><th>DAgger clone</th><th>clone + residual</th><th>vanilla RL</th></tr>
+<tr>
+<td><b>#0</b><br><small>the residual ends further out than the clone it wraps</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-miss-ep0-clone.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-miss-ep0-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-miss-ep0-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr>
+<td><b>#52</b><br><small>a 0.7 mm loss — best 10.7 mm against a 10 mm ring</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-miss-ep52-clone.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-miss-ep52-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-miss-ep52-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr>
+<td><b>#93</b><br><small>the longest reach in the set; the clone stalls, the residual stalls further out</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-miss-ep93-clone.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-miss-ep93-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-miss-ep93-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr>
+<td><b>#111</b><br><small>scored as a reach — arrives at 5.7 mm, ends 34.7 mm out</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-drift-ep111-clone.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-drift-ep111-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-drift-ep111-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+</table>
+
+Clips run the full 50-step horizon with early stopping **off**, so "arrive and
+leave" reads as the readout's `now` and `best` separating. The Select-DPC column
+is omitted above for width; all four arms are in `videos/reacher_residual_frac2/`:
+
+```bash
+uv run python scripts/record_reacher_residual.py --scan 120 \
+  --residual data/reacher_ckpt_seeds/resf2_s0/ckpt_200000_steps.zip \
+  --residual-frac 2.0 --n-miss 3 --only residual_miss,residual_widest_drift \
+  --out-dir videos/reacher_residual_frac2
+```
+
+`videos/reacher_residual/` is the same recorder run against the **superseded
+frac-1.0** policy, which misses 7 of 120 (#29, #38, #44, #68, #80, #107, #115) —
+the reach cost of the narrower authority, visible episode by episode.
+
 ### The crossover, measured
 
 Both 400k runs saved a checkpoint every 25k steps, so the sample-efficiency
