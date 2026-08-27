@@ -2990,6 +2990,11 @@ improving without reaching improving is a pattern worth distrusting on sight.</p
 <td><code>--episodes 120</code> <code>--residual-frac 2.0</code> <code>--algo sac</code></td>
 </tr>
 <tr>
+<td><code>scripts/record_reacher_dagger.py</code></td>
+<td>paired BC-vs-DAgger clone clips on the frozen 120, full horizon, picked by outcome: <code>rescue</code> / <code>both</code> / <code>bc_drift</code> / <code>regression</code> / <code>neither</code></td>
+<td><code>--scan 120</code> <code>--bc-clone data/reacher_clone_ml.pt</code> <code>--dagger-clone data/dagger_clone_r3.pt</code> <code>--episode 4</code> <code>--out-dir videos/reacher_dagger</code></td>
+</tr>
+<tr>
 <td><code>scripts/record_reacher_residual.py</code></td>
 <td>four-arm clips, full horizon, picked by outcome from a scan: <code>rescue</code> / <code>both_succeed</code> / <code>widest_drift</code> plus the residual's own <code>residual_miss</code> and <code>residual_widest_drift</code></td>
 <td><code>--scan 120</code> <code>--residual-frac 2.0</code> <code>--n-miss 3</code> <code>--only residual_miss</code> <code>--out-dir videos/reacher_residual_frac2</code></td>
