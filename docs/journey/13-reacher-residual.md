@@ -79,6 +79,56 @@ Doubling training bought both arms real precision (the residual's drift fell
 why 200k was short: vanilla's return plateaus only around ~280k, and the
 residual is still creeping at 400k.
 
+### The four arms, on video
+
+Claims 1 and 2 above are the two that a table states and a clip shows. Both
+scenarios below are from the frozen 120, picked by outcome rather than by index
+(`scripts/record_reacher_residual.py`), and both run the **full 50-step horizon
+with early stopping off** — so a controller that arrives and then leaves shows up
+as the readout's `now` and `best` numbers separating. RL arms are at 200k.
+
+**Claim 1, the residual beating the expert it was cloned from.** Scenario #4, a
+341 mm reach — the longest kind in the set. The QP expert stops 45 mm out, the
+clone of that expert flies off to 164 mm, and the residual over that same clone
+lands and holds at 6 mm:
+
+<div style="overflow-x:auto">
+<table>
+<tr><th>Select-DPC (expert)</th><th>DAgger clone</th><th>clone + residual</th><th>vanilla RL</th></tr>
+<tr>
+<td><video controls loop muted playsinline width="200"><source src="../videos/reacher-rescue-ep4-expert.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="200"><source src="../videos/reacher-rescue-ep4-clone.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="200"><source src="../videos/reacher-rescue-ep4-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="200"><source src="../videos/reacher-rescue-ep4-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr>
+<td><small>24.7 → 45.0 mm</small></td>
+<td><small>36.1 → 164.5 mm</small></td>
+<td><small><b>5.4 → 6.0 mm</b></small></td>
+<td><small>3.3 → 3.6 mm</small></td>
+</tr>
+</table>
+</div>
+
+**Claim 2, the drift fix, on a scenario both arms reach.** Scenario #1: the clone
+touches 1.8 mm and then leaves, ending 11.1 mm out — *outside* the 10 mm ring it
+had already been inside. The residual over it touches 1.1 mm and stays at 2.2 mm.
+This is the `best→final` column as a picture:
+
+<div style="overflow-x:auto">
+<table>
+<tr><th>DAgger clone — arrives, then leaves</th><th>clone + residual — arrives, holds</th></tr>
+<tr>
+<td><video controls loop muted playsinline width="330"><source src="../videos/reacher-hold-ep1-clone.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../videos/reacher-hold-ep1-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr>
+<td><small>1.8 → 11.1 mm (drifts back outside tolerance)</small></td>
+<td><small><b>1.1 → 2.2 mm</b></small></td>
+</tr>
+</table>
+</div>
+
 ### The eval-drift catch
 
 The first 200k evaluation was recorded before later working-tree changes, and
@@ -158,6 +208,7 @@ leaves, ending 34.7 mm out — 6.1x on this episode, where the table's median
 distances give 1.4x. It costs no reach because vanilla misses #111 outright
 (18.1 mm, never inside), which is what a 113/120 arm looks like at 200k.
 
+<div style="overflow-x:auto">
 <table>
 <tr><th></th><th>DAgger clone</th><th>clone + residual</th><th>vanilla RL</th></tr>
 <tr>
@@ -185,6 +236,7 @@ distances give 1.4x. It costs no reach because vanilla misses #111 outright
 <td><video controls loop muted playsinline width="240"><source src="../videos/reacher-drift-ep111-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
 </tr>
 </table>
+</div>
 
 Clips run the full 50-step horizon with early stopping **off**, so "arrive and
 leave" reads as the readout's `now` and `best` separating. The Select-DPC column
@@ -257,6 +309,50 @@ Three measured claims replace the asserted one:
    steps the pipeline's best policy wins on every seed (4/5 at 75k); above
    ~375k vanilla does on every seed, by 1–4 scenarios; in between the winner
    is seed-dependent (mean crossing ~125–150k).
+
+### The head start, on one episode
+
+The same scenario #4 as above, held fixed while only the training budget changes
+(`--episode 4`, seed 0, `best → final` under each clip). This is the sweep table
+as a picture: the residual is useful at 75k where vanilla is still 21 mm short,
+and by 400k the ordering has reversed.
+
+<div style="overflow-x:auto">
+<table>
+<tr><th>budget</th><th>clone + residual</th><th>vanilla RL</th></tr>
+<tr>
+<td><b>25k</b><br><small>residual below the clone it wraps; vanilla barely leaves its start</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-025k-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small>30.8 → 43.1 mm</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-025k-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small>87.1 → 88.5 mm</small></td>
+</tr>
+<tr>
+<td><b>75k</b><br><small>the widest gap on the sweep — 102/120 against 36/120</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-075k-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small><b>2.8 → 3.6 mm</b></small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-075k-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small>21.7 → 21.8 mm</small></td>
+</tr>
+<tr>
+<td><b>200k</b><br><small>both reach; vanilla is already the tighter of the two</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-200k-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small><b>5.4 → 6.0 mm</b></small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-200k-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small><b>3.3 → 3.6 mm</b></small></td>
+</tr>
+<tr>
+<td><b>400k</b><br><small>plateau — vanilla is the more precise arm</small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-400k-residual.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small><b>2.0 → 2.2 mm</b></small></td>
+<td><video controls loop muted playsinline width="240"><source src="../videos/reacher-ladder-ep4-400k-vanilla.mp4" type="video/mp4">Your browser does not support the video tag.</video><br><small><b>0.3 → 1.2 mm</b></small></td>
+</tr>
+</table>
+</div>
+
+One episode is an illustration, not evidence — the 5-seed sweep above is the
+evidence, and it is what the seed-dependent crossover (75k–375k) is measured
+from. Reproduce any row with:
+
+```bash
+uv run python scripts/record_reacher_residual.py --episode 4 \
+  --residual data/reacher_ckpt_seeds/resf2_s0/ckpt_75000_steps.zip \
+  --residual-frac 2.0 --vanilla data/reacher_van_ckpt_400k/ckpt_75000_steps.zip \
+  --out-dir videos/reacher_ladder/75000
+```
 
 ## How DAgger solves the imitation-learning problem
 
