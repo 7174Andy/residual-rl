@@ -96,6 +96,19 @@ Paired against fixed anchors on best distance: `n_max=1` closer on **70/120**
 (+0.8 mm median), `n_max=3` on **78/120** (+1.9 mm). The Wilson intervals overlap
 slightly, so the paired tests carry the claim, not the point estimates.
 
+A scenario fixed anchors miss and `n_max=1` reaches, both controllers on the same
+episode, early stopping **off** (`scripts/record_reacher_compare.py`, 30-episode
+scan, `--seed 0`). The readout carries current *and* best-so-far distance, so a
+controller that arrives and leaves shows the two numbers separating:
+
+<table>
+<tr><th>30 fixed anchors — miss</th><th>Select-DPC (`n_max=1`) — reach</th></tr>
+<tr>
+<td><video controls loop muted playsinline width="330"><source src="../reference/videos/reacher-fixed-rescue.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../reference/videos/reacher-select-rescue.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+</table>
+
 ### Iterating buys nothing — and past `n_max=3` it hurts
 
 `scripts/sweep_select_dpc.py`, 20 episodes:
@@ -138,6 +151,17 @@ horizon. `docs/journey/06-stop-at-goal.md` records the unicycle hitting this.
 
 Consequence: **every reach-rate number in this project flatters its controller** —
 they touch the target and leave.
+
+The scenario with the largest best-vs-final gap in that scan, both controllers —
+the failure the reach rate hides:
+
+<table>
+<tr><th>30 fixed anchors</th><th>Select-DPC (`n_max=1`)</th></tr>
+<tr>
+<td><video controls loop muted playsinline width="330"><source src="../reference/videos/reacher-fixed-drift.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="330"><source src="../reference/videos/reacher-select-drift.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+</table>
 
 ### The Panda: coverage confirmed, from a fourth direction
 
