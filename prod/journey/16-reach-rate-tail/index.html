@@ -10,31 +10,27 @@
       
       
       
-        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/">
+        <link rel="canonical" href="https://7174andy.github.io/two-wheeled-experiment/prod/journey/16-reach-rate-tail/">
       
       
-        <link rel="prev" href="../reference/reacher/">
-      
-      
-        <link rel="next" href="01-task-framing/">
       
       
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Journey - two-wheeled-experiment</title>
+        <title>16. The reach-rate tail — parked means, threshold churn, and what entropy annealing proves - two-wheeled-experiment</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -53,9 +49,9 @@
       
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -80,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#journey" class="md-skip">
+        <a href="#16-the-reach-rate-tail-parked-means-threshold-churn-and-what-entropy-annealing-proves" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +96,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="two-wheeled-experiment" class="md-header__button md-logo" aria-label="two-wheeled-experiment" data-md-component="logo">
+    <a href="../.." title="two-wheeled-experiment" class="md-header__button md-logo" aria-label="two-wheeled-experiment" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -120,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Journey
+              16. The reach-rate tail — parked means, threshold churn, and what entropy annealing proves
             
           </span>
         </div>
@@ -227,7 +223,7 @@
   
   
     <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -248,7 +244,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../getting-started/" class="md-tabs__link">
+        <a href="../../getting-started/" class="md-tabs__link">
           
   
   
@@ -270,7 +266,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../reference/" class="md-tabs__link">
+        <a href="../../reference/" class="md-tabs__link">
           
   
   
@@ -288,13 +284,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
           
   
   
@@ -336,7 +330,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="two-wheeled-experiment" class="md-nav__button md-logo" aria-label="two-wheeled-experiment" data-md-component="logo">
+    <a href="../.." title="two-wheeled-experiment" class="md-nav__button md-logo" aria-label="two-wheeled-experiment" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -366,7 +360,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -449,7 +443,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   
@@ -519,7 +513,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/" class="md-nav__link ">
+            <a href="../../reference/" class="md-nav__link ">
               
   
   
@@ -594,7 +588,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../environment/" class="md-nav__link ">
+            <a href="../../environment/" class="md-nav__link ">
               
   
   
@@ -638,7 +632,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../environment/dynamics/" class="md-nav__link">
+      <a href="../../environment/dynamics/" class="md-nav__link">
         
   
   
@@ -666,7 +660,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../environment/reward/" class="md-nav__link">
+      <a href="../../environment/reward/" class="md-nav__link">
         
   
   
@@ -694,7 +688,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../environment/deepc-interface/" class="md-nav__link">
+      <a href="../../environment/deepc-interface/" class="md-nav__link">
         
   
   
@@ -722,7 +716,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../environment/api/" class="md-nav__link">
+      <a href="../../environment/api/" class="md-nav__link">
         
   
   
@@ -789,7 +783,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../controllers/" class="md-nav__link ">
+            <a href="../../controllers/" class="md-nav__link ">
               
   
   
@@ -833,7 +827,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../controllers/deepc/" class="md-nav__link">
+      <a href="../../controllers/deepc/" class="md-nav__link">
         
   
   
@@ -861,7 +855,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../controllers/library-switching/" class="md-nav__link">
+      <a href="../../controllers/library-switching/" class="md-nav__link">
         
   
   
@@ -889,7 +883,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../controllers/data-collection/" class="md-nav__link">
+      <a href="../../controllers/data-collection/" class="md-nav__link">
         
   
   
@@ -917,7 +911,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../controllers/api/" class="md-nav__link">
+      <a href="../../controllers/api/" class="md-nav__link">
         
   
   
@@ -953,7 +947,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/metrics/" class="md-nav__link">
+      <a href="../../reference/metrics/" class="md-nav__link">
         
   
   
@@ -981,7 +975,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/cli/" class="md-nav__link">
+      <a href="../../reference/cli/" class="md-nav__link">
         
   
   
@@ -1009,7 +1003,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/mujoco-primer/" class="md-nav__link">
+      <a href="../../reference/mujoco-primer/" class="md-nav__link">
         
   
   
@@ -1037,7 +1031,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/reacher/" class="md-nav__link">
+      <a href="../../reference/reacher/" class="md-nav__link">
         
   
   
@@ -1069,8 +1063,6 @@
       
   
   
-    
-  
   
   
     
@@ -1112,23 +1104,20 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="./" class="md-nav__link md-nav__link--active">
+            <a href="../" class="md-nav__link ">
               
   
   
@@ -1146,13 +1135,13 @@
             </a>
             
               
-              <label class="md-nav__link md-nav__link--active" for="__nav_4" id="__nav_4_label" tabindex="">
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1172,7 +1161,7 @@
   
   
     <li class="md-nav__item">
-      <a href="01-task-framing/" class="md-nav__link">
+      <a href="../01-task-framing/" class="md-nav__link">
         
   
   
@@ -1200,7 +1189,7 @@
   
   
     <li class="md-nav__item">
-      <a href="02-env-design/" class="md-nav__link">
+      <a href="../02-env-design/" class="md-nav__link">
         
   
   
@@ -1228,7 +1217,7 @@
   
   
     <li class="md-nav__item">
-      <a href="04-deepc-formulation/" class="md-nav__link">
+      <a href="../04-deepc-formulation/" class="md-nav__link">
         
   
   
@@ -1256,7 +1245,7 @@
   
   
     <li class="md-nav__item">
-      <a href="05-library-switching/" class="md-nav__link">
+      <a href="../05-library-switching/" class="md-nav__link">
         
   
   
@@ -1284,7 +1273,7 @@
   
   
     <li class="md-nav__item">
-      <a href="06-stop-at-goal/" class="md-nav__link">
+      <a href="../06-stop-at-goal/" class="md-nav__link">
         
   
   
@@ -1312,7 +1301,7 @@
   
   
     <li class="md-nav__item">
-      <a href="07-imitation-learning/" class="md-nav__link">
+      <a href="../07-imitation-learning/" class="md-nav__link">
         
   
   
@@ -1340,7 +1329,7 @@
   
   
     <li class="md-nav__item">
-      <a href="08-residual-rl/" class="md-nav__link">
+      <a href="../08-residual-rl/" class="md-nav__link">
         
   
   
@@ -1368,7 +1357,7 @@
   
   
     <li class="md-nav__item">
-      <a href="09-vanilla-rl/" class="md-nav__link">
+      <a href="../09-vanilla-rl/" class="md-nav__link">
         
   
   
@@ -1396,7 +1385,7 @@
   
   
     <li class="md-nav__item">
-      <a href="10-sample-efficiency/" class="md-nav__link">
+      <a href="../10-sample-efficiency/" class="md-nav__link">
         
   
   
@@ -1424,7 +1413,7 @@
   
   
     <li class="md-nav__item">
-      <a href="11-panda-anchors/" class="md-nav__link">
+      <a href="../11-panda-anchors/" class="md-nav__link">
         
   
   
@@ -1452,7 +1441,7 @@
   
   
     <li class="md-nav__item">
-      <a href="12-select-dpc/" class="md-nav__link">
+      <a href="../12-select-dpc/" class="md-nav__link">
         
   
   
@@ -1480,7 +1469,7 @@
   
   
     <li class="md-nav__item">
-      <a href="13-reacher-residual/" class="md-nav__link">
+      <a href="../13-reacher-residual/" class="md-nav__link">
         
   
   
@@ -1508,7 +1497,7 @@
   
   
     <li class="md-nav__item">
-      <a href="14-clone-coverage/" class="md-nav__link">
+      <a href="../14-clone-coverage/" class="md-nav__link">
         
   
   
@@ -1536,7 +1525,7 @@
   
   
     <li class="md-nav__item">
-      <a href="15-panda-taskbank/" class="md-nav__link">
+      <a href="../15-panda-taskbank/" class="md-nav__link">
         
   
   
@@ -1591,10 +1580,76 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#conventions" class="md-nav__link">
+  <a href="#decision" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Conventions
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-anatomy-two-failure-classes-neither-of-them-hasnt-learned-yet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The anatomy — two failure classes, neither of them "hasn't learned yet"
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-mechanism-the-greedy-mean-lags-its-own-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The mechanism — the greedy mean lags its own distribution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-experiment-entropy-annealing-a-causally-clean-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The experiment — entropy annealing, a causally clean test
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Considered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outcome" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outcome
       
     </span>
   </a>
@@ -1621,86 +1676,168 @@
   
 
 
-<h1 id="journey">Journey<a class="headerlink" href="#journey" title="Permanent link">&para;</a></h1>
-<p>This is the <strong>decision log</strong> for the project. Each entry captures a real fork in the road, what was decided, what was tried, and what was ruled out. The point isn't to document the code; the code already speaks for itself. The point is to capture the <em>why</em>, including the dead ends.</p>
-<p>Entries are roughly chronological, but each one stands alone — you can read them in any order.</p>
+<h1 id="16-the-reach-rate-tail-parked-means-threshold-churn-and-what-entropy-annealing-proves">16. The reach-rate tail — parked means, threshold churn, and what entropy annealing proves<a class="headerlink" href="#16-the-reach-rate-tail-parked-means-threshold-churn-and-what-entropy-annealing-proves" title="Permanent link">&para;</a></h1>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
+<p>The 95→100% stretch of both Reacher RL arms' reach-rate curves is <strong>not slow
+learning</strong> and did not deserve a training fix. Per-scenario re-evaluation of
+every late checkpoint shows P50/P90 of final distance converge by 125–175k
+steps; everything the reach-rate plot renders as a long tail is <strong>1–3
+individual scenarios flickering across the 10 mm threshold</strong>. The failures come
+in two classes with different causes and different fixes, and the entropy-
+annealing experiment run to test the dominant class <strong>confirmed its mechanism
+causally while being a net wash as a training change</strong> — so annealing ships as
+an opt-in flag with its measured result, not as a default, and the reporting
+convention changes instead: <strong>checkpoint sweeps report final-distance
+percentiles alongside reach rate.</strong></p>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p>Journey <a href="../13-reacher-residual/">13</a>'s sweeps read naturally as "bcinit needs
+~300k steps to close the last 5%; vanilla needs far less" — bcinit sits at
+114/120 from 100k and only prints 120/120 at 400k. That framing treats the
+tail as a learning problem. Before fixing it, we re-ran the 120 frozen
+scenarios on every tail checkpoint of both arms <em>keeping the per-scenario
+rows</em> (<code>scripts/sweep_checkpoints_perscn.py</code> — the aggregate-only sweep of
+journey 13 is exactly what hid this), plus per-step traces of all 19 failing
+episodes.</p>
+<h2 id="the-anatomy-two-failure-classes-neither-of-them-hasnt-learned-yet">The anatomy — two failure classes, neither of them "hasn't learned yet"<a class="headerlink" href="#the-anatomy-two-failure-classes-neither-of-them-hasnt-learned-yet" title="Permanent link">&para;</a></h2>
+<p><img alt="Reach rate vs the final-distance distribution it thresholds" src="../figures/tail_percentiles.png" /></p>
+<p>Panel B is the finding: <strong>P90 final distance crosses the 10 mm tolerance at
+~125k (bcinit) / ~175k (vanilla) and sits at 3–5 mm from 200k on</strong> — bcinit
+<em>ahead</em> of vanilla the whole way, so by the continuous metric the warm start
+is never slower; the sample-efficiency win of journey
+<a href="../10-sample-efficiency/">10</a> is real in millimetres, not just in the binary
+metric. The entire reach-rate tail lives in the <strong>max</strong> — the single worst
+scenario — bouncing between 18 and 183 mm from checkpoint to checkpoint.
+Borderline scenarios flip pass/fail as SAC updates jiggle the mean action
+(scn052 passes at 250k, fails at 300k), so the tail is churn, not progress.</p>
+<p><img alt="The two failure classes, distance vs time" src="../figures/tail_anatomy.png" /></p>
+<p>The 19 failing tail episodes (bcinit ≥100k: 11 scenarios; vanilla ≥200k: 8),
+traced per step:</p>
 <table>
 <thead>
 <tr>
-<th>#</th>
-<th>Topic</th>
+<th>class</th>
+<th>count</th>
+<th>signature</th>
+<th>goal geometry</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><a href="01-task-framing/">01</a></td>
-<td>Task framing — trajectory tracking vs goal-reaching</td>
+<td><strong>parked</strong></td>
+<td>14/19, all 8 of vanilla's</td>
+<td>correct elbow fold (|q1| at closest approach matches IK within a few degrees), one approach, then a stationary point <strong>11–31 mm</strong> out, flat to the horizon, torques ≈ 0</td>
+<td>mixed radii</td>
 </tr>
 <tr>
-<td><a href="02-env-design/">02</a></td>
-<td>Env design — observation, action, reward</td>
-</tr>
-<tr>
-<td><a href="04-deepc-formulation/">04</a></td>
-<td>DeePC formulation — L1, L2, or hybrid regularization</td>
-</tr>
-<tr>
-<td><a href="05-library-switching/">05</a></td>
-<td>Library switching — bilinear dynamics force 4 local libraries</td>
-</tr>
-<tr>
-<td><a href="06-stop-at-goal/">06</a></td>
-<td>Stopping at the goal — overshoot (fixed) → over-braking (RL next)</td>
-</tr>
-<tr>
-<td><a href="07-imitation-learning/">07</a></td>
-<td>Imitation learning — cloning DeePC into a fast neural policy</td>
-</tr>
-<tr>
-<td><a href="08-residual-rl/">08</a></td>
-<td>Residual RL — TD3 correction lifts reach rate 38.5%→94.9%</td>
-</tr>
-<tr>
-<td><a href="09-vanilla-rl/">09</a></td>
-<td>Vanilla RL — the control arm; what the MPC prior actually buys</td>
-</tr>
-<tr>
-<td><a href="10-sample-efficiency/">10</a></td>
-<td>Sample efficiency on the deployed policy — prior × optimizer interact</td>
-</tr>
-<tr>
-<td><a href="11-panda-anchors/">11</a></td>
-<td>Panda anchors — the controller works, the libraries don't reach</td>
-</tr>
-<tr>
-<td><a href="12-select-dpc/">12</a></td>
-<td>Select-DPC — and a 2-DoF arm to test it on</td>
-</tr>
-<tr>
-<td><a href="13-reacher-residual/">13</a></td>
-<td>Residual RL on Reacher — DAgger fixes the clone, 400k settles it</td>
-</tr>
-<tr>
-<td><a href="14-clone-coverage/">14</a></td>
-<td>Clone coverage, measured — BC's failure follows the data, not the system</td>
-</tr>
-<tr>
-<td><a href="15-panda-taskbank/">15</a></td>
-<td>The Panda task bank — goal-directed data lifts the expert 47/78 → 70/78</td>
-</tr>
-<tr>
-<td><a href="16-reach-rate-tail/">16</a></td>
-<td>The reach-rate tail — parked means, threshold churn, entropy annealing</td>
+<td><strong>detour</strong></td>
+<td>bcinit only: scn029/052/107</td>
+<td>drives the tip <em>away</em> first (103 → 215 mm mid-episode), plunges late, 50-step horizon expires with best distance at literally the last step</td>
+<td>33–46 mm from base, elbow folded to 150–160°, near its ±172° soft limit</td>
 </tr>
 </tbody>
 </table>
-<h2 id="conventions">Conventions<a class="headerlink" href="#conventions" title="Permanent link">&para;</a></h2>
-<p>Each entry uses a small four-section template:</p>
+<p>Two more measured facts. Every bcinit failure is an upper-half-plane goal and
+every vanilla failure lower-half — arm-specific directional blind spots,
+mechanism unidentified. And the detour trio is a <strong>regression, not
+inheritance</strong>: the clone solves scn052 and scn107 at 3.9/4.6 mm best; SAC
+training <em>broke</em> working clone behaviour on the fragile near-base scenarios
+and spent ~300k steps re-fixing it. The genuinely-inherited clone failures
+(scn029/082/005, clone near-misses at 12–30 mm) were fixed quickly.</p>
+<h2 id="the-mechanism-the-greedy-mean-lags-its-own-distribution">The mechanism — the greedy mean lags its own distribution<a class="headerlink" href="#the-mechanism-the-greedy-mean-lags-its-own-distribution" title="Permanent link">&para;</a></h2>
+<p>Why would a policy park 14 mm out when the reward charges <code>−dist</code> every step
+and a 100-point-per-step bonus sits 4 mm away? Because nothing in SAC ever
+optimizes the mean action. The actor loss is <code>E[Q(s, a)]</code> over <em>samples</em>; if
+the action distribution straddles the bonus cliff, the expectation is
+satisfied with the mean outside it. The MLP critic smooths the cliff, so the
+gradient at the mean is gentle — and α's auto-tuning holds the policy at −2
+nats forever, so the mean-vs-samples gap never closes on its own. Evaluating
+<code>deterministic=True</code> then asks a question training never answered.</p>
+<p><img alt="Greedy vs sampled closest approach on every failing episode" src="../figures/tail_probe.png" /></p>
+<p>The probe: each failing episode re-rolled 5× with <code>deterministic=False</code> —
+same weights, same scenario, sampling instead of the mean. <strong>13/19 failures
+reach</strong>, some emphatically (scn082: mean parks at 30 mm, samples reach 5/5
+with best 0.8 mm), and every non-rescued episode still gets closer. Meanwhile
+the training monitors show both arms' <em>stochastic</em> behaviour policy reaching
+essentially 100% of episodes from ~225k — the competence was always there;
+the greedy summary of it is what the sweep measures.</p>
+<h2 id="the-experiment-entropy-annealing-a-causally-clean-test">The experiment — entropy annealing, a causally clean test<a class="headerlink" href="#the-experiment-entropy-annealing-a-causally-clean-test" title="Permanent link">&para;</a></h2>
+<p>If the parked offsets are the mean lagging a deliberately-wide distribution,
+shrinking the distribution should convert them. <code>AnnealTargetEntropyCallback</code>
+(<code>rl/sb3.py</code>) ramps <code>target_entropy</code> linearly −2 → −6 nats over 250k–400k
+(<code>train_reacher_window.py --anneal-entropy-from 250000</code>); same seed as the
+published run, so <strong>every checkpoint through 250k is an exact replicate and
+every post-250k difference is caused by the anneal</strong>. On-policy action noise
+fell 5× (std 0.121 → 0.025); training return and episode-success curves stay
+indistinguishable throughout — only the greedy evaluation moves.</p>
+<p><img alt="Annealing per-scenario: two stragglers fixed, one destabilized" src="../figures/tail_anneal.png" /></p>
 <ul>
-<li><strong>Decision</strong> — the one-line conclusion.</li>
-<li><strong>Context</strong> — what triggered the decision.</li>
-<li><strong>Considered</strong> — alternatives that were on the table.</li>
-<li><strong>Outcome</strong> — what changed in the code, and any caveats.</li>
+<li><strong>Predicted conversions happened</strong>: scn107 — the published run's last
+  straggler, failing until 375k — reaches from 300k on (final 90.8 → 11.4 mm
+  at 300k); scn082 likewise; the annealed tail holds 119/120 from 300k
+  instead of rotating 2–3 failures.</li>
+<li><strong>Costs</strong>: P90 final distance slightly <em>worse</em> (4.0 → 5.1 mm at 400k — the
+  killed exploration was still polishing precision on the easy 90%), and
+  scn052 destabilized into <strong>touch-and-go</strong>: best 5.7 mm (so "reached" says
+  success) but final 167 mm — it grazes the ball and flies off. Lower entropy
+  can't repair a detour behaviour; it locks it in.</li>
+<li><strong>Net</strong>: same 120/120 endpoint at 400k, marginally smoother tail,
+  marginally worse median precision. A wash — which is itself the result: it
+  confirms from the training side that the tail was a metric artifact, not a
+  deficiency.</li>
+</ul>
+<p>One seed; differences of 1–2 scenarios sit inside checkpoint churn. The
+causal signature (stragglers converting exactly when the window opens, on an
+otherwise-identical run) is the evidence, not the aggregate deltas.</p>
+<p>Side-by-side rollouts — same scenario, same checkpoint, greedy, 2× slow
+motion; left published, right annealed:</p>
+<table>
+<tr><th>scn107 @350k — detour fixed</th><th>scn082 @300k — parked fixed</th></tr>
+<tr>
+<td><video controls loop muted playsinline width="380"><source src="../videos/anneal-scn107-350k.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+<td><video controls loop muted playsinline width="380"><source src="../videos/anneal-scn082-300k.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+<tr><th colspan="2">…and the honest counter-example: scn052 @350k — published reaches, annealing destabilized it</th></tr>
+<tr>
+<td colspan="2" align="center"><video controls loop muted playsinline width="380"><source src="../videos/anneal-scn052-350k.mp4" type="video/mp4">Your browser does not support the video tag.</video></td>
+</tr>
+</table>
+
+<h2 id="considered">Considered<a class="headerlink" href="#considered" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Smooth the reach bonus</strong> (replace the 100-point cliff with a steep
+  sigmoid) — rejected. The env is the product (<a href="../02-env-design/">02</a>); the
+  unicycle uses the same bonus form, and every published number on both
+  systems was earned against the cliff. A reward change is a benchmark
+  redesign, not a fix.</li>
+<li><strong>Lengthen the 50-step horizon</strong> — rejected: it would pass the detour class
+  by redefining the task, hiding the regression instead of explaining it.</li>
+<li><strong>Stochastic or best-of-k evaluation</strong> — used as a <em>probe</em> only. As a
+  protocol it would change every published comparison; and on the continuous
+  metrics the deterministic mean is still the better policy (median final
+  ~2 mm greedy; samples are worse on average — the inversion exists only at
+  the threshold).</li>
+<li><strong>BC-anchoring the warm start</strong> (decayed BC term toward the clone, or clone
+  rollouts kept in the buffer, RLPD-style) — deferred, and it is the real
+  next question: the detour class is SAC unlearning clone behaviour, the same
+  disease as the critic-pretrain result, and the only measurable
+  bcinit-vs-vanilla difference this investigation leaves standing.</li>
+</ul>
+<h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>scripts/sweep_checkpoints_perscn.py</code> — per-scenario checkpoint sweep (the
+  aggregate sweep hid the whole story); <code>scripts/plot_tail_figures.py</code> — this
+  entry's four figures from that CSV.</li>
+<li><code>rl/sb3.py::AnnealTargetEntropyCallback</code> + <code>train_reacher_window.py
+  --anneal-entropy-from/--anneal-entropy-to</code>, opt-in, default off;
+  <code>tests/test_entropy_anneal.py</code> pins the ramp and the SB3 attribute it
+  relies on. Artifacts: <code>data/reacher_bcinit_anneal_400k.zip</code> and its
+  checkpoint dir.</li>
+<li><strong>Reporting change</strong>: sweeps report P50/P90 final distance next to reach
+  rate. And scn052's touch-and-go exposes that <code>reached</code> (ever inside) can
+  mask non-stabilizing behaviour — final-distance-under-tolerance is the
+  cheap companion column, already present in every per-scenario CSV.</li>
+<li>Caveats: single seed; the half-plane split is observed, unexplained; the
+  detour class is untouched and owns the follow-up.</li>
 </ul>
 
 
@@ -1733,44 +1870,6 @@
         <footer class="md-footer">
   
     
-      
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
-        
-          
-          <a href="../reference/reacher/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Reacher-v5">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              <div class="md-ellipsis">
-                Reacher-v5
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="01-task-framing/" class="md-footer__link md-footer__link--next" aria-label="Next: 01. Task framing">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                01. Task framing
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
-    
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -1797,10 +1896,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "prod", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "prod", "provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
