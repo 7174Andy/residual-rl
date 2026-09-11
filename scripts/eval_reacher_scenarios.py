@@ -63,7 +63,7 @@ plt.rcParams.update({
 })
 
 
-def episode(model, data, q0, goal, args, ctrl=None, rand=False):
+def episode(model, data, q0, goal, args, ctrl=None, rand=False, freeze=False):
     fs = frame_skip(model)
     set_state(model, data, q0, goal)
     t0 = fingertip(data)
@@ -89,6 +89,8 @@ def episode(model, data, q0, goal, args, ctrl=None, rand=False):
         best = min(best, dist)
         if hit_step is None and dist < args.tol:
             hit_step = t + 1
+            if freeze:
+                ctrl.frozen = True   # latch: library selection pinned from here on
             if args.early_stop:
                 break
     return {"reached": best < args.tol, "need": need, "best": best,
@@ -109,6 +111,8 @@ def main() -> None:
     p.add_argument("--stride", type=int, default=2)
     p.add_argument("--early-stop", action="store_true",
                    help="stop at first reach (censors the final-distance metric)")
+    p.add_argument("--freeze", action="store_true",
+                   help="add +frz rows: freeze the library selection at first reach")
     p.add_argument("--T-ini", type=int, default=5)
     p.add_argument("--N", type=int, default=12)
     p.add_argument("--lambda-g", type=float, default=5e-3)
@@ -143,6 +147,11 @@ def main() -> None:
             T_ini=args.T_ini, N=args.N, lambda_g=args.lambda_g, lambda_y=7.5e3,
             u_bounds=(-np.ones(NQ_ARM), np.ones(NQ_ARM)), solver="SCS",
             n_cols=args.n_cols, n_max=nm))))
+    if args.freeze:
+        # Pair every controller row with a freeze-at-first-reach variant. Same
+        # controller instance is safe: reset() unfreezes at each episode start.
+        ctrls = [row for lab, kw in ctrls
+                 for row in ((lab, kw), (f"{lab} +frz", dict(kw, freeze=True)))]
     ctrls.append(("random", dict(rand=True)))
 
     print(f"\n  {'controller':<16}{'reach rate (95% CI)':>24}{'best':>10}"
@@ -173,14 +182,27 @@ def main() -> None:
         print(f"    {label:<16} closer on {int((d < -1e-5).sum()):>3}/{len(d)}, "
               f"median gain {-np.median(d) * 1e3:+6.1f} mm")
 
+    if args.freeze:
+        # The freeze pair shares every step until first reach, so `steps` is
+        # identical within a pair; `final` AND `best` can both move, since best
+        # keeps improving after the first tolerance crossing.
+        print("\n  freeze-on-reach, paired on final distance:")
+        for lab, _ in ctrls:
+            if not lab.endswith(" +frz"):
+                continue
+            base_lab = lab[: -len(" +frz")]
+            d = np.array([a["final"] - b["final"]
+                          for a, b in zip(out[lab], out[base_lab])])
+            print(f"    {base_lab:<16} frz closer on {int((d < -1e-5).sum()):>3}"
+                  f"/{len(d)}, median change {np.median(d) * 1e3:+6.1f} mm")
+
     labels = [c[0] for c in ctrls]
+    colors = [SERIES[i % len(SERIES)] for i in range(len(labels))]
     fig, ax = plt.subplots(1, 3, figsize=(13, 4.0))
     ks = [sum(x["reached"] for x in out[lb]) for lb in labels]
     cis = [wilson_ci(k, len(eps)) for k in ks]
     y = np.arange(len(labels))
-    ax[0].barh(y, [100 * k / len(eps) for k in ks], 0.6,
-               color=[SERIES[1]] + [SERIES[2]] * len(args.n_max) + [SERIES[3]],
-               zorder=3)
+    ax[0].barh(y, [100 * k / len(eps) for k in ks], 0.6, color=colors, zorder=3)
     for i, (k, (lo, hi)) in enumerate(zip(ks, cis)):
         ax[0].plot([lo * 100, hi * 100], [i, i], color=INK, lw=1.6, zorder=4)
         ax[0].annotate(f"{k}/{len(eps)}", xy=(hi * 100, i), xytext=(5, 0),
@@ -195,7 +217,7 @@ def main() -> None:
     for i, lb in enumerate(labels):
         v = np.sort([x["final"] for x in out[lb]]) * 1e3
         ax[1].plot(v, np.linspace(0, 100, len(v)), zorder=3, label=lb,
-                   color=([SERIES[1]] + [SERIES[2], SERIES[0]] + [SERIES[3]])[i])
+                   color=colors[i])
     ax[1].axvline(args.tol * 1e3, color=CRITICAL, lw=1.2, ls="--", zorder=1)
     ax[1].set_xscale("log")
     ax[1].set_xlabel("converged distance at last step (mm)")
@@ -207,7 +229,7 @@ def main() -> None:
         b = np.array([x["best"] for x in out[lb]]) * 1e3
         f = np.array([x["final"] for x in out[lb]]) * 1e3
         ax[2].scatter(b, f, s=22, alpha=0.6, linewidths=0, zorder=3, label=lb,
-                      color=([SERIES[1]] + [SERIES[2], SERIES[0]] + [SERIES[3]])[i])
+                      color=colors[i])
     lim = 400
     ax[2].plot([0.5, lim], [0.5, lim], color=MUTED, lw=1.2, zorder=1)
     ax[2].set_xscale("log")

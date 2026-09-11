@@ -53,11 +53,19 @@ def train_clone(
     patience: int = 20,
     seed: int = 0,
     device: str = "auto",
+    squash: bool = False,
 ):
     """Train the clone. Returns `(model, stats, history)`.
 
     `stats` carries the normalization + metadata needed to reconstruct a
     `ClonePredictor`. Early-stops on val MSE; restores the best weights.
+
+    `squash=True` trains under SB3's SAC actor parameterization: the loss is
+    `MSE(tanh(net(x)), y)` and targets are NOT standardized, so `net`'s last
+    layer holds the pre-squash quantity SB3's `mu` head is supposed to hold and
+    `rl/sb3.py::init_actor_from_clone` can copy it verbatim. Requires targets
+    already inside `(-1, 1)`; an `atanh` reparameterization is not usable here
+    because saturated expert labels map to infinity.
     """
     dev = select_device(device)
     torch.manual_seed(seed)
@@ -69,9 +77,15 @@ def train_clone(
     output_dim = targets.shape[1]
 
     feat_mean, feat_std = _standardizer(features, n_lib)
-    targ_mean = targets.mean(axis=0)
-    targ_std = targets.std(axis=0)
-    targ_std[targ_std < 1e-8] = 1.0
+    if squash:
+        # Targets already live in the action box; standardizing them would
+        # reintroduce the affine the transfer has to undo.
+        targ_mean = np.zeros(output_dim)
+        targ_std = np.ones(output_dim)
+    else:
+        targ_mean = targets.mean(axis=0)
+        targ_std = targets.std(axis=0)
+        targ_std[targ_std < 1e-8] = 1.0
 
     Xn = (features - feat_mean) / feat_std
     Yn = (targets - targ_mean) / targ_std
@@ -91,6 +105,11 @@ def train_clone(
     opt = torch.optim.Adam(model.parameters(), lr=lr)
     loss_fn = nn.MSELoss()
 
+    def head(x):
+        """Model output in target space: squashed when the checkpoint says so."""
+        out = model(x)
+        return torch.tanh(out) if squash else out
+
     history = {"train_mse": [], "val_mse": []}
     best_val = float("inf")
     best_state = None
@@ -104,7 +123,7 @@ def train_clone(
         for s in range(0, n_tr, batch_size):
             b = order[s : s + batch_size]
             opt.zero_grad()
-            loss = loss_fn(model(Xtr[b]), Ytr[b])
+            loss = loss_fn(head(Xtr[b]), Ytr[b])
             loss.backward()
             opt.step()
             running += loss.detach().float().item() * len(b)
@@ -112,7 +131,7 @@ def train_clone(
 
         model.eval()
         with torch.no_grad():
-            val_mse = float(loss_fn(model(Xva), Yva))
+            val_mse = float(loss_fn(head(Xva), Yva))
         history["train_mse"].append(train_mse)
         history["val_mse"].append(val_mse)
 
@@ -136,6 +155,7 @@ def train_clone(
         "input_dim": int(input_dim),
         "output_dim": int(output_dim),
         "n_lib": int(n_lib),
+        "squash": bool(squash),
         "hidden": list(hidden),
         # The held-out validation split (indices into the training dataset) so
         # the fidelity gate can score open-loop regression on unseen rows rather
@@ -162,6 +182,8 @@ class ClonePredictor:
         self.feat_std = stats["feat_std"]
         self.targ_mean = stats["targ_mean"]
         self.targ_std = stats["targ_std"]
+        # Absent in checkpoints written before the squash mode existed.
+        self.squash = bool(stats.get("squash", False))
         # Held-out split metadata (may be absent in older checkpoints).
         self.val_idx = stats.get("val_idx")
         self.n_train_samples = stats.get("n_samples")
@@ -174,7 +196,10 @@ class ClonePredictor:
         Xn = (features - self.feat_mean) / self.feat_std
         with torch.no_grad():
             x = torch.as_tensor(Xn, dtype=torch.float32, device=self.device)
-            yn = self.model(x).cpu().numpy().astype(np.float64)
+            out = self.model(x)
+            if self.squash:
+                out = torch.tanh(out)
+            yn = out.cpu().numpy().astype(np.float64)
         y = yn * self.targ_std + self.targ_mean
         return y[0] if single else y
 

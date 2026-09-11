@@ -27,6 +27,11 @@ def main() -> None:
     p.add_argument("--lr", type=float, default=1e-3)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--device", default="auto")
+    p.add_argument("--squash", action="store_true",
+                   help="train under SB3's actor parameterization: loss on "
+                        "tanh(net(x)), targets unstandardized. Required for a "
+                        "clone that will initialize an SAC actor "
+                        "(rl/sb3.py::init_actor_from_clone).")
     args = p.parse_args()
 
     with np.load(args.dataset) as z:
@@ -38,7 +43,8 @@ def main() -> None:
 
     model, stats, history = train_clone(
         features, actions, n_lib=n_lib, hidden=tuple(args.hidden),
-        epochs=args.epochs, lr=args.lr, seed=args.seed, device=args.device)
+        epochs=args.epochs, lr=args.lr, seed=args.seed, device=args.device,
+        squash=args.squash)
     save_clone(args.out, model, stats)
     print(f"wrote {args.out}")
     print(f"  epochs run {len(history['val_mse'])}, "
@@ -46,9 +52,9 @@ def main() -> None:
     # The clone's job is to reproduce the controller, so the number that matters
     # is error relative to the spread of what it is imitating -- an absolute MSE
     # is unreadable without knowing the action scale.
+    units = "raw torque units" if args.squash else "standardized units"
     print(f"  target std {actions.std(axis=0)}, "
-          f"val RMSE / std = {np.sqrt(min(history['val_mse'])):.3f} "
-          f"(standardized units)")
+          f"val RMSE = {np.sqrt(min(history['val_mse'])):.4f} ({units})")
 
 
 if __name__ == "__main__":
