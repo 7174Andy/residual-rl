@@ -184,6 +184,11 @@ class DeePC:
         self._u_buf: Optional[np.ndarray] = None  # shape (T_ini, m_u)
         self._y_buf: Optional[np.ndarray] = None  # shape (T_ini, p_y)
 
+        # While True, act() keeps the library of the previous solve instead of
+        # re-keying on y — set by a caller (e.g. on goal reach), cleared by
+        # reset(). Subclasses with their own selection honor the same flag.
+        self.frozen: bool = False
+
         # Diagnostics.
         self.last_library_idx: int = -1
         self.last_warm_started: bool = False
@@ -299,8 +304,9 @@ class DeePC:
             u_initial = np.asarray(u_initial, dtype=np.float64).reshape(self.m_u)
         self._u_buf = np.tile(u_initial, (self.T_ini, 1))
         self._y_buf = np.tile(y_initial, (self.T_ini, 1))
-        # A fresh episode invalidates any prior warm-start.
+        # A fresh episode invalidates any prior warm-start, and unfreezes.
         self._prev_idx = -1
+        self.frozen = False
         self._g.value = None
         # Clearing the VARIABLE's value is not enough, and that gap was a real bug.
         # `solve(warm_start=True)` restarts the solver from cached state held on the
@@ -413,8 +419,12 @@ class DeePC:
         else:
             raise ValueError(f"y_ref must be 1-D or 2-D; got ndim={y_ref.ndim}")
 
-        # Select the active library by heading (trivially 0 for a single library).
-        idx = self._select_index_for(y_current)
+        # Select the active library by heading (trivially 0 for a single
+        # library) — unless frozen, which pins the previous solve's library.
+        if self.frozen and self._prev_idx >= 0:
+            idx = self._prev_idx
+        else:
+            idx = self._select_index_for(y_current)
 
         # A warm-start `g` indexes the *previous* library's columns; clear it on
         # a switch so the solve doesn't start from a meaningless point.

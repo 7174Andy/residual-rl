@@ -146,6 +146,11 @@ class SelectDPC(DeePC):
 
     def act(self, y_current: np.ndarray, y_ref: np.ndarray) -> np.ndarray:
         y_current = np.asarray(y_current, dtype=np.float64)
+        if self.frozen and self.last_sel is not None:
+            # Selection frozen (e.g. on goal reach): keep the last-selected
+            # columns, single solve; the base act() slides the buffer itself.
+            self.last_iters = 0
+            return super().act(y_current, y_ref)
         if not self.carry_prediction:
             self._tau_prev = None
         tau = self._tau_prev if self._tau_prev is not None else self._warm_tau(y_current)
