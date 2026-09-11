@@ -86,11 +86,6 @@ markdown_extensions:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
-extra:
-  version:
-    provider: mike
-    default: prod
-
 extra_javascript:
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
@@ -132,3 +127,4 @@ nav:
       - 13. Reacher residual RL: journey/13-reacher-residual.md
       - 14. Clone coverage: journey/14-clone-coverage.md
       - 15. Panda task bank: journey/15-panda-taskbank.md
+      - 16. The reach-rate tail: journey/16-reach-rate-tail.md

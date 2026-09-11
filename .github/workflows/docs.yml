@@ -1,8 +1,6 @@
 name: two-wheel-exp Docs
 
 on:
-  release:
-    types: [published]
   push:
     branches:
       - main
@@ -20,7 +18,7 @@ on:
 permissions:
   contents: write
 
-# Avoid concurrent mike pushes to gh-pages.
+# Avoid concurrent pushes to gh-pages.
 concurrency:
   group: docs-${{ github.ref }}
   cancel-in-progress: false
@@ -56,30 +54,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Determine version
-        id: version
-        if: github.event_name == 'push'
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "version=prod" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Deploy documentation (release)
-        if: github.event_name == 'release'
-        run: |
-          VERSION=${{ github.event.release.tag_name }}
-          uv run mike deploy --push --update-aliases "$VERSION" latest
-          uv run mike set-default --push latest
-
-      - name: Deploy documentation (branch)
-        if: github.event_name == 'push' && steps.version.outputs.version != ''
-        run: |
-          uv run mike deploy --push --update-aliases ${{ steps.version.outputs.version }}
-
-      - name: Set default version to prod
+      - name: Deploy documentation
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          uv run mike set-default --push prod
+        # --force overwrites gh-pages, wiping the old mike layout (prod/,
+        # versions.json) so the site serves from the root.
+        run: uv run mkdocs gh-deploy --force
 
       - name: Build documentation (manual / PR)
         if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
