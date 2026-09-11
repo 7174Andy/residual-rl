@@ -25,6 +25,7 @@ import deepc_scenarios as S  # noqa: E402
 
 from core.deepc import DeePC  # noqa: E402
 from core.hankel import build_hankel  # noqa: E402
+from core.selectdpc import SelectDPC, trajectory_bank  # noqa: E402
 
 _FIXTURE = np.load(pathlib.Path(__file__).resolve().parent / "fixtures" / "deepc_golden.npz")
 
@@ -214,6 +215,41 @@ def test_warm_start_retained_within_library_and_cleared_on_switch():
     assert flags[2] is False          # switched 0 -> 1, warm-start cleared
     assert flags[3] is False          # switched 1 -> 2
     assert flags[5] is False          # switched 3 -> 0
+
+
+# ---- Freezing the selection (e.g. at goal reach) -----------------------------
+
+
+def test_frozen_pins_previous_library_until_reset():
+    c = _build_multi()
+    y0 = np.array([0.0, 0.0, S.ANCHORS[0]])
+    y1 = np.array([0.0, 0.0, S.ANCHORS[1]])
+    c.reset(y0)
+    c.act(y0, y0)
+    assert c.last_library_idx == 0
+    c.frozen = True
+    c.act(y1, y1)                      # heading would route to library 1
+    assert c.last_library_idx == 0     # pinned
+    c.reset(y1)                        # a new episode unfreezes
+    assert c.frozen is False
+    c.act(y1, y1)
+    assert c.last_library_idx == 1
+
+
+def test_selectdpc_frozen_keeps_last_column_selection():
+    pairs = S.multi_libraries(2)
+    bank = trajectory_bank([u for u, _ in pairs], [y for _, y in pairs],
+                           S.T_INI, S.N)
+    c = SelectDPC(bank, anchor_headings=[0.0], n_cols=20, n_max=2, **_defaults())
+    y0 = np.array([0.0, 0.0, 0.5])
+    c.reset(y0)
+    c.act(y0, y0)
+    sel = c.last_sel.copy()
+    c.frozen = True
+    u = c.act(np.array([1.0, -1.0, -2.0]), y0)   # far away: would re-select
+    assert np.array_equal(c.last_sel, sel)       # selection untouched
+    assert c.last_iters == 0                     # marker: no selection pass ran
+    assert u.shape == (2,)
 
 
 # ---- Closed-loop behavior on a simple LTI system ----------------------------
