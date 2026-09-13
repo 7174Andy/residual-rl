@@ -6,7 +6,7 @@ workspace — plus a **DeePC** (data-driven predictive control) baseline and a *
 RL** policy trained on top of it.
 
 📖 **Full docs:** <https://7174andy.github.io/residual-rl/> — install guide, API
-reference, CLI reference, and the [decision log](https://7174andy.github.io/residual-rl/prod/journey/)
+reference, CLI reference, and the [decision log](https://7174andy.github.io/residual-rl/journey/)
 behind every design choice (action bounds, DeePC formulation, library switching, imitation
 learning, residual RL).
 
@@ -44,8 +44,8 @@ uv run python scripts/run_deepc.py --episodes 5 --seed 42
 uv run python scripts/run_residual.py --seeds 4104626029
 ```
 
-See the [getting started guide](https://7174andy.github.io/two-wheeled-experiment/prod/getting-started/)
-and [CLI reference](https://7174andy.github.io/two-wheeled-experiment/prod/reference/cli/) for every
+See the [getting started guide](https://7174andy.github.io/residual-rl/getting-started/)
+and [CLI reference](https://7174andy.github.io/residual-rl/reference/cli/) for every
 script and flag.
 
 ## Repo layout
