@@ -2,134 +2,138 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://7174andy.github.io/residual-rl/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/getting-started/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/controllers/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/controllers/api/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/controllers/data-collection/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/controllers/deepc/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/controllers/library-switching/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/environment/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/environment/api/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/environment/deepc-interface/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/environment/dynamics/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/environment/reward/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/01-task-framing/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/02-env-design/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/04-deepc-formulation/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/05-library-switching/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/06-stop-at-goal/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/07-imitation-learning/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/08-residual-rl/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/09-vanilla-rl/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/10-sample-efficiency/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/11-panda-anchors/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/12-select-dpc/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/13-reacher-residual/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/14-clone-coverage/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/journey/15-panda-taskbank/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
-         <loc>https://7174andy.github.io/residual-rl/journey/16-reach-rate-tail/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <loc>https://7174andy.github.io/residual-rl/journey/16-warm-start-rl/</loc>
+         <lastmod>2026-10-01</lastmod>
+    </url>
+    <url>
+         <loc>https://7174andy.github.io/residual-rl/journey/17-reach-rate-tail/</loc>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/reference/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/reference/cli/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/reference/metrics/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/reference/mujoco-primer/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
     <url>
          <loc>https://7174andy.github.io/residual-rl/reference/reacher/</loc>
-         <lastmod>2026-09-13</lastmod>
+         <lastmod>2026-10-01</lastmod>
     </url>
 </urlset>

@@ -10,10 +10,10 @@
       
       
       
-        <link rel="canonical" href="https://7174andy.github.io/residual-rl/journey/16-reach-rate-tail/">
+        <link rel="canonical" href="https://7174andy.github.io/residual-rl/journey/17-reach-rate-tail/">
       
       
-        <link rel="prev" href="../15-panda-taskbank/">
+        <link rel="prev" href="../16-warm-start-rl/">
       
       
       
@@ -25,7 +25,7 @@
     
     
       
-        <title>16. The reach-rate tail - two-wheeled-experiment</title>
+        <title>17. The reach-rate tail - two-wheeled-experiment</title>
       
     
     
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              16. The reach-rate tail
+              17. The reach-rate tail
             
           </span>
         </div>
@@ -1104,6 +1104,8 @@
       
         
       
+        
+      
     
     
     
@@ -1557,6 +1559,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-warm-start-rl/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16. Warm-start RL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1576,7 +1606,7 @@
   <span class="md-ellipsis">
     
   
-    16. The reach-rate tail
+    17. The reach-rate tail
   
 
     
@@ -1594,7 +1624,7 @@
   <span class="md-ellipsis">
     
   
-    16. The reach-rate tail
+    17. The reach-rate tail
   
 
     
@@ -1849,7 +1879,9 @@ an opt-in flag with its measured result, not as a default, and the reporting
 convention changes instead: <strong>checkpoint sweeps report final-distance
 percentiles alongside reach rate.</strong></p>
 <h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p>Journey <a href="../13-reacher-residual/">13</a>'s sweeps read naturally as "bcinit needs
+<p>The warm-start arm of <a href="../16-warm-start-rl/">16</a> is where this surfaced: its
+sweeps, and journey <a href="../13-reacher-residual/">13</a>'s before them, read naturally
+as "bcinit needs
 ~300k steps to close the last 5%; vanilla needs far less" — bcinit sits at
 114/120 from 100k and only prints 120/120 at 400k. That framing treats the
 tail as a learning problem. Before fixing it, we re-ran the 120 frozen
@@ -2033,7 +2065,7 @@ motion; left published, right annealed:</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../15-panda-taskbank/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 15. Panda task bank">
+          <a href="../16-warm-start-rl/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 16. Warm-start RL">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2043,7 +2075,7 @@ motion; left published, right annealed:</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                15. Panda task bank
+                16. Warm-start RL
               </div>
             </div>
           </a>

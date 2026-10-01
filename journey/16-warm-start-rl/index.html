@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://7174andy.github.io/residual-rl/journey/05-library-switching/">
+        <link rel="canonical" href="https://7174andy.github.io/residual-rl/journey/16-warm-start-rl/">
       
       
-        <link rel="prev" href="../04-deepc-formulation/">
+        <link rel="prev" href="../15-panda-taskbank/">
       
       
-        <link rel="next" href="../06-stop-at-goal/">
+        <link rel="next" href="../17-reach-rate-tail/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>05. Library switching - two-wheeled-experiment</title>
+        <title>16. Warm-start RL - two-wheeled-experiment</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#05-library-switching-one-library-cant-work-four-can" class="md-skip">
+        <a href="#16-warm-start-rl-one-prior-two-injection-sites" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              05. Library switching
+              16. Warm-start RL
             
           </span>
         </div>
@@ -1253,37 +1253,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    05. Library switching
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../05-library-switching/" class="md-nav__link">
         
   
   
@@ -1299,103 +1272,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#decision" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Decision
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#context-bilinear-dynamics-defeat-a-single-predictor" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Context — bilinear dynamics defeat a single predictor
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#why-local-linearization-works" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Why local linearization works
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Implementation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#outcome" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Outcome
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#caveats" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Caveats
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#code" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Code
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1685,10 +1561,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../16-warm-start-rl/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16. Warm-start RL
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1704,6 +1607,125 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-was-run-and-what-wasnt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What was run, and what wasn't
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#m2-the-refit-moved-the-prior-slightly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        M2 — the refit moved the prior, slightly
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#m3-p3-confirmed-the-cold-critic-erases-the-prior-in-4000-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        M3 — P3 confirmed: the cold critic erases the prior in 4,000 steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-100k-three-arm-sweep-and-both-remedies-backfiring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 100k three-arm sweep — and both remedies backfiring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-400k-verdict-p1-inverts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 400k verdict — P1 inverts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Considered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outcome" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outcome
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1782,10 +1804,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#context-bilinear-dynamics-defeat-a-single-predictor" class="md-nav__link">
+  <a href="#context" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Context — bilinear dynamics defeat a single predictor
+        Context
       
     </span>
   </a>
@@ -1793,10 +1815,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-local-linearization-works" class="md-nav__link">
+  <a href="#what-was-run-and-what-wasnt" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why local linearization works
+        What was run, and what wasn't
       
     </span>
   </a>
@@ -1804,10 +1826,54 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation" class="md-nav__link">
+  <a href="#m2-the-refit-moved-the-prior-slightly" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Implementation
+        M2 — the refit moved the prior, slightly
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#m3-p3-confirmed-the-cold-critic-erases-the-prior-in-4000-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        M3 — P3 confirmed: the cold critic erases the prior in 4,000 steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-100k-three-arm-sweep-and-both-remedies-backfiring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 100k three-arm sweep — and both remedies backfiring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-400k-verdict-p1-inverts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 400k verdict — P1 inverts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Considered
       
     </span>
   </a>
@@ -1819,28 +1885,6 @@
     <span class="md-ellipsis">
       
         Outcome
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#caveats" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Caveats
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#code" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Code
       
     </span>
   </a>
@@ -1867,113 +1911,366 @@
   
 
 
-<h1 id="05-library-switching-one-library-cant-work-four-can">05. Library switching — one library can't work, four can<a class="headerlink" href="#05-library-switching-one-library-cant-work-four-can" title="Permanent link">&para;</a></h1>
+<h1 id="16-warm-start-rl-one-prior-two-injection-sites">16. Warm-start RL — one prior, two injection sites<a class="headerlink" href="#16-warm-start-rl-one-prior-two-injection-sites" title="Permanent link">&para;</a></h1>
 <h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p>A <strong>single DeePC library cannot navigate the unicycle to a goal</strong> — the reason is structural, not a tuning problem. So: <strong>pre-collect four data libraries, one per heading quadrant, and hand all four to a single <code>DeePC</code> controller.</strong> Each step, the controller selects the library whose anchor heading is closest to the robot's current heading, swaps its Hankel matrices into one cached QP, and solves. The robot keeps one controller; only the <em>data library</em> feeding the predictor changes.</p>
-<h2 id="context-bilinear-dynamics-defeat-a-single-predictor">Context — bilinear dynamics defeat a single predictor<a class="headerlink" href="#context-bilinear-dynamics-defeat-a-single-predictor" title="Permanent link">&para;</a></h2>
-<p>DeePC's behavioral predictor is a <strong>linear span</strong> of past trajectories. For an LTI system the lemma is exact. For a system that's "linear enough" locally, it approximates well. The unicycle is neither — its dynamics are <em>bilinear</em>:</p>
-<div class="arithmatex">\[
-x_{t+1} = x_t + \Delta t \cdot \cos(\delta_t) \cdot v_t
-\]</div>
-<p>The product <span class="arithmatex">\(\cos(\delta_t) \cdot v_t\)</span> cannot be represented as a linear function of <span class="arithmatex">\((v_t)\)</span> across the full range of <span class="arithmatex">\(\delta_t \in [-\pi, \pi]\)</span>. A single linear predictor trained on all-orientations data <strong>averages out the heading dependence</strong> — it predicts <code>cos(δ) ≈ 0</code> and <code>sin(δ) ≈ 0</code> on average over uniform δ.</p>
-<p>Trained on a broad-PE library covering all orientations:</p>
-<ul>
-<li>The controller's predicted <code>Δx</code> for a given action depends almost entirely on where the data happened to land — not on the <em>current</em> heading.</li>
-<li>Asked "what happens if I drive <code>v = 10</code> right now?" the predictor returns something like "could be <code>+0.25</code> or <code>-0.25</code> or <code>0</code>, depending on which columns the QP selects."</li>
-<li>The QP's safest answer is "do nothing" (<code>v ≈ 0</code>). It cannot reliably claim that moving will reduce the position cost, because its predictor doesn't know which direction <code>v</code> will push the robot.</li>
-</ul>
-<p>Empirically:</p>
-<ul>
-<li>Broad-<code>w</code> collection + single library: <code>v</code> collapses to ~0 across all episodes regardless of hyperparameters (<code>Q_heading</code>, <code>λ_g</code>, <code>λ_y</code>, <code>N</code>).</li>
-<li>Narrow-<code>w</code> collection + single library: <code>w</code> saturates at the bound; the robot moves in a tight circle.</li>
-<li>Adding bearing-aware <code>y_ref</code> + nonzero <code>Q[2, 2]</code>: <code>w</code> varies sensibly but <code>v</code> still collapses.</li>
-</ul>
-<p>Across many hyperparameter sweeps, the failure mode is the same. <strong>It's not tunable</strong> — the root cause is the dynamics, not the QP. This is worth stating explicitly because it isn't obvious from the formulation; several hours of sweeping hyperparameters and reading run-output gradients eventually points to "the predictor is too uncertain to commit to motion," and recognizing that earlier saves time on a future similar pivot.</p>
-<p>The paper's quote is the explicit acknowledgement that one library isn't enough: <em>"the data-driven constraint can be viewed as a local linear approximation, [so] our strategy is to switch the data library based on the robot's current state."</em> The fix is <strong>piecewise linearization</strong> — fit a separate local model in each operating region and route the controller through whichever region you're in.</p>
-<p>From <a href="https://arxiv.org/abs/2603.07395">arXiv:2603.07395</a> Appendix D:</p>
-<blockquote>
-<p><em>"For each prediction horizon W, we construct 4 corresponding data libraries Hd with Tini = 5, each approximately representing the local behavior of the nonlinear system within orientation intervals [0, π/2), [π/2, π), [π, 3π/2), and [3π/2, 2π). During online tracking, the data library associated with the robot's current orientation is selected to improve tracking performance."</em></p>
-</blockquote>
-<p>So four libraries cover the heading circle, each anchored at the midpoint of its quadrant.</p>
-<h2 id="why-local-linearization-works">Why local linearization works<a class="headerlink" href="#why-local-linearization-works" title="Permanent link">&para;</a></h2>
-<p>Within a fixed heading region — say <code>δ ≈ π/4</code> — both <code>cos(δ)</code> and <code>sin(δ)</code> are nearly constant (<code>≈ 0.71</code> each). The dynamics behave locally like:</p>
-<div class="arithmatex">\[
-\Delta x \approx \Delta t \cdot 0.71 \cdot v, \qquad \Delta y \approx \Delta t \cdot 0.71 \cdot v
-\]</div>
-<p>This is <strong>linear in <code>v</code></strong> with fixed slope. A linear behavioral predictor trained on data collected while the robot was near heading <code>π/4</code> will correctly capture this slope and produce confident, non-degenerate predictions.</p>
-<p>By collecting one library <em>starting from each of four orientations</em> (the paper's <code>π/4, 3π/4, 5π/4, 7π/4</code>), each library's data is concentrated in a roughly π/2-wide heading region around its anchor. At runtime we always have <strong>the right library for the current heading</strong>.</p>
-<h2 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h2>
-<p>Switching lives <strong>inside <code>DeePC</code></strong> — there is no separate wrapper class. One controller holds:</p>
-<ul>
-<li>A list of N pre-collected libraries (each a <code>(Up, Uf, Yp, Yf)</code> Hankel tuple) plus their anchor headings.</li>
-<li>The active library's Hankels in <code>cp.Parameter</code>s, so swapping libraries means writing new parameter values into <strong>one compiled QP</strong> — no recompile per library.</li>
-<li><strong>One shared past-<code>(u, y)</code> buffer</strong> — the robot's actual history is the same regardless of which library predicts the future.</li>
-</ul>
-<p>On each <code>act(y_current, y_ref)</code>:</p>
-<ol>
-<li><code>idx = argmin_i |wrap(y_current[heading_index] − anchor_i)|</code> (trivially 0 with a single library).</li>
-<li>If <code>idx</code> changed since last step, clear the warm-start <code>g</code> — its columns indexed the old library and are meaningless under the new one.</li>
-<li>Write <code>libraries[idx]</code>'s <code>(Up, Uf, Yp, Yf)</code> into the Hankel parameters and solve.</li>
-<li>Slide the shared buffer with the applied <code>(u_t, y_current)</code>.</li>
-</ol>
-<p>The four libraries come from offline rollouts started at the paper's four init headings (<code>controllers/data_collection.PAPER_INIT_HEADINGS</code>); each rollout's data concentrates around one quadrant anchor. <code>scripts/run_deepc.py</code> builds all four by default (<code>--single_library N</code> passes a one-element list for the single-library contrast) and prints <strong>per-episode library usage</strong> so you can see when switching actually triggered:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>episode 1: REACHED   after  94 steps  final_dist=0.46
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  library usage: [0, 0, 17, 77]    # Q3 → Q4 mid-flight
-</span></code></pre></div>
-<h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
-<p>Closed-loop test on broad-<code>w</code> data with library switching enabled (all four libraries loaded). Reproduce with <code>uv run python scripts/run_deepc.py --headless --episodes 4 --seed 0</code> (data: <code>data/libraries_v0.npz</code>, <code>T_ini=5</code>, <code>N=12</code>):</p>
+<p>Injecting the clone into the actor's <strong>weights</strong> (the source paper's Eq. 17) is
+not the weaker architecture its Table IV predicts. On Reacher the warm arm ends
+at <strong>120/120</strong> against the residual's 119/120, holds a <strong>higher return asymptote</strong>
+(36.8 against 34.5), and is <strong>19 scenarios ahead of it at 100k</strong> (114/120
+against 95/120). Prediction <strong>P1 inverts on this system.</strong>
+Prediction <strong>P3 is confirmed as a mechanism and refuted as a consequence</strong>: the
+cold critic really does erase the prior — 79/120 → <strong>3/120 within 4,000 steps</strong> —
+but the collapse is transient, and both pre-registered remedies cost more than
+the disease. <strong>P2 was never measured.</strong> Single seed; the cold control ran to
+100k, not 400k.</p>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p><a href="../13-reacher-residual/">Journey 13</a> put the DAgger clone's knowledge into the
+<strong>action</strong>: freeze the clone, learn a correction on top (<code>u = u_base + frac ·
+a_res</code>). Jia &amp; Bajaj, <em>On Architectures for Combining Reinforcement Learning and
+Model Predictive Control with Runtime Improvements</em> (arXiv:2510.03354) — already
+cited by <code>reacher/residual_env.py</code> — proposes <strong>two</strong> architectures over a neural
+MPC surrogate, and this repo had built only one:</p>
 <table>
 <thead>
 <tr>
-<th>Episode</th>
-<th>Outcome</th>
-<th>Steps</th>
-<th>Final dist</th>
+<th>arm</th>
+<th>paper</th>
+<th>where the prior lives</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>0</td>
-<td>truncated</td>
-<td>200</td>
-<td>16.95</td>
+<td>clone + residual</td>
+<td><strong>Eq. 18</strong>, "RL + MPC"</td>
+<td>in the <strong>action</strong> — frozen clone plus a learned correction</td>
 </tr>
 <tr>
-<td>1</td>
-<td><strong>REACHED</strong></td>
-<td>94</td>
-<td><strong>0.46</strong></td>
-</tr>
-<tr>
-<td>2</td>
-<td><strong>REACHED</strong></td>
-<td>35</td>
-<td><strong>0.46</strong></td>
-</tr>
-<tr>
-<td>3</td>
-<td><strong>REACHED</strong></td>
-<td>115</td>
-<td><strong>0.48</strong></td>
+<td>clone + warm start</td>
+<td><strong>Eq. 17</strong>, "Warm Start RL"</td>
+<td>in the <strong>weights</strong> — actor initialized to the clone</td>
 </tr>
 </tbody>
 </table>
-<p>Success rate <strong>3/4</strong> on this seed (mean steps-to-reach 81). This is the first time the DeePC controller actually navigated the robot to the goal. Compare to single-library across the same seeds, where <code>v</code> was stuck at zero in all four episodes.</p>
-<p>Seed 0 is a lucky draw, though. Over a larger random sample (<code>--episodes 100 --random</code>, base seed <code>4104626029</code>, n=78 before the run was stopped) the aggregate is more sobering:</p>
+<p><a href="../07-imitation-learning/">Journey 07</a> named the missing artifact and declined to
+build it ("not as a policy to fine-tune away from, but as a frozen, amortized
+copy"). This entry builds it, so one prior can be measured at both injection
+sites.</p>
+<div class="admonition warning">
+<p class="admonition-title">Two different things are called 'warm start' in this repo</p>
+<p>Journey 13's results table has a row named <strong><code>clone + warm start</code></strong>. That is
+<code>reacher/eval.py::WarmStartClonePolicy</code> — the <em>base controller</em> driving the
+first <code>T_ini</code> steps to prime the DeePC buffer, at 83/120. It has nothing to
+do with this entry. This entry's arm is <code>bcinit</code>: SAC whose <strong>actor weights</strong>
+start at the clone. Both rows can appear in the same table; they are
+unrelated.</p>
+</div>
+<h2 id="what-was-run-and-what-wasnt">What was run, and what wasn't<a class="headerlink" href="#what-was-run-and-what-wasnt" title="Permanent link">&para;</a></h2>
+<p>Stated up front, because three planned pieces are missing and the conclusions
+are bounded by their absence.</p>
+<table>
+<thead>
+<tr>
+<th>planned</th>
+<th>status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bcinit</code> arm, 400k</td>
+<td><strong>run</strong>, seed 0</td>
+</tr>
+<tr>
+<td>cold-start control, same env/script/seed</td>
+<td><strong>run to 100k only</strong> — no 400k point</td>
+</tr>
+<tr>
+<td>5 seeds per arm</td>
+<td><strong>not run</strong> — every number here is seed 0</td>
+</tr>
+<tr>
+<td>M6, inference cost per step (<code>scripts/measure_step_cost.py</code>)</td>
+<td><strong>not written</strong>; P2 untested</td>
+</tr>
+</tbody>
+</table>
+<h2 id="m2-the-refit-moved-the-prior-slightly">M2 — the refit moved the prior, slightly<a class="headerlink" href="#m2-the-refit-moved-the-prior-slightly" title="Permanent link">&para;</a></h2>
+<p>The warm arm needs an actor that is byte-compatible with SB3's squashed-Gaussian
+SAC head, so <code>data/dagger_clone_r3.pt</code> was <strong>refit</strong> (same dataset, same
+architecture, reparameterized output) into <code>data/dagger_clone_r3_squash.pt</code>
+rather than copied. That refit is a new
+prior and had to be gated before any RL ran — a bad refit would invalidate the
+whole framing.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>[OPEN LOOP] 2500 held-out rows
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  median |u_clone - u_select|  0.1383   (torque units, box width 2.0)
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  p95                          0.6361
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  median |u_select - mean|     0.2236   &lt;- what a constant predictor would score
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>[CLOSED LOOP] 120 frozen scenarios, full horizon
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                  reached      best     final   path/net
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  Select-DPC    89/120        2.9 mm    6.4 mm     1.6
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  squash clone  79/120        5.9 mm   13.8 mm     1.7
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>  GATE: PASS
+</span></code></pre></div>
+<p>The refit tracks the expert at ~60% of a constant predictor's error and lands
+<strong>10 scenarios below</strong> it. So "the same prior" is true to within a refit: the
+warm arm starts at 79/120 where the residual's frozen base was measured at
+82/120.</p>
+<div class="admonition note">
+<p class="admonition-title">Do not read these against journey 13's table</p>
+<p>Journey 13 reports Select-DPC at 96/120 and the clone at 82/120. This gate
+re-measured <strong>both</strong> under the current tree in one run and got 89 and 79.
+The paired comparison is what the gate uses and it is internally consistent;
+the difference against journey 13 is cross-tree eval drift, which journey 13
+itself warns about. Numbers from the two tables do not mix.</p>
+</div>
+<h2 id="m3-p3-confirmed-the-cold-critic-erases-the-prior-in-4000-steps">M3 — P3 confirmed: the cold critic erases the prior in 4,000 steps<a class="headerlink" href="#m3-p3-confirmed-the-cold-critic-erases-the-prior-in-4000-steps" title="Permanent link">&para;</a></h2>
+<p>The spec deliberately did <strong>not</strong> pre-empt this. A warm actor paired with a
+randomly-initialized critic is the configuration the paper says will fail, so it
+was run first as a ~1-minute 20k probe, at 2k resolution, before committing any
+400k budget.</p>
+<table>
+<thead>
+<tr>
+<th>steps</th>
+<th>reach</th>
+<th>best</th>
+<th>final</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>t=0 (the refit clone itself)</td>
+<td>79/120</td>
+<td>5.9 mm</td>
+<td>13.8 mm</td>
+</tr>
+<tr>
+<td>2,000</td>
+<td>12/120</td>
+<td>59.1 mm</td>
+<td>138.0 mm</td>
+</tr>
+<tr>
+<td><strong>4,000</strong></td>
+<td><strong>3/120</strong></td>
+<td>101.5 mm</td>
+<td>151.4 mm</td>
+</tr>
+<tr>
+<td>10,000</td>
+<td>8/120</td>
+<td>65.6 mm</td>
+<td>140.9 mm</td>
+</tr>
+<tr>
+<td>20,000</td>
+<td>42/120</td>
+<td>15.4 mm</td>
+<td>36.4 mm</td>
+</tr>
+</tbody>
+</table>
+<p>Seventy-six scenarios gone in 4k steps. The actor is dragged apart by an
+untrained critic exactly as predicted — P3's mechanism is real and it is not
+subtle.</p>
+<h2 id="the-100k-three-arm-sweep-and-both-remedies-backfiring">The 100k three-arm sweep — and both remedies backfiring<a class="headerlink" href="#the-100k-three-arm-sweep-and-both-remedies-backfiring" title="Permanent link">&para;</a></h2>
+<p>The probe's verdict routed the budget to a 100k comparison of the warm arm
+against the pre-registered remedy (<strong>freeze the actor for 10k while the critic
+fits</strong>) and the cold control.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>  t=0 prior (refit clone) 79/120  |  Select-DPC expert 89/120
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    steps |   A warm  C warm+frozen   B cold |   C-A  p(C,A) |   A-B
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    10000 |    8/120         79/120    3/120 |   +71   0.000 |    +5
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    50000 |   88/120         27/120   75/120 |   -61   0.000 |   +13
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>   100000 |  114/120        102/120  111/120 |   -12   0.019 |    +3
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  median best @100k (mm):  A 2.4   C 3.7   B 2.6
+</span></code></pre></div>
+<p>Three things fall out, and two of them were not the expected answer.</p>
+<ol>
+<li><strong>The collapse doesn't matter.</strong> Arm A is at 8/120 at 10k — a 71-scenario
+   hole below the frozen arm, which is still sitting on the intact prior — and
+   finishes as the best of the three at 100k. The catastrophe M3 measured is a
+   transient, not a trap.</li>
+<li><strong>The remedy is worse than the disease.</strong> Freezing the actor does exactly what
+   it promises — C at 10k is <strong>79/120, the prior to the scenario</strong>, which is the
+   closed-loop invariant <code>tests/test_warmstart_transfer.py</code> pins — and then
+   <em>lags for the rest of training</em>, ending 12 scenarios behind A. Protecting the
+   prior from the critic costs more than letting the critic eat it.</li>
+<li><strong>The paper's own remedy is much worse.</strong> Critic pre-training by supervised
+   MC-return regression on the clone dataset (arXiv:2510.03354 §III.C) scored
+   <strong>33/120 at 100k</strong> — 81 scenarios behind A, having peaked at 56/120 at 90k and
+   fallen back. Two measured causes: the critic only ever saw expert actions, so
+   random actions score <em>higher</em> than the expert's (mean min-head Q 6.27 against
+   4.98, higher on 54% of states), and MC targets carry no entropy term or
+   bootstrapped tail, so early TD critic loss runs ~15–20 against ~0.1 for a cold
+   critic. Fit quality was not the problem (R² 0.85). <strong>That code was removed on
+   2026-09-11</strong> at the repo owner's request — <code>rl/sb3.py::pretrain_critic</code>, the
+   <code>--pretrain-critic</code> flags, and <code>reacher/clone_data.py::returns_from_dataset</code>
+   no longer exist. This paragraph and <code>data/qpre_sweep_100k.log</code> are the record.
+   <code>FreezeActorCallback</code> was kept: different mechanism, and it is arm C above.</li>
+</ol>
+<h2 id="the-400k-verdict-p1-inverts">The 400k verdict — P1 inverts<a class="headerlink" href="#the-400k-verdict-p1-inverts" title="Permanent link">&para;</a></h2>
+<p><img alt="Training return, three arms, seed 0" src="../figures/warmstart_returns.png" /></p>
+<p><img alt="Deployed greedy reach rate vs training steps" src="../figures/warmstart_reach.png" /></p>
+<p>Greedy, 120 frozen scenarios, full horizon, early stopping off — journey 13's
+protocol. The warm arm and vanilla were swept together in one session; the
+residual row is read across a boundary that is checked below. Following journey
+<a href="../17-reach-rate-tail/">17</a>, distances are reported as percentiles, not means:</p>
+<table>
+<thead>
+<tr>
+<th>arm</th>
+<th>reach @100k</th>
+<th>reach @200k</th>
+<th>reach @400k</th>
+<th>best (med)</th>
+<th>final P50</th>
+<th>final P90</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Select-DPC (expert) †</td>
+<td>—</td>
+<td>—</td>
+<td>89/120</td>
+<td>2.9 mm</td>
+<td>6.4 mm</td>
+<td>—</td>
+</tr>
+<tr>
+<td>squash clone (the prior) †</td>
+<td>—</td>
+<td>—</td>
+<td>79/120</td>
+<td>5.9 mm</td>
+<td>13.8 mm</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>BC-init (Eq. 17)</strong></td>
+<td><strong>114/120</strong></td>
+<td><strong>117/120</strong></td>
+<td><strong>120/120</strong></td>
+<td>1.27 mm</td>
+<td>2.00 mm</td>
+<td>4.01 mm</td>
+</tr>
+<tr>
+<td>cold-start ctrl (same env)</td>
+<td>111/120</td>
+<td>—</td>
+<td>not run</td>
+<td>2.6 mm</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>clone + residual (Eq. 18)</td>
+<td>95/120</td>
+<td>—</td>
+<td>119/120</td>
+<td>1.67 mm</td>
+<td>2.51 mm</td>
+<td>—</td>
+</tr>
+<tr>
+<td>vanilla RL, 8-D obs</td>
+<td>87/120</td>
+<td>114/120</td>
+<td>120/120</td>
+<td><strong>1.10 mm</strong></td>
+<td><strong>1.73 mm</strong></td>
+<td><strong>3.26 mm</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Distance columns are the <strong>400k</strong> values for the RL rows, as in journey 13.</p>
+<p>† Single evaluation, no training axis; printed in the <code>@400k</code> column so the
+reach numbers line up. The cold control's <code>best</code> is its <strong>100k</strong> median; it
+has no 400k point and no percentile columns because the per-scenario rows were
+not kept for that arm.</p>
+<p>The residual's row comes from <code>docs/reference/reacher_crossover.csv</code> rather than
+from this sweep, which needs a word. That file's <strong>vanilla</strong> rows reproduce the
+September per-scenario sweep <em>to the digit</em> — 87/120, 6.45 mm, 8.91 mm at 100k
+and 120/120, 1.10 mm, 1.73 mm at 400k — so the two sweeps agree where they
+overlap, and the residual row is being read across a boundary that has been
+checked rather than assumed. The warm arm's and vanilla's percentile columns are
+recomputed from <code>data/tail_perscn.csv</code>.</p>
+<p>Training return, last-1000-episode mean at 400k: <strong>warm 36.83, vanilla 36.98,
+residual 34.46.</strong> At episode 2,000 (100k steps, trailing-500 mean) the warm arm
+is at 24.2 where vanilla is at 5.4.</p>
+<p><strong>P1 — refuted, and inverted.</strong> The paper has the warm start improving on its
+surrogate by 1–5% and the residual by 12–40%. Here both improve enormously
+(79/120 → 120 and 119), and the <em>ordering flips</em>: the warm arm matches the
+residual on reach, beats it by 2.4 on return asymptote, and is 19 scenarios
+ahead of it at 100k. (The two are within a scenario or two of each other from
+25k to 75k — the warm arm's separation opens after that, not from the start.)
+The architecture ranking in Table IV is task-specific, not
+general — which journey 13 already hinted at when the residual beat the expert it
+was cloned from.</p>
+<p><strong>P2 — untested.</strong> The paper's compensating advantage for the warm start is
+runtime: one network per step against the residual's two (0.0850 µs against
+0.2513 µs, Table V). <code>scripts/measure_step_cost.py</code> was never written, and this
+repo still has no inference-cost number for either arm. The one axis where the
+warm start was <em>predicted</em> to win is the one axis not measured.</p>
+<p><strong>P3 — mechanism confirmed, consequence refuted.</strong> See M3 and the 100k sweep. The
+honest statement is "the cold critic destroys the prior and it doesn't matter on
+this system at this budget," not "the cold critic is fine."</p>
+<div class="admonition warning">
+<p class="admonition-title">This design controls the prior, not the observation</p>
+<p>Stated in the spec (D1) and repeated here because the table above invites the
+error. The warm arm's actor sees the clone's <strong>43-D feature window</strong>; the
+residual's policy sees a 10-D normalized body observation plus <code>u_base</code>;
+vanilla sees the env's 8-D observation. Holding the prior fixed is what makes
+"one prior, two injection sites" a fair question, and it costs the
+observation axis: the 8-D observation cannot be reconstructed from the DAgger
+dataset (<code>qvel</code> appears nowhere in the window), so the alternative fork would
+have required a second clone and the two arms would no longer share a prior.
+<strong>No arrangement of these arms controls both axes</strong>, and nothing here should
+be read as a clean warm-start-versus-residual result at equal observation.</p>
+</div>
+<h2 id="considered">Considered<a class="headerlink" href="#considered" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Reach rate ≈ 39%</strong> (30/78); the rest truncate at 200 steps.</li>
-<li><strong>QP failures: 0/78</strong> — the solver did not fail once across the whole sample (nor on seed 0).</li>
-<li>Steps-to-reach (successes): mean ≈ 103, range 7–174. Final distance: mean ≈ 4.0, max ≈ 15.8.</li>
+<li><strong>Train the warm actor on the env's 8-D observation</strong>, making the existing
+  5-seed vanilla runs a free exact control — rejected (D1): it needs a second
+  clone from a second DAgger loop, so the headline comparison would no longer be
+  about one prior.</li>
+<li><strong>BC-regularized actor loss, or an entropy schedule, to survive the cold
+  critic</strong> — excluded from this arm as non-goals: each adds a hyperparameter and
+  breaks the one-variable delta against the control. (The entropy schedule was
+  later built for a different reason — journey <a href="../17-reach-rate-tail/">17</a> — and
+  the BC-regularized variant is still the open follow-up.)</li>
+<li><strong>Critic pre-training</strong> — specified, budget-gated, run, and measured harmful;
+  see above. Any future attempt should start from off-manifold overestimation,
+  not from fit quality.</li>
+<li><strong>Re-collecting data for the refit</strong> — rejected: journey 14 established that BC
+  failure follows the data, and this is the same student on the same
+  distribution, so the dataset is reused untouched.</li>
 </ul>
-<p>So switching makes goal-reaching <em>possible</em> (~39% vs single-library's 0%), but it is far from reliable — the dominant failure is the truncation/spin mode below, not the QP.</p>
-<h2 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h2>
+<h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Switching only helps if the robot <strong>actually crosses quadrant boundaries</strong> during an episode. With narrow <code>w</code> data the turn rate is too low and switching becomes a no-op.</li>
-<li><strong>Truncation/spin is the dominant failure</strong> (~61% of random episodes). Episode 0 above is typical: 200 steps, ends 16.95 from goal despite cycling all four libraries — <code>w</code> saturates positive while <code>v</code> stays near zero, so the robot spins in place rather than driving out. Diagnosing these would benefit from logging the QP's <code>σ_y</code> and the controller's predicted vs actual trajectory.</li>
-<li><strong>QP solver failures did not appear</strong> in this measurement (0 across 82 episodes: 78 random + 4 at seed 0), so they are not the bottleneck here — the earlier "occasional <code>user_limit</code> failure" concern is not borne out on this build/data. The QP is still ill-conditioned at the paper's <code>λ_y ≈ 3e6</code> (see <code>deepc.py</code>), so a numerical breakdown remains <em>possible</em> on other data/solvers (SCS is chosen for robustness; CLARABEL can break down), but it is not what limits reaching.</li>
+<li><code>scripts/train_reacher_window.py</code> (both arms from one code path — <code>--clone</code>
+  present or absent is the only difference), <code>reacher/window_env.py</code>'s
+  <code>CloneWindowEnv</code>, <code>rl/sb3.py::init_actor_from_clone</code> and <code>FreezeActorCallback</code>,
+  and <code>rl/clone.py</code>'s squash mode. <code>tests/test_warmstart_transfer.py</code> pins the
+  transfer, including the closed-loop invariant that a frozen warm actor
+  reproduces the clone over a full episode.</li>
+<li>Checkpoints and monitors under <code>data/reacher_{bcinit,cold}_*</code>; the gate, probe
+  and sweep logs are <code>data/{gate_squash_clone,probe_bcinit_sweep,
+  sweep_100k_3arm,qpre_sweep_100k}.log</code>. Both figures were generated on
+  2026-09-10 from the monitor CSVs and the checkpoint sweep; like every CSV in
+  this repo those inputs are gitignored, and there is no committed generator
+  script for these two figures.</li>
+<li><strong>What would change the conclusions:</strong> 5 seeds (journeys 10/13/14 make
+  single-seed crossover claims non-quotable, and none is quoted here), a 400k
+  cold control, and M6. Until then P1's inversion is a seed-0 result on one
+  system.</li>
+<li>The tail this entry's sweeps show at the top end — both arms crawling from 95%
+  to 100% — is <strong>not</strong> slow learning, and is taken apart in journey
+  <a href="../17-reach-rate-tail/">17</a>.</li>
 </ul>
-<h2 id="code">Code<a class="headerlink" href="#code" title="Permanent link">&para;</a></h2>
-<p><code>two_wheel_robot/controllers/deepc.py::DeePC</code> — library switching is built into the controller (<code>libraries</code>, <code>anchor_headings</code>, <code>heading_index</code>; <code>last_library_idx</code> diagnostic). See <a href="../../controllers/library-switching/">library switching reference</a>.</p>
 
 
 
@@ -2009,7 +2306,7 @@ x_{t+1} = x_t + \Delta t \cdot \cos(\delta_t) \cdot v_t
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../04-deepc-formulation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 04. DeePC formulation">
+          <a href="../15-panda-taskbank/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 15. Panda task bank">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2019,20 +2316,20 @@ x_{t+1} = x_t + \Delta t \cdot \cos(\delta_t) \cdot v_t
                 Previous
               </span>
               <div class="md-ellipsis">
-                04. DeePC formulation
+                15. Panda task bank
               </div>
             </div>
           </a>
         
         
           
-          <a href="../06-stop-at-goal/" class="md-footer__link md-footer__link--next" aria-label="Next: 06. Stopping at the goal">
+          <a href="../17-reach-rate-tail/" class="md-footer__link md-footer__link--next" aria-label="Next: 17. The reach-rate tail">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                06. Stopping at the goal
+                17. The reach-rate tail
               </div>
             </div>
             <div class="md-footer__button md-icon">
