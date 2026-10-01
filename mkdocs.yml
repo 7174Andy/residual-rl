@@ -127,4 +127,5 @@ nav:
       - 13. Reacher residual RL: journey/13-reacher-residual.md
       - 14. Clone coverage: journey/14-clone-coverage.md
       - 15. Panda task bank: journey/15-panda-taskbank.md
-      - 16. The reach-rate tail: journey/16-reach-rate-tail.md
+      - 16. Warm-start RL: journey/16-warm-start-rl.md
+      - 17. The reach-rate tail: journey/17-reach-rate-tail.md

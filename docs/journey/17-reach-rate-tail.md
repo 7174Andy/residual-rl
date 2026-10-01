@@ -16,7 +16,9 @@ percentiles alongside reach rate.**
 
 ## Context
 
-Journey [13](13-reacher-residual.md)'s sweeps read naturally as "bcinit needs
+The warm-start arm of [16](16-warm-start-rl.md) is where this surfaced: its
+sweeps, and journey [13](13-reacher-residual.md)'s before them, read naturally
+as "bcinit needs
 ~300k steps to close the last 5%; vanilla needs far less" — bcinit sits at
 114/120 from 100k and only prints 120/120 at 400k. That framing treats the
 tail as a learning problem. Before fixing it, we re-ran the 120 frozen
