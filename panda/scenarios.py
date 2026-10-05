@@ -33,8 +33,11 @@ _ENV_PARAM_KEYS = (
 _ENV_PARAM_INT_KEYS = frozenset({"max_steps", "frame_skip"})
 
 
-def generate(n: int = N_SCENARIOS) -> dict:
+def generate(n: int = N_SCENARIOS, goal_box=None) -> dict:
     """Sample `n` scenarios from the env's own reset, then freeze them.
+
+    `goal_box` is passed through to `PandaReachEnv` and, when set, recorded in
+    the file as `goal_box` (3, 2) so a boxed scenario set says what it is.
 
     Uses `reset(seed=i)` for `i in range(n)` -- seeds are fine *here*, because
     this runs once and the result is what gets frozen. The `seed` column is kept
@@ -48,7 +51,7 @@ def generate(n: int = N_SCENARIOS) -> dict:
     # package before this function is ever called.
     from panda.env import PandaReachEnv
 
-    env = PandaReachEnv()
+    env = PandaReachEnv(goal_box=goal_box)
     try:
         qpos = np.empty((n, env.nq), dtype=np.float64)
         goal = np.empty((n, 3), dtype=np.float64)
@@ -61,6 +64,8 @@ def generate(n: int = N_SCENARIOS) -> dict:
             "goal": goal,
             "seed": np.arange(n, dtype=np.int64),
         }
+        if env.goal_box is not None:
+            out["goal_box"] = env.goal_box.copy()
         for k in _ENV_PARAM_KEYS:
             value = getattr(env, k)
             out[k] = np.int64(value) if k in _ENV_PARAM_INT_KEYS else np.float64(value)

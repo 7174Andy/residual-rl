@@ -22,6 +22,9 @@ def main() -> None:
     ap.add_argument("--n", type=int, default=sc.N_SCENARIOS)
     ap.add_argument("--force", action="store_true",
                     help="overwrite an existing file (invalidates recorded results)")
+    ap.add_argument("--goal-box", type=float, nargs=6, default=None,
+                    metavar=("XLO", "XHI", "YLO", "YHI", "ZLO", "ZHI"),
+                    help="restrict goals to this box (m); use a new --out")
     args = ap.parse_args()
 
     if os.path.exists(args.out) and not args.force:
@@ -37,7 +40,8 @@ def main() -> None:
         return
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
-    data = sc.generate(args.n)
+    box = None if args.goal_box is None else np.reshape(args.goal_box, (3, 2))
+    data = sc.generate(args.n, goal_box=box)
     sc.save(args.out, data)
     print(f"wrote {args.out}  ({args.n} scenarios)")
     print(f"checksum {sc.checksum(data)}")

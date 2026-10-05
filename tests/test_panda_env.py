@@ -381,3 +381,16 @@ def test_extended_output_does_not_change_the_reward(env):
         expect = -(err @ env.Q @ err + u @ env.R @ u)
         expect += env.reach_bonus if info["distance"] < env.goal_tolerance else 0.0
         assert reward == pytest.approx(expect)
+
+
+def test_goal_box_confines_goals_and_rejects_unreachable_box():
+    box = np.array([[0.3, 0.6], [-0.25, 0.25], [0.2, 0.5]])
+    e = PandaReachEnv(goal_box=box)
+    for seed in range(20):
+        e.reset(seed=seed)
+        assert np.all((e.goal >= box[:, 0]) & (e.goal <= box[:, 1]))
+    e.close()
+    far = PandaReachEnv(goal_box=((5.0, 6.0), (5.0, 6.0), (5.0, 6.0)))
+    with pytest.raises(RuntimeError, match="goal_box"):
+        far.reset(seed=0)
+    far.close()

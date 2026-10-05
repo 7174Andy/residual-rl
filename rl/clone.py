@@ -184,6 +184,11 @@ class ClonePredictor:
         self.targ_std = stats["targ_std"]
         # Absent in checkpoints written before the squash mode existed.
         self.squash = bool(stats.get("squash", False))
+        # The full stats dict, so a system can stash its own conventions in the
+        # checkpoint and read them back at deploy time (the Panda clone records
+        # whether its target is an absolute q_des or a delta -- reading one
+        # under the wrong convention produces plausible garbage silently).
+        self.stats = stats
         # Held-out split metadata (may be absent in older checkpoints).
         self.val_idx = stats.get("val_idx")
         self.n_train_samples = stats.get("n_samples")

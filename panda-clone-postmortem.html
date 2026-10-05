@@ -1,0 +1,458 @@
+<title>Panda Clone Postmortem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: single reading column at 68ch, figures break out to a wider band,
+     experiments run down a numbered rail because they are a real sequence.
+     Palette is lifted from the repo's own matplotlib style so the embedded
+     figures sit on the page rather than on top of it. */
+  :root {
+    --paper: #fcfcfb;
+    --surface: #f5f4f1;
+    --ink: #11100e;
+    --ink-2: #52514e;
+    --muted: #8a8a86;
+    --rule: #e2e0db;
+    --blue: #2a78d6;
+    --orange: #c2531f;
+    --crit: #c0392f;
+    --green: #2f7d32;
+
+    --display: "Spectral", Georgia, "Times New Roman", serif;
+    --body: "Source Sans 3", system-ui, -apple-system, sans-serif;
+    --data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    --measure: 68ch;
+    --wide: 1080px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --paper: #15171a;
+      --surface: #1c1f24;
+      --ink: #eef0f2;
+      --ink-2: #aab0b8;
+      --muted: #7c838c;
+      --rule: #2b3037;
+      --blue: #6aa6ef;
+      --orange: #ef9065;
+      --crit: #e4736a;
+      --green: #6cbb72;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #15171a;
+    --surface: #1c1f24;
+    --ink: #eef0f2;
+    --ink-2: #aab0b8;
+    --muted: #7c838c;
+    --rule: #2b3037;
+    --blue: #6aa6ef;
+    --orange: #ef9065;
+    --crit: #e4736a;
+    --green: #6cbb72;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.62;
+    margin: 0;
+  }
+  .wrap {
+    max-width: var(--wide);
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 56px 96px;
+  }
+  .col { max-width: var(--measure); }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(2.1rem, 5.2vw, 3.1rem);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0 0 14px;
+  }
+  h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.55rem;
+    line-height: 1.22;
+    text-wrap: balance;
+    margin: 0 0 12px;
+  }
+  h3 {
+    font-family: var(--body);
+    font-weight: 600;
+    font-size: 1.02rem;
+    margin: 0 0 6px;
+  }
+  p { margin: 0 0 16px; }
+  a { color: var(--blue); }
+
+  .eyebrow {
+    font-family: var(--data);
+    font-size: 0.72rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 18px;
+  }
+  .standfirst {
+    font-family: var(--display);
+    font-size: 1.22rem;
+    line-height: 1.5;
+    color: var(--ink-2);
+    margin: 0 0 30px;
+  }
+  .byline {
+    font-family: var(--data);
+    font-size: 0.78rem;
+    color: var(--muted);
+    border-top: 1px solid var(--rule);
+    padding-top: 14px;
+    margin-bottom: 46px;
+  }
+
+  /* headline figures */
+  .scoreline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 34px;
+    padding: 22px 24px;
+    background: var(--surface);
+    border-left: 3px solid var(--crit);
+    margin: 0 0 46px;
+  }
+  .score .n {
+    font-family: var(--data);
+    font-weight: 500;
+    font-size: 1.85rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    display: block;
+  }
+  .score .k {
+    font-family: var(--data);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .score.good .n { color: var(--green); }
+  .score.bad .n { color: var(--crit); }
+
+  section { margin-bottom: 52px; }
+
+  /* the numbered sequence of attempts */
+  ol.runs { list-style: none; margin: 0; padding: 0; counter-reset: run; }
+  ol.runs > li {
+    counter-increment: run;
+    display: grid;
+    grid-template-columns: 54px 1fr;
+    gap: 18px;
+    padding: 20px 0;
+    border-top: 1px solid var(--rule);
+  }
+  ol.runs > li::before {
+    content: counter(run, decimal-leading-zero);
+    font-family: var(--data);
+    font-size: 0.95rem;
+    color: var(--muted);
+    padding-top: 2px;
+  }
+  .run-body p { margin: 0 0 8px; }
+  .run-body p:last-child { margin-bottom: 0; }
+  .why { color: var(--ink-2); }
+  .outcome {
+    font-family: var(--data);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .flag {
+    display: inline-block;
+    font-family: var(--data);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+    margin-left: 4px;
+    vertical-align: 1px;
+  }
+  .flag.no { color: var(--crit); }
+  .flag.part { color: var(--orange); }
+
+  figure {
+    margin: 34px 0;
+    max-width: var(--wide);
+  }
+  figure img {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    border: 1px solid var(--rule);
+    background: #fcfcfb;
+  }
+  figcaption {
+    font-size: 0.88rem;
+    color: var(--ink-2);
+    margin-top: 10px;
+    max-width: var(--measure);
+  }
+  figcaption b { color: var(--ink); font-weight: 600; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.93rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .scroll { overflow-x: auto; }
+  th, td {
+    text-align: left;
+    padding: 9px 14px 9px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  th {
+    font-family: var(--data);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  td.num { font-family: var(--data); }
+
+  ul.plain { margin: 0 0 16px; padding-left: 20px; }
+  ul.plain li { margin-bottom: 8px; }
+
+  .pull {
+    font-family: var(--display);
+    font-size: 1.3rem;
+    line-height: 1.45;
+    color: var(--ink);
+    border-left: 3px solid var(--blue);
+    padding: 4px 0 4px 20px;
+    margin: 30px 0;
+    max-width: var(--measure);
+  }
+  .caveats {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 22px 24px;
+  }
+  .caveats h2 { font-size: 1.2rem; }
+  code {
+    font-family: var(--data);
+    font-size: 0.88em;
+    background: var(--surface);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+  @media (max-width: 560px) {
+    ol.runs > li { grid-template-columns: 1fr; gap: 6px; }
+    .scoreline { gap: 22px; }
+  }
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">PandaReach-v0 · Phase 2</p>
+  <h1>Panda Clone Postmortem</h1>
+  <p class="standfirst col">The Select-DPC expert reaches 70 of 78 goals. Seven attempts to compress it into a
+  network all land between 2 and 9. Each candidate explanation was measured, then fixed, and the outcome never moved.</p>
+  <p class="byline">Frozen 78 scenarios · greedy · full horizon · single seed throughout · 1 October 2026</p>
+
+  <div class="scoreline">
+    <div class="score good"><span class="n">70/78</span><span class="k">Select-DPC expert</span></div>
+    <div class="score bad"><span class="n">9/78</span><span class="k">best clone</span></div>
+    <div class="score"><span class="n">3.2 s</span><span class="k">expert, per control step</span></div>
+    <div class="score"><span class="n">162×</span><span class="k">slower than real time</span></div>
+  </div>
+
+  <section class="col">
+    <h2>What we were trying to do</h2>
+    <p>The expert is good and unusable. It solves a quadratic program at every control step, selecting 300 columns
+    from a bank of roughly 180,000, and takes 3.2 seconds to do it against a 20 ms control period. The clone exists
+    to make that policy run in a forward pass, exactly as it did on the unicycle and the 2-DoF reacher.</p>
+    <p>The clone reads a 99-dimensional window — the last five applied targets, the last five outputs, the current
+    output, the goal offset, and a buffer-validity flag — and must emit the expert's commanded joint target
+    <code>q_des</code>.</p>
+  </section>
+
+  <section>
+    <h2 class="col">Where the difficulty comes from</h2>
+    <figure>
+      <img src="figures/expert_vs_clone.png" alt="Four panels: the expert's output is a smooth integrator ramp; the clone's predicted direction is mostly correct on held-out episodes; the error accumulates to 1.53 rad over an episode; reach collapses from 70/78 to 9/78.">
+      <figcaption><b>The chain.</b> The expert's rate limit <code>du_max = 0.02</code> binds on essentially every
+      step, so its output is an integrator and the decision it actually makes is a 0.02 rad direction inside a
+      0.9 rad-scale target. The clone gets that direction right 86% of the time on episodes it has never seen —
+      and because the target is a state, the other 14% accumulates to 1.53 rad over one episode, three times the
+      radius inside which the expert's own libraries are valid.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2 class="col">Seven attempts</h2>
+    <p class="col">In order. Each one targets a mechanism we had measured first.</p>
+    <ol class="runs col">
+      <li>
+        <div class="run-body">
+          <h3>Baseline behavioral cloning</h3>
+          <p class="why">The pipeline as ported from the reacher: 100 expert-driven episodes, 150 steps each,
+          15,000 labelled rows, one-step regression on absolute <code>q_des</code>.</p>
+          <p class="outcome">reach <b>2/78</b> <span class="flag no">failed</span></p>
+        </div>
+      </li>
+      <li>
+        <div class="run-body">
+          <h3>Reparameterize the output</h3>
+          <p class="why">The learnable signal is the 0.02 rad increment, which is 2% of the target's standard
+          deviation — so a mean-squared error on the absolute target barely registers it. Tried absolute, then
+          delta from current joints, then increment from the previous target.</p>
+          <p class="outcome">reach <b>2 → 7 → 9/78</b>, directional accuracy 0.70 → 0.87
+          <span class="flag part">real, insufficient</span></p>
+        </div>
+      </li>
+      <li>
+        <div class="run-body">
+          <h3>DAgger, one round</h3>
+          <p class="why">Cloning trains on the expert's states; the deployed clone visits its own. Collected 100
+          clone-driven episodes with the expert labelling every state it reached.</p>
+          <p class="outcome">reach <b>2 → 2</b> <span class="flag no">no effect</span></p>
+          <p class="why">A student at 3% reach wanders where the <em>teacher</em> is unreliable: only 36% of
+          clone-visited states fall inside the expert's validity radius, against 57% of expert-visited ones.</p>
+        </div>
+      </li>
+      <li>
+        <div class="run-body">
+          <h3>Spread the data further</h3>
+          <p class="why">200 placements left the nearest training state 4.36 away in standardized units, with only
+          1% of states having a neighbour close enough for the expert's decision to transfer. Re-spent the identical
+          solver budget as 400 placements × 35 steps instead of 100 × 150.</p>
+          <p class="outcome">coverage +16% (5.51 → 4.64), reach <b>8 → 5</b> <span class="flag no">no effect</span></p>
+        </div>
+      </li>
+      <li>
+        <div class="run-body">
+          <h3>Fix the training</h3>
+          <p class="why">Training accuracy 0.87 against held-out 0.37 is overfitting, and the validation split was
+          by row — with 150 correlated rows per episode, early stopping leaked and never fired honestly. Added an
+          episode-wise split, weight decay, a cosine loss, a smaller network.</p>
+          <p class="outcome">per-step error −18%, reach <b>9 → 6</b> <span class="flag no">no effect</span></p>
+        </div>
+      </li>
+      <li>
+        <div class="run-body">
+          <h3>Rollout loss, short horizon</h3>
+          <p class="why">Train against the clone's own accumulated target instead of scoring each step in
+          isolation, unrolling 16 steps.</p>
+          <p class="outcome">drift unchanged <span class="flag no">no effect</span></p>
+          <p class="why">At 16 steps the drift is only about 0.35 rad. The loss never saw the regime it was built
+          to fix.</p>
+        </div>
+      </li>
+      <li>
+        <div class="run-body">
+          <h3>Rollout loss, long horizon</h3>
+          <p class="why">The same loss unrolled to 120 steps, with the rollout term weighted five times the
+          one-step term.</p>
+          <p class="outcome">drift <b>3.2 → 0.19 rad</b>, a 16× reduction that stops growing — reach <b>5/78</b>
+          <span class="flag no">mechanism fixed, outcome unchanged</span></p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <h2 class="col">Every fix landed. None of them mattered.</h2>
+    <figure>
+      <img src="figures/why_clone_fails.png" alt="Three panels: the long rollout loss flattens drift to 0.19 rad while other clones climb past 3 rad; a scatter of four interventions showing improvements from 0 to 94 percent in their own metrics against essentially zero change in scenarios reached; and a bar chart of six clones between 2 and 9 against the expert's 70.">
+      <figcaption><b>The pattern.</b> Four interventions, each improving its own target metric by between 0% and
+      94%, and all four sitting in the same band of reach outcomes. The long rollout loss is the clearest case:
+      it eliminated the accumulation entirely — the green curve goes flat inside the validity radius — and the
+      clone reached five scenarios instead of nine.</figcaption>
+    </figure>
+    <p class="pull">We fixed every mechanism we could measure. What is left is the one thing behavioral cloning
+    structurally cannot touch.</p>
+    <p class="col">The drift measurement is teacher-forced: states come from the expert's own trajectory. So the
+    long-rollout clone tracks the expert's commands almost perfectly <em>along a path the expert chose</em>. In
+    deployment the clone chooses the path, and correct commands on the wrong trajectory are worth nothing.
+    Correcting that requires the simulator inside the training loop — which is reinforcement learning, not
+    cloning.</p>
+  </section>
+
+  <section>
+    <h2 class="col">Why the 2-DoF reacher did clone</h2>
+    <p class="col">The same pipeline produced a working clone on the reacher at 82/120. Three measured
+    differences, and they compound.</p>
+    <div class="scroll">
+      <table class="col">
+        <thead>
+          <tr><th>&nbsp;</th><th>Reacher</th><th>Panda</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>expert output</td><td>torque, stateless</td><td>rate-limited joint target</td></tr>
+          <tr><td>accumulation</td><td>none</td><td>integrator</td></tr>
+          <tr><td class="num">effective dimension</td><td class="num">3.3 ± 0.3</td><td class="num">5.1 ± 0.5</td></tr>
+          <tr><td class="num">coverage at 180 placements</td><td class="num">0.169</td><td class="num">0.307</td></tr>
+          <tr><td class="num">episode horizon</td><td class="num">50 steps</td><td class="num">150 steps</td></tr>
+          <tr><td class="num">BC clone when DAgger began</td><td class="num">55%</td><td class="num">3%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure>
+      <img src="figures/coverage_scaling.png" alt="Two panels: coverage against placements on log-log axes for both systems, with fitted exponents 3.3 and 5.1; and a bar chart of the placements needed to get 2x, 4x and 8x closer, reaching 923x for the reacher and 36,733x for the Panda.">
+      <figcaption><b>The exponent is the whole story on the data side.</b> Getting twice as close to your training
+      data costs 10× more placements on the reacher and 33× on the Panda; eight times closer costs 923× against
+      36,733×. The Panda does not simply need more data — it needs exponentially more per unit of improvement.
+      The torque-versus-integrator difference is invisible here, and it is the half we showed was separately
+      fixable.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2 class="col">What the training set actually looks like</h2>
+    <figure>
+      <img src="figures/dataset_coverage.png" alt="Three panels: episode trajectories as threads in principal-component space with held-out episodes running through unvisited regions; two separated histograms showing 0.16 within an episode against 4.16 to the nearest other episode; and a coverage curve showing only 1 percent of states have a close enough neighbour.">
+      <figcaption><b>30,000 rows is 200 threads.</b> Steps within an episode sit 0.16 apart; the nearest state from
+      any <em>other</em> episode is 4.16 away — 26× further. Almost all of the apparent dataset size is resolution
+      along journeys we already have, and only 1% of states have a neighbour close enough to be informative.</figcaption>
+    </figure>
+  </section>
+
+  <section class="col">
+    <h2>Recommendation</h2>
+    <ul class="plain">
+      <li><b>Keep the clone, change its job.</b> Use it as an initialization for reinforcement learning, where
+      being imperfect is permitted. The reacher's warm-start arm took a 79/120 clone to the same return asymptote
+      as training from scratch while leading by 19 scenarios at 100k steps.</li>
+      <li><b>Run vanilla RL as the control.</b> On both prior systems it matched or beat the residual at
+      convergence, and it tells us whether 70/78 was ever the ceiling.</li>
+      <li><b>Still untested:</b> closed-loop training with the simulator in the loop. Separately, matching the
+      reacher's relative data density would cost roughly 180 worker-hours of solver time.</li>
+    </ul>
+  </section>
+
+  <section class="col caveats">
+    <h2>Caveats</h2>
+    <ul class="plain">
+      <li><b>Single seed throughout.</b> Differences of one to four scenarios are noise; the observed band across
+      configurations is 1–9.</li>
+      <li><b>The effective dimension is 5.1 ± 0.5</b>, with individual fits between 4.2 and 5.8. Because it is an
+      exponent, every cost multiplier here is order-of-magnitude rather than precise.</li>
+      <li><b>The row-wise validation split</b> made early clone validation numbers optimistic by roughly 10–13×,
+      including the reacher figures reported in journey 13.</li>
+    </ul>
+  </section>
+
+</div>

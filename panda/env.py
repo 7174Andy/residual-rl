@@ -79,6 +79,7 @@ class PandaReachEnv(gym.Env):
         R: Optional[np.ndarray] = None,
         reach_bonus: float = 100.0,
         render_mode: Optional[str] = None,
+        goal_box=None,
     ):
         super().__init__()
         # The scene backdrop is compiled in only when something will actually
@@ -103,6 +104,11 @@ class PandaReachEnv(gym.Env):
         self.goal_tolerance = float(goal_tolerance)
         self.min_start_goal_dist = float(min_start_goal_dist)
         self.max_steps = int(max_steps)
+        # Optional ((x_lo, x_hi), (y_lo, y_hi), (z_lo, z_hi)) in metres; None
+        # samples goals over the whole reachable workspace.
+        self.goal_box = (
+            None if goal_box is None else np.asarray(goal_box, dtype=np.float64).reshape(3, 2)
+        )
         self.reach_bonus = float(reach_bonus)
         self.render_mode = render_mode
         self._min_dist_relaxed: bool = False
@@ -295,9 +301,24 @@ class PandaReachEnv(gym.Env):
         if "goal" in options:
             self.goal = np.asarray(options["goal"], dtype=np.float64).reshape(3).copy()
         else:
-            _, self.goal = sample_config(
-                self.model, self.data, rng, self._lo, self._hi, self._tip_id
-            )
+            # A goal box is enforced by rejecting FK samples, never by sampling
+            # the box directly, so the reachability guarantee above survives.
+            # ponytail: plain rejection, ~4% accept for a 0.3 x 0.5 x 0.3 m box
+            # in front of the base; switch to IK-checked box samples if a much
+            # smaller box makes resets slow.
+            for _ in range(1000):
+                _, self.goal = sample_config(
+                    self.model, self.data, rng, self._lo, self._hi, self._tip_id
+                )
+                if self.goal_box is None or np.all(
+                    (self.goal >= self.goal_box[:, 0]) & (self.goal <= self.goal_box[:, 1])
+                ):
+                    break
+            else:
+                raise RuntimeError(
+                    f"no reachable goal found in goal_box={self.goal_box.tolist()} "
+                    "after 1000 draws; is the box inside the workspace?"
+                )
 
         if "qpos" in options:
             q0 = np.clip(

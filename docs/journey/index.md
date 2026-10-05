@@ -22,6 +22,7 @@ Entries are roughly chronological, but each one stands alone — you can read th
 | [15](15-panda-taskbank.md)       | The Panda task bank — goal-directed data lifts the expert 47/78 → 70/78 |
 | [16](16-warm-start-rl.md)        | Warm-start RL — one prior, two injection sites; the paper's ranking inverts |
 | [17](17-reach-rate-tail.md)      | The reach-rate tail — parked means, threshold churn, entropy annealing |
+| [18](18-panda-box-rl.md)        | Panda RL on a goal box — clone works once the task is local; RL makes it optional |
 
 ## Conventions
 
