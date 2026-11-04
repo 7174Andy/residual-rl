@@ -1793,6 +1793,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#the-gait" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The gait
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#data" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1922,6 +1933,17 @@
   
     <nav class="md-nav" aria-label="Context — the same pipeline, a legged plant">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-gait" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The gait
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#data" class="md-nav__link">
@@ -2061,6 +2083,67 @@ the unicycle setup, beat the 39%". Five plant facts forced changes on the way:</
 </tr>
 </tbody>
 </table>
+<h3 id="the-gait">The gait<a class="headerlink" href="#the-gait" title="Permanent link">&para;</a></h3>
+<p>DeePC never sees joints: the plant it identifies is "command in, trunk pose
+out", with the trot below inside it (<code>quadruped/gait.py::TrotGait</code>). Feet are
+in the trunk frame, relative to each leg's hip-abduction joint. Constants:
+period <span class="arithmatex">\(T = 0.4\)</span> s, <span class="arithmatex">\(\Delta t = 0.02\)</span> s, standing height <span class="arithmatex">\(h = 0.27\)</span> m, swing
+lift <span class="arithmatex">\(H = 0.07\)</span> m, side <span class="arithmatex">\(s_i = \pm 1\)</span> (+1 = left), abduction offset
+<span class="arithmatex">\(l_\text{ab} = 0.08\)</span> m, thigh and calf lengths <span class="arithmatex">\(a = b = 0.213\)</span> m.</p>
+<p><strong>Phase clock.</strong> One global phase. Each leg gets an offset
+<span class="arithmatex">\(o = (0.5, 0, 0, 0.5)\)</span> for (FR, FL, RR, RL), so the diagonal pairs FL+RR and
+FR+RL alternate:</p>
+<div class="arithmatex">\[
+\phi_{t+1} = (\phi_t + \Delta t / T) \bmod 1, \qquad
+\varphi_i = (\phi_{t+1} + o_i) \bmod 1, \qquad
+\text{leg } i \text{ in stance} \iff \varphi_i &lt; 0.5
+\]</div>
+<p><strong>Foot velocity.</strong> The command <span class="arithmatex">\(u = (v_x, v_y, \omega)\)</span> is turned into the
+planar velocity of a rigid body at each leg's nominal foot point
+<span class="arithmatex">\(r_i = (r_{i,x}, r_{i,y})\)</span> in the trunk frame:</p>
+<div class="arithmatex">\[
+u_i = \begin{pmatrix} v_x - \omega\, r_{i,y} \\ v_y + \omega\, r_{i,x} \end{pmatrix}
+\]</div>
+<p><strong>Stance</strong> (<span class="arithmatex">\(\varphi_i &lt; 0.5\)</span>). The foot slides backward at <span class="arithmatex">\(u_i\)</span> on the
+ground plane. If it does not slip, the trunk moves at <span class="arithmatex">\(u_i\)</span>:</p>
+<div class="arithmatex">\[
+p_i^{xy} \leftarrow p_i^{xy} - u_i \Delta t, \qquad p_i^z = -h
+\]</div>
+<p><strong>Swing</strong> (<span class="arithmatex">\(\varphi_i \ge 0.5\)</span>). Let <span class="arithmatex">\(\sigma = 2(\varphi_i - 0.5) \in [0, 1)\)</span>
+be the swing progress and <span class="arithmatex">\(p_i^\text{lift}\)</span> the foot position at liftoff. The
+foot follows a cosine-eased path to a landing point a quarter period of travel
+ahead of its nominal point <span class="arithmatex">\(n_i = (0, s_i l_\text{ab})\)</span>, with a sine arc in
+height:</p>
+<div class="arithmatex">\[
+\ell_i = n_i + u_i \tfrac{T}{4}, \qquad
+e(\sigma) = \tfrac{1}{2}\big(1 - \cos \pi\sigma\big)
+\]</div>
+<div class="arithmatex">\[
+p_i^{xy} = p_i^\text{lift} + \big(\ell_i - p_i^\text{lift}\big)\, e(\sigma), \qquad
+p_i^z = -h + H \sin \pi\sigma
+\]</div>
+<p>Stance lasts <span class="arithmatex">\(T/2\)</span> and covers <span class="arithmatex">\(u_i T/2\)</span>. Landing at <span class="arithmatex">\(+u_i T/4\)</span> therefore lifts
+off at <span class="arithmatex">\(-u_i T/4\)</span>: the stance is centred on the nominal point. The
+foot-placement feedback term (<code>k_foot</code>) is off (<span class="arithmatex">\(k_\text{foot} = 0\)</span>), so the
+gait is fully open-loop.</p>
+<p><strong>Leg IK.</strong> For each foot target <span class="arithmatex">\(p = (x, y, z)\)</span>, with <span class="arithmatex">\(l_1 = s_i l_\text{ab}\)</span>:</p>
+<div class="arithmatex">\[
+L = \sqrt{y^2 + z^2 - l_1^2}, \qquad
+q_\text{ab} = \operatorname{atan2}(z, y) - \operatorname{atan2}(-L, l_1)
+\]</div>
+<div class="arithmatex">\[
+r = \min\!\Big(\sqrt{x^2 + L^2},\ a + b\Big), \qquad
+q_\text{knee} = -\Big(\pi - \arccos \frac{a^2 + b^2 - r^2}{2ab}\Big)
+\]</div>
+<div class="arithmatex">\[
+q_\text{thigh} = \operatorname{atan2}(-x, L) - \operatorname{atan2}\big(b \sin q_\text{knee},\ a + b \cos q_\text{knee}\big)
+\]</div>
+<p>The <span class="arithmatex">\(\min\)</span> projects unreachable targets onto the workspace boundary. The joint
+targets <span class="arithmatex">\(q_i = \operatorname{clip}(q, q_\text{lo}, q_\text{hi})\)</span> are
+<code>info["ctrl"]</code>, and MuJoCo's PD-servo actuators track them. The −0.09 m/s
+<span class="arithmatex">\(v_x\)</span> offset and the in-cycle yaw oscillation are what this ideal no-slip
+model leaves out. Both are measured in the table above, not predicted by the
+equations.</p>
 <h3 id="data">Data<a class="headerlink" href="#data" title="Permanent link">&para;</a></h3>
 <p>There are four libraries, keyed at headings <code>±π/4</code> and <code>±3π/4</code>. Each is one
 1500-step trajectory (30 s), so the robot walks for <strong>2 minutes</strong> in total. No
