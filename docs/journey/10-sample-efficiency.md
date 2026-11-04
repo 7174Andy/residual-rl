@@ -291,19 +291,19 @@ seeds 4104626034 and 4104626050. The vanilla-SAC arm has no videos yet.
 
 ```bash
 # the 2x2: {residual, vanilla} x {td3, sac}, 5 seeds each, checkpoints every 25k
-uv run python scripts/train_residual.py --residual-frac 2.0 --timesteps 400000 --seed 0 \
+uv run python scripts/train/train_residual.py --residual-frac 2.0 --timesteps 400000 --seed 0 \
     --out data/ckptsweep/res_s0.zip --checkpoint-dir data/ckptsweep/res_s0 --checkpoint-freq 25000
-uv run python scripts/train_residual.py --algo sac --residual-frac 2.0 --timesteps 400000 --seed 0 \
+uv run python scripts/train/train_residual.py --algo sac --residual-frac 2.0 --timesteps 400000 --seed 0 \
     --out data/sacsweep/res_s0.zip --checkpoint-dir data/sacsweep/res_s0 --checkpoint-freq 25000 \
     --monitor-out data/sacsweep/res_s0_mon
-uv run python scripts/train_vanilla.py --timesteps 400000 --seed 0 \
+uv run python scripts/train/train_vanilla.py --timesteps 400000 --seed 0 \
     --out data/ckptsweep/van_s0.zip --checkpoint-dir data/ckptsweep/van_s0 --checkpoint-freq 25000
-uv run python scripts/train_vanilla.py --algo sac --timesteps 400000 --seed 0 \
+uv run python scripts/train/train_vanilla.py --algo sac --timesteps 400000 --seed 0 \
     --out data/sacsweep_van/van_s0.zip --checkpoint-dir data/sacsweep_van/van_s0 \
     --checkpoint-freq 25000 --monitor-out data/sacsweep_van/van_s0_mon
 
 # the 5k-resolution early window (25k budget, same seeds) -- needed for SAC's crossing point
-uv run python scripts/train_residual.py --algo sac --residual-frac 2.0 --timesteps 25000 --seed 0 \
+uv run python scripts/train/train_residual.py --algo sac --residual-frac 2.0 --timesteps 25000 --seed 0 \
     --out data/earlysweep_sac/res_s0.zip --checkpoint-dir data/earlysweep_sac/res_s0 --checkpoint-freq 5000
 
 # greedy evaluation of every checkpoint on the canonical 78 eval seeds, one call per arm
@@ -314,8 +314,8 @@ uv run python scripts/sweep_checkpoints.py --ckpt-root data/sacsweep_van --arms 
     --algo sac --label vanilla_sac --out data/checkpoint_sweep_sacvan.csv
 
 # figures (the plot script merges comma-separated CSVs)
-uv run python scripts/plot_checkpoint_sweep.py --csv data/checkpoint_sweep_all.csv
-uv run python scripts/plot_learning_curves.py \
+uv run python scripts/plot/plot_checkpoint_sweep.py --csv data/checkpoint_sweep_all.csv
+uv run python scripts/plot/plot_learning_curves.py \
     --glob-sac 'data/sacsweep/res_s*_mon.monitor.csv' \
     --glob-sac-van 'data/sacsweep_van/van_s*_mon.monitor.csv' \
     --out docs/journey/figures/learning_curves_3arm.png

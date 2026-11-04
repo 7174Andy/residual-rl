@@ -179,7 +179,7 @@ _negative skill_: worse than assuming the tip does not move. The nearest data si
 **1.98 rad** away against a ~0.5 rad validity radius, and no selection rule
 manufactures data that is not there.
 
-`scripts/plot_panda_coverage_argument.py` assembles the four independent routes to
+`scripts/plot/plot_panda_coverage_argument.py` assembles the four independent routes to
 this conclusion into one figure.
 
 ### Why selection cannot rescue a 7-DoF arm — the floor is 1.48 rad

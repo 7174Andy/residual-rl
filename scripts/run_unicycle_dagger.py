@@ -56,7 +56,7 @@ def _rollout(seed: int):
 
 
 def train(ds: str, out: str, *extra: str) -> None:
-    subprocess.run([sys.executable, "scripts/train_clone.py", "--data", ds, "--out", out,
+    subprocess.run([sys.executable, "scripts/train/train_clone.py", "--data", ds, "--out", out,
                     "--device", "cpu", *extra], check=True)
 
 

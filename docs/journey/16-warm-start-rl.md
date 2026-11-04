@@ -142,11 +142,10 @@ Three things fall out, and two of them were not the expected answer.
    random actions score *higher* than the expert's (mean min-head Q 6.27 against
    4.98, higher on 54% of states), and MC targets carry no entropy term or
    bootstrapped tail, so early TD critic loss runs ~15–20 against ~0.1 for a cold
-   critic. Fit quality was not the problem (R² 0.85). **That code was removed on
-   2026-09-11** at the repo owner's request — `rl/sb3.py::pretrain_critic`, the
-   `--pretrain-critic` flags, and `reacher/clone_data.py::returns_from_dataset`
-   no longer exist. This paragraph and `data/qpre_sweep_100k.log` are the record.
-   `FreezeActorCallback` was kept: different mechanism, and it is arm C above.
+   critic. Fit quality was not the problem (R² 0.85). **The critic-pretraining and
+   actor-freeze code was removed on 2026-11-03**, with the other failed dip fixes
+   ([journey 19](19-warm-start-dip.md)). This paragraph and
+   `data/qpre_sweep_100k.log` are the record.
 
 ## The 400k verdict — P1 inverts
 
@@ -240,10 +239,10 @@ this system at this budget," not "the cold critic is fine."
 
 ## Outcome
 
-- `scripts/train_reacher_window.py` (both arms from one code path — `--clone`
+- `scripts/train/train_reacher_window.py` (both arms from one code path — `--clone`
   present or absent is the only difference), `reacher/window_env.py`'s
-  `CloneWindowEnv`, `rl/sb3.py::init_actor_from_clone` and `FreezeActorCallback`,
-  and `rl/clone.py`'s squash mode. `tests/test_warmstart_transfer.py` pins the
+  `CloneWindowEnv`, `rl/sb3.py::init_actor_from_clone`, and `rl/clone.py`'s
+  squash mode. Arm C's `FreezeActorCallback` was removed on 2026-11-03. `tests/test_warmstart_transfer.py` pins the
   transfer, including the closed-loop invariant that a frozen warm actor
   reproduces the clone over a full episode.
 - Checkpoints and monitors under `data/reacher_{bcinit,cold}_*`; the gate, probe
@@ -259,3 +258,6 @@ this system at this budget," not "the cold critic is fine."
 - The tail this entry's sweeps show at the top end — both arms crawling from 95%
   to 100% — is **not** slow learning, and is taken apart in journey
   [17](17-reach-rate-tail.md).
+- The dip itself (P3's collapse) is taken apart in journey
+  [19](19-warm-start-dip.md): why every fix trades the dip against the final
+  result.

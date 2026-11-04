@@ -2,7 +2,7 @@
 
 Schema: `traj_<seed>_{clone,residual}.csv`, columns `step, x, y, heading, v,
 w, goal_x, goal_y`. Kept gym/torch-free so lightweight consumers
-(`scripts/plot_seed_traces.py`) don't pay for `stable_baselines3`/`torch`
+(`scripts/plot/plot_seed_traces.py`) don't pay for `stable_baselines3`/`torch`
 imports just to read a trace someone else already generated.
 """
 from __future__ import annotations

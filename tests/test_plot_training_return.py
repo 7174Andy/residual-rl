@@ -1,9 +1,9 @@
-"""Smoke tests for scripts/plot_training_return.py (both input modes)."""
+"""Smoke tests for scripts/plot/plot_training_return.py (both input modes)."""
 import csv
 import subprocess
 import sys
 
-SCRIPT = "scripts/plot_training_return.py"
+SCRIPT = "scripts/plot/plot_training_return.py"
 
 
 def _run(args):

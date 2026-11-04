@@ -22,7 +22,7 @@ def _skip_if_stale(path):
         got = int(torch.load(path, map_location="cpu",
                              weights_only=False)["stats"]["input_dim"])
     except FileNotFoundError:
-        pytest.skip(f"{path} not trained; run scripts/train_reacher_clone.py")
+        pytest.skip(f"{path} not trained; run scripts/train/train_reacher_clone.py")
     if got != want:
         pytest.skip(f"{path} has input_dim {got}, features are now {want}-D "
                     f"(stale checkpoint -- retrain on a 43-D dataset)")

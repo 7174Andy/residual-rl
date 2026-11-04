@@ -3,7 +3,7 @@
 Used by scripts/render_dashboard_video.py so a new seed needs one command,
 not a separate scripts/eval_seed_showcase.py pass first. Kept separate from
 core.trace_io (pure CSV I/O, no gym/torch/sb3) so
-scripts/plot_seed_traces.py can read traces without paying for those imports.
+scripts/plot/plot_seed_traces.py can read traces without paying for those imports.
 """
 from __future__ import annotations
 

@@ -35,7 +35,7 @@ under each distribution — the exact protocol of journey 13's 2.75x. The
 ablations retrain the identical architecture on single slices (the dataset's
 `regime` column tags every row); closed-loop gates are
 `scripts/validate_clone.py`, 78 seeds. Figure:
-`docs/reference/clone_coverage.png` (`scripts/plot_clone_coverage.py`).
+`docs/reference/clone_coverage.png` (`scripts/plot/plot_clone_coverage.py`).
 
 | clone trained on | in-dist fit | at expert states | at own states | ratio | closed loop, 78 seeds |
 | --- | --- | --- | --- | --- | --- |
@@ -78,7 +78,7 @@ Three readings, one per row:
 
 ## Outcome
 
-- `scripts/measure_clone_disagreement.py`, `scripts/plot_clone_coverage.py`,
+- `scripts/measure_clone_disagreement.py`, `scripts/plot/plot_clone_coverage.py`,
   `docs/reference/clone_coverage.png`; raw distances in
   `data/disagree_{hybrid,onpolicyonly,noonpolicy}.npz`, ablation clones and
   filtered datasets in `data/clone_{onpolicyonly,noonpolicy}.pt` /

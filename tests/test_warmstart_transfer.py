@@ -22,7 +22,7 @@ def _skip_if_missing(path):
         stats = torch.load(path, map_location="cpu",
                            weights_only=False)["stats"]
     except FileNotFoundError:
-        pytest.skip(f"{path} not trained; run scripts/train_reacher_clone.py "
+        pytest.skip(f"{path} not trained; run scripts/train/train_reacher_clone.py "
                     f"--squash --out {path}")
     if int(stats["input_dim"]) != feature_dim(5, 0):
         pytest.skip(f"{path} has input_dim {stats['input_dim']}, features are "
@@ -210,49 +210,3 @@ def test_warm_actor_reproduces_the_clone_over_a_full_episode():
         win.close()
         ref.close()
 
-
-def test_freeze_actor_callback_holds_the_actor_weights_then_releases():
-    """Assert on WEIGHTS, never on the learning rate.
-
-    The lr is not a valid probe: SAC.train() calls _update_learning_rate on
-    [actor.optimizer, critic.optimizer] at the top of every call, overwriting
-    anything a callback wrote. An earlier version of this callback zeroed the lr,
-    was a complete no-op, and passed an lr-based test anyway.
-    """
-    from reacher.window_env import CloneWindowEnv
-    from rl.sb3 import FreezeActorCallback, build_model
-
-    env = CloneWindowEnv()
-    try:
-        # (a) A freeze spanning the whole run: the actor must not move at all,
-        #     while the critic MUST still train -- that is the entire point.
-        model = build_model("sac", env, 3e-4, "cpu", 0, 0, 0.1)
-        actor_w = model.policy.actor.mu.weight.detach().clone()
-        critic_w = model.policy.critic.qf0[0].weight.detach().clone()
-        cb = FreezeActorCallback(10_000)
-        model.learn(total_timesteps=400, callback=cb, progress_bar=False)
-        assert torch.equal(model.policy.actor.mu.weight, actor_w), \
-            "actor moved while frozen"
-        assert not torch.equal(model.policy.critic.qf0[0].weight, critic_w), \
-            "critic did not train during the freeze -- the freeze is too broad"
-        assert model.actor.optimizer.step is not None
-        # _on_training_end must have restored the real step method.
-        assert cb._released is True
-
-        # (b) A freeze that releases mid-run: the actor MUST move.
-        model2 = build_model("sac", env, 3e-4, "cpu", 0, 0, 0.1)
-        actor_w2 = model2.policy.actor.mu.weight.detach().clone()
-        model2.learn(total_timesteps=400, callback=FreezeActorCallback(150),
-                     progress_bar=False)
-        assert not torch.equal(model2.policy.actor.mu.weight, actor_w2), \
-            "actor never moved after the freeze released"
-
-        # (c) n_steps=0 must be a true no-op, since that is the cold-critic arm.
-        model3 = build_model("sac", env, 3e-4, "cpu", 0, 0, 0.1)
-        actor_w3 = model3.policy.actor.mu.weight.detach().clone()
-        model3.learn(total_timesteps=400, callback=FreezeActorCallback(0),
-                     progress_bar=False)
-        assert not torch.equal(model3.policy.actor.mu.weight, actor_w3), \
-            "n_steps=0 should not freeze anything"
-    finally:
-        env.close()

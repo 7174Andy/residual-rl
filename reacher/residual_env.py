@@ -107,6 +107,13 @@ class ResidualSelectEnv(gym.Env):
                          self.base.step_idx, self.anchors)
         return np.clip(self.predictor.predict(feat), self.a_low, self.a_high)
 
+    def window_features(self) -> np.ndarray:
+        """The 43-D clone window for the current state (no anchor one-hot) --
+        the input `rl/shaping.py`'s Phi = V^clone was fit on."""
+        assert self._u_buf is not None and self._y_buf is not None
+        return featurize(self._u_buf, self._y_buf, self.base.y, self.base.goal,
+                         self.base.step_idx, None)
+
     def _make_obs(self, inner_obs: np.ndarray) -> np.ndarray:
         """Cache u_base for the CURRENT state, then return the normalized obs."""
         self.u_base = self._base_action()

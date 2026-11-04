@@ -265,8 +265,8 @@ selected per solve, held at 300 throughout) and `n_max` (the iteration cap).
 
 ## RL interface — `ReacherGoal-v0`
 
-`reacher/env.py`. Two RL arms consume it — `scripts/train_reacher_vanilla.py` and
-`scripts/train_reacher_residual.py` — and **they do not see the same observation
+`reacher/env.py`. Two RL arms consume it — `scripts/train/train_reacher_vanilla.py` and
+`scripts/train/train_reacher_residual.py` — and **they do not see the same observation
 vector.** The *why* is [journey 13](../journey/13-reacher-residual.md); this is the
 contract.
 
@@ -472,9 +472,9 @@ All defaults are baked into `argparse`; there are no config files.
 | `scripts/run_select_dpc_reacher.py` | Select-DPC vs fixed anchors on the identical 20 episodes, plus figure and videos | `--n-sel 300` `--n-max 3` `--out-dir videos/reacher_select` `--fig docs/reference/reacher_select_dpc.png` |
 | `scripts/record_reacher_video.py` | DeePC vs random torque on the same episodes; supplies the camera, lights and tolerance ring the XML lacks | `--scan 20` `--fps 25` `--size 720 720` `--out-dir videos/reacher` |
 | `scripts/record_reacher_compare.py` | paired fixed-vs-Select clips, full horizon, showing `rescue` / `drift` / `both` / `neither` | `--scan 30` `--out-dir videos/reacher_compare` |
-| `scripts/plot_reacher_results.py` | renders `reacher_results.png` from `reacher_results.csv` (transcribed, not recomputed — the closed-loop rows cost ~15 min of QP each) | `--out docs/reference/reacher_results.png` |
-| `scripts/train_reacher_vanilla.py` | SAC from scratch on the bare env — the control arm | `--steps 200000` `--algo sac` `--lr 3e-4` `--seed 0` |
-| `scripts/train_reacher_residual.py` | zero-init SAC residual over the frozen clone | `--clone data/dagger_clone_r3.pt` `--residual-frac 1.0` (**pass `2.0`** — see above) `--steps 200000` |
+| `scripts/plot/plot_reacher_results.py` | renders `reacher_results.png` from `reacher_results.csv` (transcribed, not recomputed — the closed-loop rows cost ~15 min of QP each) | `--out docs/reference/reacher_results.png` |
+| `scripts/train/train_reacher_vanilla.py` | SAC from scratch on the bare env — the control arm | `--steps 200000` `--algo sac` `--lr 3e-4` `--seed 0` |
+| `scripts/train/train_reacher_residual.py` | zero-init SAC residual over the frozen clone | `--clone data/dagger_clone_r3.pt` `--residual-frac 1.0` (**pass `2.0`** — see above) `--steps 200000` |
 | `scripts/eval_reacher_residual.py` | the 5-row table + figure: Select-DPC, clone, clone+residual, vanilla, on 120 shared scenarios | `--episodes 120` `--residual-frac 2.0` `--algo sac` |
 | `scripts/record_reacher_dagger.py` | paired BC-vs-DAgger clone clips on the frozen 120, full horizon, picked by outcome: `rescue` / `both` / `bc_drift` / `regression` / `neither` | `--scan 120` `--bc-clone data/reacher_clone_ml.pt` `--dagger-clone data/dagger_clone_r3.pt` `--episode 4` `--out-dir videos/reacher_dagger` |
 | `scripts/record_reacher_residual.py` | four-arm clips, full horizon, picked by outcome from a scan: `rescue` / `both_succeed` / `widest_drift` plus the residual's own `residual_miss` and `residual_widest_drift` | `--scan 120` `--residual-frac 2.0` `--n-miss 3` `--only residual_miss` `--out-dir videos/reacher_residual_frac2` |

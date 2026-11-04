@@ -3,7 +3,7 @@
 
 Writes full per-step (x, y, heading, v, w) closed-loop traces for one or more
 showcase seeds, for both clone and residual, to
-`<outdir>/traj_<seed>_{clone,residual}.csv`, for `scripts/plot_seed_traces.py`.
+`<outdir>/traj_<seed>_{clone,residual}.csv`, for `scripts/plot/plot_seed_traces.py`.
 Both closed loops are DeePC-free (clone/residual only -- no QP), so this runs
 in well under a second per seed. Defaults to `--trace-model
 data/residual_td3.zip` (the 200k checkpoint) to match the checkpoint used to

@@ -38,7 +38,7 @@ the fix, they narrowed.
 120 held-out scenarios (`--seed 90000`, disjoint from every training stream), full
 horizon, early stopping **off** (`scripts/eval_reacher_residual.py`). Every row
 below was evaluated under the same tree — see "The eval-drift catch". Figure:
-`docs/reference/reacher_residual_rl.png` (`scripts/plot_reacher_residual_rl.py`);
+`docs/reference/reacher_residual_rl.png` (`scripts/plot/plot_reacher_residual_rl.py`);
 the per-scenario CSV records are gitignored like all CSVs — regenerate them
 with `scripts/eval_reacher_residual.py` (~13 min).
 
@@ -275,7 +275,7 @@ never outside ±6 pp after that — this seed ends at −0.8 pp (119 vs 120).
 Rerun across **five training seeds** per arm (seeds 1–4 added 2026-08-24;
 checkpoints and per-seed sweep CSVs in `data/reacher_ckpt_seeds/`, figure
 `docs/reference/reacher_crossover_seeds.png` via
-`scripts/plot_reacher_crossover_seeds.py`; CSVs are gitignored repo-wide), the
+`scripts/plot/plot_reacher_crossover_seeds.py`; CSVs are gitignored repo-wide), the
 crossover survives but its location does not. The residual leads on 5/5 seeds
 at 25k and 50k (pooled +25 and +43 pp over 600 episodes) and vanilla leads on
 5/5 seeds only from 375k on (pooled 600 vs 583, then 599 vs 589 at 400k) —

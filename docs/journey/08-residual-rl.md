@@ -81,7 +81,7 @@ _Mean episode return (SB3 `ep_rew_mean`) over training episodes — the shipped 
 rapid climb (episodes ~20–200), then a noisy plateau (~−7k to −11k). The return plateaus and
 even dips late while the **reach rate is 87.2 %** — the reward also charges control effort
 `−uᵀRu`, so a lower return does not mean fewer reaches (TD3 also saves the final, not the best,
-policy). Regenerate from the committed curve with `uv run python scripts/plot_training_return.py`._
+policy). Regenerate from the committed curve with `uv run python scripts/plot/plot_training_return.py`._
 
 ## Side-by-side — clone vs clone+residual
 
@@ -115,7 +115,7 @@ _Trajectory panel: clone (dashed gray, stalls) vs clone + TD3 residual (blue, re
 marked with a star and the 0.5-unit tolerance circle. `v(t)` panel: the same two closed loops'
 forward-velocity channel — the clone's `v` decays toward 0 (the collapse), the residual's `v`
 climbs instead of decaying and drives the reach. Regenerate with
-`uv run python scripts/plot_seed_traces.py --seed 4104626029` (reads the committed
+`uv run python scripts/plot/plot_seed_traces.py --seed 4104626029` (reads the committed
 `traj_<seed>_{clone,residual}.csv`, written once by `scripts/eval_seed_showcase.py`)._
 
 ## Metrics
@@ -137,7 +137,7 @@ the harness is identical to [07](07-imitation-learning.md).
 _Reach rate over the canonical 78-seed sweep, error bars = 95 % Wilson CI. DeePC and the
 clone are statistically indistinguishable (by construction); the residual is a clear jump
 outside either baseline's CI, and doubling the training budget lifts it further still.
-Regenerate with `uv run python scripts/plot_reach_rates.py` (reads the committed
+Regenerate with `uv run python scripts/plot/plot_reach_rates.py` (reads the committed
 `docs/journey/figures/reach_rates.csv` — no benchmark re-run needed)._
 
 ### Paired — residual vs clone (the decisive test)
@@ -192,7 +192,7 @@ horizon differs), then visibly diverge before the 200k run ends at ~episode 1,55
 run is not simply "the 200k run, continued," it's a fresh zero-init run whose noisy plateau
 happens to sit at a similar level, consistent with the reach-rate gain coming from convergence
 on individual hard seeds rather than a still-rising aggregate curve. Regenerate with
-`uv run python scripts/plot_training_return.py --compare 200k:docs/journey/figures/residual_return.csv
+`uv run python scripts/plot/plot_training_return.py --compare 200k:docs/journey/figures/residual_return.csv
 400k:docs/journey/figures/residual_return_400k.csv` (both curve CSVs are committed data)._
 
 Reach rate for both checkpoints is already in the [Three-way reach rate table](#three-way-reach-rate-78-seeds-base-seed-4104626029-canonical-config)
@@ -277,7 +277,7 @@ exception — it looks like pure undertraining and may well flip with even more 
 
 ```bash
 # train the TD3 residual over the frozen clone (native env reward; QP never in the loop)
-uv run python scripts/train_residual.py --timesteps 200000 --out data/residual_td3.zip
+uv run python scripts/train/train_residual.py --timesteps 200000 --out data/residual_td3.zip
 
 # three-way benchmark: DeePC (QP) vs clone-only vs clone+residual on the 78-seed sweep
 uv run python scripts/eval_residual.py --model data/residual_td3.zip \
@@ -288,17 +288,17 @@ uv run python scripts/run_clone.py    --record docs/journey/videos --seeds 41046
 uv run python scripts/run_residual.py --record docs/journey/videos --seeds 4104626029  # -> episode_<seed>.mp4
 
 # regenerate the training-return figure from the committed curve CSV
-uv run python scripts/plot_training_return.py
+uv run python scripts/plot/plot_training_return.py
 # ...or from a fresh run's raw returns:
-#   uv run python scripts/train_residual.py --monitor-out data/residual_monitor ...
-#   uv run python scripts/plot_training_return.py --monitor data/residual_monitor.monitor.csv
+#   uv run python scripts/train/train_residual.py --monitor-out data/residual_monitor ...
+#   uv run python scripts/plot/plot_training_return.py --monitor data/residual_monitor.monitor.csv
 
 # regenerate the reach-rate bar chart from the committed benchmark-results CSV
 # (no 78-seed re-run needed -- it's QP-bound and takes minutes per seed)
-uv run python scripts/plot_reach_rates.py
+uv run python scripts/plot/plot_reach_rates.py
 
 # --- 2026-07-20 follow-up: 400k-step run ---
-uv run python scripts/train_residual.py --timesteps 400000 --out data/residual_td3_400k.zip \
+uv run python scripts/train/train_residual.py --timesteps 400000 --out data/residual_td3_400k.zip \
     --monitor-out data/residual_400k_monitor
 
 uv run python scripts/eval_residual.py --model data/residual_td3_400k.zip \
@@ -311,10 +311,10 @@ uv run python scripts/run_residual.py --model data/residual_td3_400k.zip \
 
 # regenerate the 200k-vs-400k training-return overlay from the committed curve CSVs
 # (the 400k curve CSV was derived once via:
-#   uv run python scripts/plot_training_return.py --monitor data/residual_400k_monitor.monitor.csv \
+#   uv run python scripts/plot/plot_training_return.py --monitor data/residual_400k_monitor.monitor.csv \
 #       --out docs/journey/figures/residual_return_400k.png \
 #       --save-curve docs/journey/figures/residual_return_400k.csv )
-uv run python scripts/plot_training_return.py --compare \
+uv run python scripts/plot/plot_training_return.py --compare \
     200k:docs/journey/figures/residual_return.csv \
     400k:docs/journey/figures/residual_return_400k.csv \
     --out docs/journey/figures/residual_return_comparison.png
@@ -327,6 +327,6 @@ uv run python scripts/eval_seed_showcase.py
 
 # trajectory + v(t) companion figure for a video-showcased seed (200k, to match
 # the embedded video's checkpoint)
-uv run python scripts/plot_seed_traces.py --seed 4104626029
-uv run python scripts/plot_seed_traces.py --seed 4104626034
+uv run python scripts/plot/plot_seed_traces.py --seed 4104626029
+uv run python scripts/plot/plot_seed_traces.py --seed 4104626034
 ```

@@ -80,12 +80,12 @@ uv run python scripts/gen_clone_data.py --out data/clone_dataset.npz \
 
 Prints sample count, feature dim, and per-regime counts, e.g. `wrote data/clone_dataset.npz: 28345 samples, dim 40` / `regimes: {'synthetic': 20000, 'onpolicy': 8345}`.
 
-## `scripts/train_clone.py`
+## `scripts/train/train_clone.py`
 
 Trains the imitation-learning clone MLP (`f_θ`) on a generated dataset and saves the checkpoint.
 
 ```bash
-uv run python scripts/train_clone.py --data data/clone_dataset.npz \
+uv run python scripts/train/train_clone.py --data data/clone_dataset.npz \
     --out data/clone.pt --device auto
 ```
 
@@ -150,12 +150,12 @@ uv run python scripts/run_clone.py --headless --episodes 78 --seed 4104626029
 
 Per-episode output mirrors `run_deepc.py`'s (`seed N: REACHED after S steps return=... final_dist=...`, plus `v`/`w` mean±std), with a final `reached: k/n` summary line across all episodes run.
 
-## `scripts/train_residual.py`
+## `scripts/train/train_residual.py`
 
 Trains the TD3 (default) or SAC residual over the frozen clone — RL correction on top of the imitation-learned base policy (`two_wheel_robot.rl.residual_env.ResidualDeePCEnv`).
 
 ```bash
-uv run python scripts/train_residual.py --clone data/clone.pt \
+uv run python scripts/train/train_residual.py --clone data/clone.pt \
     --out data/residual_td3.zip --timesteps 200000
 ```
 
@@ -258,12 +258,12 @@ uv run python scripts/render_dashboard_video.py --seeds 4104626029,4104626034
 | `--fps` | 40 | Playback frame rate |
 | `--device` | `cpu` | Inference device |
 
-## `scripts/plot_reach_rates.py`
+## `scripts/plot/plot_reach_rates.py`
 
 Bar chart of DeePC vs clone vs clone+TD3-residual (200k, 400k) reach rates with Wilson 95% CIs. Default input is the committed benchmark CSV, so the figure regenerates without re-running the (QP-bound, minutes-per-seed) benchmark.
 
 ```bash
-uv run python scripts/plot_reach_rates.py
+uv run python scripts/plot/plot_reach_rates.py
 ```
 
 | Flag | Default | Meaning |
@@ -273,12 +273,12 @@ uv run python scripts/plot_reach_rates.py
 
 Prints `wrote <out> (N bars)`.
 
-## `scripts/plot_seed_traces.py`
+## `scripts/plot/plot_seed_traces.py`
 
 Trajectory + forward-velocity (`v(t)`) companion figure for one showcase seed, from the trace CSVs `eval_seed_showcase.py` writes.
 
 ```bash
-uv run python scripts/plot_seed_traces.py --seed 4104626029
+uv run python scripts/plot/plot_seed_traces.py --seed 4104626029
 ```
 
 | Flag | Default | Meaning |
@@ -291,13 +291,13 @@ uv run python scripts/plot_seed_traces.py --seed 4104626029
 
 Prints `wrote <out>`.
 
-## `scripts/plot_training_return.py`
+## `scripts/plot/plot_training_return.py`
 
 Plots the TD3 residual's training-return curve (mean episode return vs. episode). Default input is a committed curve CSV; `--monitor` derives the curve fresh from an SB3 Monitor CSV instead; `--compare` overlays multiple committed curves (used for the 200k-vs-400k comparison).
 
 ```bash
-uv run python scripts/plot_training_return.py
-uv run python scripts/plot_training_return.py \
+uv run python scripts/plot/plot_training_return.py
+uv run python scripts/plot/plot_training_return.py \
     --compare 200k:docs/journey/figures/residual_return.csv \
               400k:docs/journey/figures/residual_return_400k.csv
 ```
@@ -495,7 +495,7 @@ control of identical command magnitude on the same episodes.
 Reports **path/net** — tip path length per unit of progress. A controller that
 steers runs 1–2×; measured 1.0 at the anchor and 53.8 at 2 rad.
 
-## `scripts/plot_panda_analysis.py`
+## `scripts/plot/plot_panda_analysis.py`
 
 Regenerates the three figures behind the linear-region, state-space and anchor
 measurements. Everything is recomputed from the model, not transcribed.

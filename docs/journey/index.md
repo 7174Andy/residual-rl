@@ -23,6 +23,9 @@ Entries are roughly chronological, but each one stands alone — you can read th
 | [16](16-warm-start-rl.md)        | Warm-start RL — one prior, two injection sites; the paper's ranking inverts |
 | [17](17-reach-rate-tail.md)      | The reach-rate tail — parked means, threshold churn, entropy annealing |
 | [18](18-panda-box-rl.md)        | Panda RL on a goal box — clone works once the task is local; RL makes it optional |
+| [19](19-warm-start-dip.md)       | The warm-start dip — the critic can't steer near the clone; no fix tried avoids the dip and still improves |
+| [20](20-residual-cold-critic.md) | Residual RL's cold critic — DAWN's warmup data lifts 95 → 116 @100k; the dip and LayerNorm don't move |
+| [21](21-quadruped-deepc.md)      | Quadruped DeePC — a longer window lifts the Go1 from 22/78 to 60/78 |
 
 ## Conventions
 

@@ -1,4 +1,4 @@
-"""Smoke test for scripts/plot_seed_traces.py using synthetic trace CSVs --
+"""Smoke test for scripts/plot/plot_seed_traces.py using synthetic trace CSVs --
 no real checkpoints needed, confirming the trace_io refactor didn't change
 behavior: the script still reads two traces and writes one PNG."""
 from __future__ import annotations
@@ -8,7 +8,7 @@ import sys
 
 from tests.trace_csv_helpers import write_synthetic_trace
 
-SCRIPT = "scripts/plot_seed_traces.py"
+SCRIPT = "scripts/plot/plot_seed_traces.py"
 
 
 def test_plot_seed_traces_from_synthetic_csvs(tmp_path):

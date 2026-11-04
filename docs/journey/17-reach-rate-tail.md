@@ -149,13 +149,12 @@ motion; left published, right annealed:
 ## Outcome
 
 - `scripts/sweep_checkpoints_perscn.py` — per-scenario checkpoint sweep (the
-  aggregate sweep hid the whole story); `scripts/plot_tail_figures.py` — this
-  entry's four figures from that CSV.
-- `rl/sb3.py::AnnealTargetEntropyCallback` + `train_reacher_window.py
-  --anneal-entropy-from/--anneal-entropy-to`, opt-in, default off;
-  `tests/test_entropy_anneal.py` pins the ramp and the SB3 attribute it
-  relies on. Artifacts: `data/reacher_bcinit_anneal_400k.zip` and its
-  checkpoint dir.
+  aggregate sweep hid the whole story). The script that drew this entry's four
+  figures was removed on 2026-11-04; the figures are the record.
+- `rl/sb3.py::AnnealTargetEntropyCallback` and the `--anneal-entropy-*`
+  flags (Reacher and Panda) were removed on 2026-11-04: annealing was a wash
+  here and made no difference on the Panda (journey 18). Artifacts:
+  `data/reacher_bcinit_anneal_400k.zip` and its checkpoint dir.
 - **Reporting change**: sweeps report P50/P90 final distance next to reach
   rate. And scn052's touch-and-go exposes that `reached` (ever inside) can
   mask non-stabilizing behaviour — final-distance-under-tolerance is the

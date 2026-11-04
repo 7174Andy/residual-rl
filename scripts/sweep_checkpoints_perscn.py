@@ -1,10 +1,10 @@
-"""Per-scenario greedy sweep of a checkpoint directory (journey 16).
+"""Per-scenario greedy sweep of a checkpoint directory (journey 17).
 
 `sweep_reacher_checkpoints.py` reports one aggregate row per checkpoint, which
-is exactly what hid journey 16's finding: the 95->100% reach-rate tail is 1-3
+is exactly what hid journey 17's finding: the 95->100% reach-rate tail is 1-3
 individual scenarios flickering across the 10 mm threshold. This sweep keeps
 the per-scenario rows so failures can be tracked, classified, and plotted
-individually (`scripts/plot_tail_figures.py`).
+individually (journey 17).
 
     # the window-env arms (bcinit / cold / annealed)
     uv run python scripts/sweep_checkpoints_perscn.py \\
@@ -35,7 +35,7 @@ def episode(env, env_kind, model, q0, g):
     need = best = float(info["dist"])
     reached, trunc = False, False
     while not trunc:
-        x = obs if env_kind == "window" else base.build_obs()
+        x = base.build_obs() if env_kind == "vanilla" else obs
         a, _ = model.predict(x, deterministic=True)
         obs, _r, _t, trunc, info = env.step(a)
         best = min(best, float(info["dist"]))
@@ -49,10 +49,15 @@ def main() -> None:
     p.add_argument("--ckpt-dir", required=True)
     p.add_argument("--arm", required=True,
                    help="label written into the CSV's `arm` column")
-    p.add_argument("--env", default="window", choices=["window", "vanilla"],
+    p.add_argument("--env", default="window",
+                   choices=["window", "vanilla", "residual"],
                    help="observation the checkpoints were trained on: 43-D "
                         "clone window (train_reacher_window.py) or the plain "
                         "8-D ReacherGoal obs (train_reacher_vanilla.py)")
+    p.add_argument("--clone", default="data/dagger_clone_r3.pt",
+                   help="--env residual only: the frozen base clone")
+    p.add_argument("--residual-frac", type=float, default=2.0,
+                   help="--env residual only (the published arm is resf2)")
     p.add_argument("--algo", default="sac")
     p.add_argument("--scenarios", default="data/reacher_scenarios_v1.npz")
     p.add_argument("--min-steps", type=int, default=0,
@@ -73,8 +78,13 @@ def main() -> None:
                  for f in os.listdir(args.ckpt_dir)
                  if (m := re.fullmatch(r"ckpt_(\d+)_steps\.zip", f))
                  and int(m.group(1)) >= args.min_steps)
-    env = (CloneWindowEnv() if args.env == "window"
-           else gym.make("ReacherGoal-v0"))
+    if args.env == "window":
+        env = CloneWindowEnv()
+    elif args.env == "residual":
+        from reacher.residual_env import ResidualSelectEnv
+        env = ResidualSelectEnv(clone_path=args.clone, residual_frac=args.residual_frac)
+    else:
+        env = gym.make("ReacherGoal-v0")
     rows = []
     for steps, path in cks:
         model = load_policy(path, algo=args.algo, device="cpu")

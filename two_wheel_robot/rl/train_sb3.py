@@ -50,7 +50,7 @@ def make_residual_env(
 
     ``monitor_path`` (optional): when set, SB3 writes per-episode returns to
     ``<monitor_path>.monitor.csv`` — the reproducible source for the training-return
-    plot (``scripts/plot_training_return.py --monitor``). ``None`` keeps returns
+    plot (``scripts/plot/plot_training_return.py --monitor``). ``None`` keeps returns
     in-memory only.
     """
     def _factory():

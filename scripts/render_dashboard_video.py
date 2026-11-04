@@ -38,10 +38,10 @@ _INK = "#52514e"
 _RED = "#e34948"
 # vanilla-TD3 arm, distinct from the residual's blue. Validated with the dataviz
 # skill alongside #898781/#3987e5: clears the 3:1 surface-contrast check that the
-# lighter #d9822b failed. Same hex as scripts/plot_robustness.py, so the arm keeps
+# lighter #d9822b failed. Same hex as scripts/plot/plot_robustness.py, so the arm keeps
 # one identity across figures and videos.
 _ORANGE = "#c1701c"
-# SAC residual arm, same violet as scripts/plot_checkpoint_sweep.py so an arm keeps
+# SAC residual arm, same violet as scripts/plot/plot_checkpoint_sweep.py so an arm keeps
 # one identity across figures and videos.
 _VIOLET = "#4a3aa7"
 _TOLERANCE = DEFAULT_GOAL_TOLERANCE  # two_wheel_robot/rl/trace_reward.py's copy of env.py's default
@@ -277,8 +277,8 @@ def main() -> int:
         except FileNotFoundError as e:
             print(
                 f"error: {e}. Train the missing checkpoint first "
-                f"(scripts/train_clone.py / scripts/train_residual.py / "
-                f"scripts/train_vanilla.py).",
+                f"(scripts/train/train_clone.py / scripts/train/train_residual.py / "
+                f"scripts/train/train_vanilla.py).",
                 file=sys.stderr,
             )
             return 1

@@ -211,7 +211,7 @@ Open question carried forward: does residual RL beat the much cheaper
 uv run python scripts/gen_clone_data.py --out data/clone_dataset.npz
 
 # train the clone
-uv run python scripts/train_clone.py --data data/clone_dataset.npz --out data/clone.pt
+uv run python scripts/train/train_clone.py --data data/clone_dataset.npz --out data/clone.pt
 
 # the 3-layer fidelity gate (open-loop regression + closed-loop paired outcomes)
 uv run python scripts/validate_clone.py --clone data/clone.pt \

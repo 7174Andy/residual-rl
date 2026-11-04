@@ -28,6 +28,7 @@ QP (per step) — hybrid regularization following arXiv:2603.07395 (Reg-DDPC):
          Yp · g + σ_y = y_ini               (past-output constraint with slack)
          u_min ≤ Uf·g ≤ u_max               (control bounds, optional)
          |u_j − u_{j−1}| ≤ du_max           (input RATE bound, optional)
+         1ᵀg = 1                            (optional, affine=True)
 
 `du_max` defaults to `None`, which adds no constraint and leaves every existing
 result bit-identical. It exists because `u_bounds` limits *where* the input may
@@ -83,6 +84,7 @@ class DeePC:
         lambda_y: float = 3e6,
         u_bounds: Optional[tuple[np.ndarray, np.ndarray]] = None,
         du_max: Optional[np.ndarray] = None,
+        affine: bool = False,
         heading_index: int = 2,
         key_fn: Optional[Callable[[np.ndarray], float]] = None,
         solver: Optional[str] = "SCS",
@@ -169,6 +171,7 @@ class DeePC:
         self.du_max = (None if du_max is None
                        else np.broadcast_to(np.asarray(du_max, dtype=np.float64),
                                             (m_u,)).copy())
+        self.affine = bool(affine)
         self.heading_index = int(heading_index)
         self.key_fn = key_fn
         self.solver = solver
@@ -272,6 +275,11 @@ class DeePC:
             u_shift = cp.hstack([u_prev, u_future[: -self.m_u]])
             constraints.append(u_future - u_shift <= du_max)
             constraints.append(u_future - u_shift >= -du_max)
+
+        # Without 1'g = 1 a constant offset in the plant (the quadruped gait's
+        # -0.09 m/s vx) scales with sum(g) instead of staying fixed.
+        if self.affine:
+            constraints.append(cp.sum(g) == 1)
 
         self._g = g
         self._sigma_y = sigma_y

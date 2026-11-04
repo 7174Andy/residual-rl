@@ -130,3 +130,6 @@ nav:
       - 16. Warm-start RL: journey/16-warm-start-rl.md
       - 17. The reach-rate tail: journey/17-reach-rate-tail.md
       - 18. Panda RL on a goal box: journey/18-panda-box-rl.md
+      - 19. The warm-start dip: journey/19-warm-start-dip.md
+      - 20. Residual RL's cold critic: journey/20-residual-cold-critic.md
+      - 21. Quadruped DeePC: journey/21-quadruped-deepc.md

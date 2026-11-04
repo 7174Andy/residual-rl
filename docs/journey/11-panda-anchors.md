@@ -43,7 +43,7 @@ linear algebra what `PandaReachEnv.y_ext`'s docstring measured globally from 132
 configuration pairs. Putting `q` in the output fixes it (`cond ≈ 98` against
 `1e13`–`1e20` for tip-only), which is why the plan's `y = [q; …]` is right.
 
-Reproduce: `scripts/plot_panda_analysis.py --figure statespace`.
+Reproduce: `scripts/plot/plot_panda_analysis.py --figure statespace`.
 
 ## Considered
 

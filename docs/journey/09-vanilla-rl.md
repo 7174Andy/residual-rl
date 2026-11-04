@@ -246,7 +246,7 @@ four failures, **gained 4 / lost 0**. The feared wider dead zone never materiali
 
 ```bash
 # train the from-scratch baseline (no DeePC, no clone; same reward and bounds)
-uv run python scripts/train_vanilla.py --timesteps 400000 --seed 0 \
+uv run python scripts/train/train_vanilla.py --timesteps 400000 --seed 0 \
     --out data/vanilla_td3_400k.zip --monitor-out data/vanilla_400k_monitor
 
 # four-way benchmark: DeePC (QP) vs clone vs clone+residual vs vanilla, 78 seeds
@@ -255,19 +255,19 @@ uv run python scripts/eval_residual.py --model data/residual_td3_400k_frac2.zip 
     --vanilla data/vanilla_td3_400k.zip
 
 # the residual with full authority -- the frac=1.0 default is underpowered
-uv run python scripts/train_residual.py --timesteps 400000 --residual-frac 2.0 \
+uv run python scripts/train/train_residual.py --timesteps 400000 --residual-frac 2.0 \
     --out data/residual_td3_400k_frac2.zip --monitor-out data/residual_frac2_400k_monitor
 
 # 5-seed sweep behind every number on this page (15 runs; ~25 min each, 6 in parallel)
 for s in 0 1 2 3 4; do
-  uv run python scripts/train_vanilla.py  --timesteps 400000 --seed $s \
+  uv run python scripts/train/train_vanilla.py  --timesteps 400000 --seed $s \
       --out data/seedsweep/van_s$s.zip    --monitor-out data/seedsweep/van_s${s}_mon
-  uv run python scripts/train_residual.py --timesteps 400000 --seed $s --residual-frac 2.0 \
+  uv run python scripts/train/train_residual.py --timesteps 400000 --seed $s --residual-frac 2.0 \
       --out data/seedsweep/res_f2_s$s.zip --monitor-out data/seedsweep/res_f2_s${s}_mon
 done
 
 # learning-speed figure + steps-to-threshold table (reads the monitor CSVs above)
-uv run python scripts/plot_learning_curves.py
+uv run python scripts/plot/plot_learning_curves.py
 
 # side-by-side videos: clone vs vanilla on the canonical showcase seeds
 uv run python scripts/render_dashboard_video.py --compare clone-vanilla \

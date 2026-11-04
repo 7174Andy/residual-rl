@@ -14,8 +14,9 @@ Repo status:
 2. Classical controller baseline — **DeePC** (data-EnablEd predictive control, Coulson/Lygeros/Dörfler 2019; same family as the paper's DDPC) with orientation-keyed library switching — done.
 3. Imitation-learned clone of DeePC (fast MLP surrogate) plus **TD3/SAC residual RL** correction on top, via stable-baselines3 — done; the residual lifts reach rate from ~39% (DeePC/clone) to 87–95% depending on training length (see `docs/journey/07-imitation-learning.md`, `docs/journey/08-residual-rl.md`).
 4. A second, structurally different env — **`PandaReach-v0`**, a 7-DoF Franka Panda end-effector reaching env built on MuJoCo (`panda/`) — done, to test whether the DeePC → clone → residual pipeline generalizes past the unicycle. A DeePC-on-Panda spec is next; see [the MuJoCo primer](docs/reference/mujoco-primer.md).
+5. A third env — **`QuadrupedGoal-v0`**, a Unitree Go1 (MuJoCo, `quadruped/`) walking to a goal point, mirroring the unicycle env with a legged plant — done.
 
-The env is the product; controllers/policies are baselines that consume it. That statement now covers two, structurally different envs — don't assume the whole repo is 2-D, heading-based, or numpy-only-dynamics; `PandaReach-v0` is none of those.
+The env is the product; controllers/policies are baselines that consume it. That statement now covers three, structurally different envs (`TwoWheelGoal-v0`, `PandaReach-v0`, `QuadrupedGoal-v0`) — don't assume the whole repo is 2-D, heading-based, or numpy-only-dynamics; `PandaReach-v0` is none of those.
 
 ## Domain facts (do not re-derive these)
 
@@ -60,6 +61,19 @@ Model source: `franka_emika_panda/panda_nohand.xml` from google-deepmind/mujoco_
 - Goals are sampled by forward kinematics from a random valid (collision-free, above-floor) configuration, so every goal is guaranteed reachable — a Cartesian box sample would not guarantee this.
 - Solvability bounds, with provenance — only the lower one is live: random actions reach **0/20** seeds (still reproducible via `scripts/record_panda_video.py`). A DLS-IK oracle once measured **0.90** over 60 seeds during design on 2026-08-10, establishing the task was achievable, before being removed as out-of-scope (not part of the QP → NN → residual pipeline under study); that number is not reproducible from this tree — it's preserved verbatim in `docs/superpowers/specs/2026-08-10-panda-reach-env-design.md`'s appendix if it ever needs re-measuring.
 
+## QuadrupedGoal-v0 domain facts (do not re-derive these either)
+
+- Plant: Unitree Go1 (MuJoCo) with the hand-built open-loop trot from `quadruped/gait.py` inside it, 50 Hz (`dt = 0.02`). The agent commands a body-frame velocity `u = (vx, vy, yaw_rate)`; `info["ctrl"]` is the joint-level input, shape (4, 3) in LEGS order (FR, FL, RR, RL) × (hip, thigh, calf); `.ravel()` gives the 12 actuator targets in menagerie actuator order.
+- Action bounds `vx ∈ [−0.25, 0.6]`, `vy ∈ [−0.2, 0.2]`, `yaw_rate ∈ [−0.8, 0.8]`; out-of-bounds actions are clipped. These are the gait's measured stable range for changing commands: new commands every 0.5 s fall 0/10 (`vx ∈ [−0.5, 0.6]` falls 7/10). Faster changes are not safe with backward `vx`: per-step uniform random falls 6/20 (see solvability), and `run_random` over these bounds falls 3/10 at 0.02 s holds and 4/10 at 0.1 s holds, but 0/10 at 0.02 s with `vx ∈ (0, 0.6)` (`run_random`, seeds `s = 0..9`, 20 s, default noise, ranges = env bounds, or `vx (0, 0.6)`). So the falls need backward `vx` plus fast changes. DeePC excitation and RL exploration need commands held for several steps (≥0.5 s is measured safe), smoothed, or a narrower backward range.
+- Scale: workspace `[−1.5, 1.5]²` (position is not wall-clipped), `min_start_goal_dist = 0.5`, `goal_tolerance = 0.15` m, `max_steps = 400`.
+- `y` = trunk `(x, y, yaw)`, `y_ref = (g_x, g_y, 0)`; `Q = diag(1, 1, 2)`, `R = diag(3.3e-2, 3.3e-2, 1.1e-4)` (ratio-matched to the unicycle, not copied), `reach_bonus = 100`.
+- The gait adds a constant `vx` offset of ≈ −0.09 m/s to every command, so command → velocity is affine, not identity.
+- Yaw rate oscillates within each 0.4 s gait cycle (std ≈ 0.3–0.4 rad/s), so only cycle averages are meaningful.
+- Fall rule: if the trunk tips over and the goal was not reached that step, the episode terminates with `info["fell"]=True` and reward = stage reward × steps left (as if standing still until timeout). Reached wins.
+- `reset(options={"state": ...})` is the pre-settle pose: the robot is placed there, then settles at zero command (measured drift 6.3 cm and −0.040 rad yaw, deterministic; re-measure: reset with `options["state"]`, compare `env.y` to the state).
+- Solvability (2026-10-29, menagerie `feadf76`), `.venv/bin/python scripts/check_quadruped_env.py --seeds 20`: random **0/20** reached (6 falls, 14 truncations; a fall terminates, so the truncations are 400-step timeouts); holonomic P-control (no offset compensation) **20/20**, mean 255.6 steps (min 148, max 370), 0 falls.
+- DeePC baseline (`quadruped/deepc_setup.py::build_canonical_quadruped_deepc`, plain DeePC, 4 heading-keyed libraries, `T_ini=20, N=25`, `λ_g=2`, `λ_y=3e6`, rate limit `(hi−lo)/25`): **60/78 (77%, Wilson [0.66, 0.85])** on the frozen eval scenarios, 0 falls, ~19 s/solve; the unicycle's `T_ini=5, N=12` gets 22/78. Misses concentrate on goal bearings near 3π/4, where library 1 has only 16% of its data near its anchor (`scripts/quadruped_library_coverage.py`). Re-measure: `.venv/bin/python scripts/run_quadruped_deepc.py --split eval --out <csv>` (logs an eval look). See [journey 21](docs/journey/21-quadruped-deepc.md).
+
 ## Layout rules
 
 There is no `two_wheel_robot/eval/` package and no `configs/` directory. Evaluation/metrics logic lives in `rl/clone_eval.py`, `rl/residual_eval.py`, and `rl/trace_reward.py`; every script takes CLI flags (argparse, hardcoded defaults) instead of YAML configs.
@@ -71,6 +85,7 @@ Boundary rules:
 - `controllers/` is RL-library-agnostic and has no `gym` import. There's no formal `Controller` base class yet — `DeePC` (`core/deepc.py`) exposes `reset(y_initial, u_initial=None)` / `act(y_current, y_ref)` as its de facto contract.
 - `rl/` is the only place that imports `stable_baselines3` (and the only place that imports `torch`, via the clone MLP).
 - `panda/model.py` imports `mujoco` and `numpy` only, no `gymnasium` — mirrors the `env/dynamics.py` rule above.
+- `quadruped/gait.py` imports `numpy` only; `quadruped/model.py` `mujoco` + `numpy` only; `quadruped/env.py` is the only `gymnasium` import in `quadruped/`.
 - `scripts/*.py` is the CLI surface — each script is a standalone `argparse` entrypoint over some combination of the env, a controller, and/or a trained checkpoint. See `docs/reference/cli.md` for the full flag reference.
 
 ## Public env attributes (consumed by classical controllers)
@@ -78,6 +93,8 @@ Boundary rules:
 This section is `TwoWheelGoal-v0`-specific (2-D action, 3-D `y` with a heading component). `PandaReach-v0` exposes the analogous `state`/`y`/`y_ref`/`tip_site_id`/`safe_box` accessors with different shapes — see `panda/env.py`'s own docstrings, not this section.
 
 DeePC contract: `u = action_space` (dim 2), `y` (dim 3), no disturbance `e`. The controller maintains its own past-trajectory buffer `(u_ini, y_ini)` of length `T_ini` and Hankel matrices built from offline data; the env stays stateless from the controller's perspective beyond exposing `y` each step.
+
+`QuadrupedGoal-v0` mirrors the unicycle's contract with a 3-D action `(vx, vy, yaw_rate)` and `info["ctrl"]` — see `quadruped/env.py`.
 
 Predictive controllers should read `env.unwrapped` directly rather than reverse-engineering from the body-frame observation.
 

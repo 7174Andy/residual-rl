@@ -91,7 +91,7 @@ def main() -> None:
 
         clone_path = f"{args.out_prefix}_clone_r{r}.pt"
         subprocess.run([sys.executable.replace("python", "python"),
-                        "scripts/train_reacher_clone.py",
+                        "scripts/train/train_reacher_clone.py",
                         "--dataset", ds, "--out", clone_path], check=True)
         subprocess.run([sys.executable, "scripts/validate_reacher_clone.py",
                         "--clone", clone_path, "--dataset", ds,

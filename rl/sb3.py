@@ -230,7 +230,7 @@ def init_actor_from_clone(model, clone_path: str,
             f"{clone_path} was not trained with squash=True. Its output is "
             f"de-standardized torque, but SB3's actor emits tanh(mu(x)), so the "
             f"transferred policy would be a silently compressed clone. Retrain "
-            f"with `scripts/train_reacher_clone.py --squash`.")
+            f"with `scripts/train/train_reacher_clone.py --squash`.")
 
     actor = model.policy.actor
     if not isinstance(actor.mu, nn.Linear):

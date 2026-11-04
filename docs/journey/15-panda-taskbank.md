@@ -112,7 +112,7 @@ changes along the row is the number of anchor circles. That is the variable, and
 the consequence of it is panel B.
 
 (Both figures plot distances measured against the 78 frozen episode starts,
-which is the protocol `scripts/plot_bank_informativeness.py` reproduces from the
+which is the protocol `scripts/plot/plot_bank_informativeness.py` reproduces from the
 repo. The prose above quotes the gate's own numbers instead — 0.86 → 0.49 rad —
 because those are what the Phase-1 decision was actually made on, and the gate
 drew fresh uniform probes rather than the evaluation starts. Same quantity,
@@ -287,8 +287,8 @@ automatically on every collection to emit the `_sdpc` companion file.
 - `panda_expert_v1` frozen in `data/panda_expert_v1.md` — bank path, controller
   kwargs, reproduction commands, and the exact constructor call Phase 2 imports.
 - Figures: `panda_taskbank_result.png`, `panda_taskbank_coverage.png`,
-  `panda_taskbank_horizon.png` (`scripts/plot_panda_taskbank.py`) and
-  `panda_bank_informativeness.png` (`scripts/plot_bank_informativeness.py` —
+  `panda_taskbank_horizon.png` (`scripts/plot/plot_panda_taskbank.py`) and
+  `panda_bank_informativeness.png` (`scripts/plot/plot_bank_informativeness.py` —
   written for this entry; the PNG previously existed with no generator behind
   it, so its numbers could not be checked or re-run). Videos in
   `docs/journey/videos/`.

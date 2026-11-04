@@ -88,7 +88,7 @@ def main() -> int:
         clone = load_clone(args.clone, device=args.device)
     except FileNotFoundError:
         print(f"error: could not find clone checkpoint {args.clone}. Train it first:\n"
-              f"  uv run python scripts/train_clone.py --out {args.clone}",
+              f"  uv run python scripts/train/train_clone.py --out {args.clone}",
               file=sys.stderr)
         return 1
 
