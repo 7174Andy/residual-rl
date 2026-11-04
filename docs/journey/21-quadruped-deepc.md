@@ -35,6 +35,84 @@ the unicycle setup, beat the 39%". Five plant facts forced changes on the way:
 | Yaw rate oscillates within each 0.4 s gait cycle | Only cycle averages are meaningful. See the horizon discussion below |
 | Response lag of about 0.3 s (table below) | Sets the scale of `T_ini` and `N` |
 
+### The gait
+
+DeePC never sees joints: the plant it identifies is "command in, trunk pose
+out", with the trot below inside it (`quadruped/gait.py::TrotGait`). Feet are
+in the trunk frame, relative to each leg's hip-abduction joint. Constants:
+period $T = 0.4$ s, $\Delta t = 0.02$ s, standing height $h = 0.27$ m, swing
+lift $H = 0.07$ m, side $s_i = \pm 1$ (+1 = left), abduction offset
+$l_\text{ab} = 0.08$ m, thigh and calf lengths $a = b = 0.213$ m.
+
+**Phase clock.** One global phase. Each leg gets an offset
+$o = (0.5, 0, 0, 0.5)$ for (FR, FL, RR, RL), so the diagonal pairs FL+RR and
+FR+RL alternate:
+
+$$
+\phi_{t+1} = (\phi_t + \Delta t / T) \bmod 1, \qquad
+\varphi_i = (\phi_{t+1} + o_i) \bmod 1, \qquad
+\text{leg } i \text{ in stance} \iff \varphi_i < 0.5
+$$
+
+**Foot velocity.** The command $u = (v_x, v_y, \omega)$ is turned into the
+planar velocity of a rigid body at each leg's nominal foot point
+$r_i = (r_{i,x}, r_{i,y})$ in the trunk frame:
+
+$$
+u_i = \begin{pmatrix} v_x - \omega\, r_{i,y} \\ v_y + \omega\, r_{i,x} \end{pmatrix}
+$$
+
+**Stance** ($\varphi_i < 0.5$). The foot slides backward at $u_i$ on the
+ground plane. If it does not slip, the trunk moves at $u_i$:
+
+$$
+p_i^{xy} \leftarrow p_i^{xy} - u_i \Delta t, \qquad p_i^z = -h
+$$
+
+**Swing** ($\varphi_i \ge 0.5$). Let $\sigma = 2(\varphi_i - 0.5) \in [0, 1)$
+be the swing progress and $p_i^\text{lift}$ the foot position at liftoff. The
+foot follows a cosine-eased path to a landing point a quarter period of travel
+ahead of its nominal point $n_i = (0, s_i l_\text{ab})$, with a sine arc in
+height:
+
+$$
+\ell_i = n_i + u_i \tfrac{T}{4}, \qquad
+e(\sigma) = \tfrac{1}{2}\big(1 - \cos \pi\sigma\big)
+$$
+
+$$
+p_i^{xy} = p_i^\text{lift} + \big(\ell_i - p_i^\text{lift}\big)\, e(\sigma), \qquad
+p_i^z = -h + H \sin \pi\sigma
+$$
+
+Stance lasts $T/2$ and covers $u_i T/2$. Landing at $+u_i T/4$ therefore lifts
+off at $-u_i T/4$: the stance is centred on the nominal point. The
+foot-placement feedback term (`k_foot`) is off ($k_\text{foot} = 0$), so the
+gait is fully open-loop.
+
+**Leg IK.** For each foot target $p = (x, y, z)$, with $l_1 = s_i l_\text{ab}$:
+
+$$
+L = \sqrt{y^2 + z^2 - l_1^2}, \qquad
+q_\text{ab} = \operatorname{atan2}(z, y) - \operatorname{atan2}(-L, l_1)
+$$
+
+$$
+r = \min\!\Big(\sqrt{x^2 + L^2},\ a + b\Big), \qquad
+q_\text{knee} = -\Big(\pi - \arccos \frac{a^2 + b^2 - r^2}{2ab}\Big)
+$$
+
+$$
+q_\text{thigh} = \operatorname{atan2}(-x, L) - \operatorname{atan2}\big(b \sin q_\text{knee},\ a + b \cos q_\text{knee}\big)
+$$
+
+The $\min$ projects unreachable targets onto the workspace boundary. The joint
+targets $q_i = \operatorname{clip}(q, q_\text{lo}, q_\text{hi})$ are
+`info["ctrl"]`, and MuJoCo's PD-servo actuators track them. The −0.09 m/s
+$v_x$ offset and the in-cycle yaw oscillation are what this ideal no-slip
+model leaves out. Both are measured in the table above, not predicted by the
+equations.
+
 ### Data
 
 There are four libraries, keyed at headings `±π/4` and `±3π/4`. Each is one
