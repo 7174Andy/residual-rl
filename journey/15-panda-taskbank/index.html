@@ -1110,6 +1110,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1800,6 +1806,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-warm-start-dip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19. The warm-start dip
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-residual-cold-critic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20. Residual RL's cold critic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-quadruped-deepc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    21. Quadruped DeePC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2078,7 +2168,7 @@ is essentially identical across all three designs.</strong> The only thing that 
 changes along the row is the number of anchor circles. That is the variable, and
 the consequence of it is panel B.</p>
 <p>(Both figures plot distances measured against the 78 frozen episode starts,
-which is the protocol <code>scripts/plot_bank_informativeness.py</code> reproduces from the
+which is the protocol <code>scripts/plot/plot_bank_informativeness.py</code> reproduces from the
 repo. The prose above quotes the gate's own numbers instead — 0.86 → 0.49 rad —
 because those are what the Phase-1 decision was actually made on, and the gate
 drew fresh uniform probes rather than the evaluation starts. Same quantity,
@@ -2319,8 +2409,8 @@ automatically on every collection to emit the <code>_sdpc</code> companion file.
 <li><code>panda_expert_v1</code> frozen in <code>data/panda_expert_v1.md</code> — bank path, controller
   kwargs, reproduction commands, and the exact constructor call Phase 2 imports.</li>
 <li>Figures: <code>panda_taskbank_result.png</code>, <code>panda_taskbank_coverage.png</code>,
-  <code>panda_taskbank_horizon.png</code> (<code>scripts/plot_panda_taskbank.py</code>) and
-  <code>panda_bank_informativeness.png</code> (<code>scripts/plot_bank_informativeness.py</code> —
+  <code>panda_taskbank_horizon.png</code> (<code>scripts/plot/plot_panda_taskbank.py</code>) and
+  <code>panda_bank_informativeness.png</code> (<code>scripts/plot/plot_bank_informativeness.py</code> —
   written for this entry; the PNG previously existed with no generator behind
   it, so its numbers could not be checked or re-run). Videos in
   <code>docs/journey/videos/</code>.</li>

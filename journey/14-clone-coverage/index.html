@@ -1110,6 +1110,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1756,6 +1762,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-warm-start-dip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19. The warm-start dip
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-residual-cold-critic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20. Residual RL's cold critic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-quadruped-deepc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    21. Quadruped DeePC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1905,7 +1995,7 @@ under each distribution — the exact protocol of journey 13's 2.75x. The
 ablations retrain the identical architecture on single slices (the dataset's
 <code>regime</code> column tags every row); closed-loop gates are
 <code>scripts/validate_clone.py</code>, 78 seeds. Figure:
-<code>docs/reference/clone_coverage.png</code> (<code>scripts/plot_clone_coverage.py</code>).</p>
+<code>docs/reference/clone_coverage.png</code> (<code>scripts/plot/plot_clone_coverage.py</code>).</p>
 <table>
 <thead>
 <tr>
@@ -1979,7 +2069,7 @@ ablations retrain the identical architecture on single slices (the dataset's
 </ul>
 <h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>scripts/measure_clone_disagreement.py</code>, <code>scripts/plot_clone_coverage.py</code>,
+<li><code>scripts/measure_clone_disagreement.py</code>, <code>scripts/plot/plot_clone_coverage.py</code>,
   <code>docs/reference/clone_coverage.png</code>; raw distances in
   <code>data/disagree_{hybrid,onpolicyonly,noonpolicy}.npz</code>, ablation clones and
   filtered datasets in <code>data/clone_{onpolicyonly,noonpolicy}.pt</code> /

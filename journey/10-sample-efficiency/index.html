@@ -1110,6 +1110,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1804,6 +1810,90 @@
     
   
     18. Panda RL on a goal box
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-warm-start-dip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19. The warm-start dip
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-residual-cold-critic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20. Residual RL's cold critic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-quadruped-deepc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    21. Quadruped DeePC
   
 
     
@@ -2533,19 +2623,19 @@ seeds 4104626034 and 4104626050. The vanilla-SAC arm has no videos yet.</p>
 </ul>
 <h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># the 2x2: {residual, vanilla} x {td3, sac}, 5 seeds each, checkpoints every 25k</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train/train_residual.py<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span>--out<span class="w"> </span>data/ckptsweep/res_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/ckptsweep/res_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train/train_residual.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span>--out<span class="w"> </span>data/sacsweep/res_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/sacsweep/res_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span>--monitor-out<span class="w"> </span>data/sacsweep/res_s0_mon
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_vanilla.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train/train_vanilla.py<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span>--out<span class="w"> </span>data/ckptsweep/van_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/ckptsweep/van_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_vanilla.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train/train_vanilla.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">400000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span>--out<span class="w"> </span>data/sacsweep_van/van_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/sacsweep_van/van_s0<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span>--checkpoint-freq<span class="w"> </span><span class="m">25000</span><span class="w"> </span>--monitor-out<span class="w"> </span>data/sacsweep_van/van_s0_mon
 </span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
 </span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># the 5k-resolution early window (25k budget, same seeds) -- needed for SAC&#39;s crossing point</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train_residual.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">25000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/train/train_residual.py<span class="w"> </span>--algo<span class="w"> </span>sac<span class="w"> </span>--residual-frac<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>--timesteps<span class="w"> </span><span class="m">25000</span><span class="w"> </span>--seed<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span>--out<span class="w"> </span>data/earlysweep_sac/res_s0.zip<span class="w"> </span>--checkpoint-dir<span class="w"> </span>data/earlysweep_sac/res_s0<span class="w"> </span>--checkpoint-freq<span class="w"> </span><span class="m">5000</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1"># greedy evaluation of every checkpoint on the canonical 78 eval seeds, one call per arm</span>
@@ -2556,8 +2646,8 @@ seeds 4104626034 and 4104626050. The vanilla-SAC arm has no videos yet.</p>
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span>--algo<span class="w"> </span>sac<span class="w"> </span>--label<span class="w"> </span>vanilla_sac<span class="w"> </span>--out<span class="w"> </span>data/checkpoint_sweep_sacvan.csv
 </span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>
 </span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="c1"># figures (the plot script merges comma-separated CSVs)</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_checkpoint_sweep.py<span class="w"> </span>--csv<span class="w"> </span>data/checkpoint_sweep_all.csv
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot_learning_curves.py<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot/plot_checkpoint_sweep.py<span class="w"> </span>--csv<span class="w"> </span>data/checkpoint_sweep_all.csv
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/plot/plot_learning_curves.py<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span>--glob-sac<span class="w"> </span><span class="s1">&#39;data/sacsweep/res_s*_mon.monitor.csv&#39;</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span>--glob-sac-van<span class="w"> </span><span class="s1">&#39;data/sacsweep_van/van_s*_mon.monitor.csv&#39;</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">    </span>--out<span class="w"> </span>docs/journey/figures/learning_curves_3arm.png

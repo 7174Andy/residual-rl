@@ -1487,6 +1487,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
     
@@ -2004,6 +2010,90 @@
     
   
     18. Panda RL on a goal box
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../journey/19-warm-start-dip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19. The warm-start dip
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../journey/20-residual-cold-critic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20. Residual RL's cold critic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../journey/21-quadruped-deepc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    21. Quadruped DeePC
   
 
     
@@ -2790,8 +2880,8 @@ as-is. The Panda's <code>τ</code> under-weights its tip block ~10×.</p>
 <p>Two design parameters, easy to conflate: <code>n_cols</code> (the paper's <code>N_cols</code>, columns
 selected per solve, held at 300 throughout) and <code>n_max</code> (the iteration cap).</p>
 <h2 id="rl-interface-reachergoal-v0">RL interface — <code>ReacherGoal-v0</code><a class="headerlink" href="#rl-interface-reachergoal-v0" title="Permanent link">&para;</a></h2>
-<p><code>reacher/env.py</code>. Two RL arms consume it — <code>scripts/train_reacher_vanilla.py</code> and
-<code>scripts/train_reacher_residual.py</code> — and <strong>they do not see the same observation
+<p><code>reacher/env.py</code>. Two RL arms consume it — <code>scripts/train/train_reacher_vanilla.py</code> and
+<code>scripts/train/train_reacher_residual.py</code> — and <strong>they do not see the same observation
 vector.</strong> The <em>why</em> is <a href="../../journey/13-reacher-residual/">journey 13</a>; this is the
 contract.</p>
 <h3 id="the-env-itself">The env itself<a class="headerlink" href="#the-env-itself" title="Permanent link">&para;</a></h3>
@@ -3116,17 +3206,17 @@ improving without reaching improving is a pattern worth distrusting on sight.</p
 <td><code>--scan 30</code> <code>--out-dir videos/reacher_compare</code></td>
 </tr>
 <tr>
-<td><code>scripts/plot_reacher_results.py</code></td>
+<td><code>scripts/plot/plot_reacher_results.py</code></td>
 <td>renders <code>reacher_results.png</code> from <code>reacher_results.csv</code> (transcribed, not recomputed — the closed-loop rows cost ~15 min of QP each)</td>
 <td><code>--out docs/reference/reacher_results.png</code></td>
 </tr>
 <tr>
-<td><code>scripts/train_reacher_vanilla.py</code></td>
+<td><code>scripts/train/train_reacher_vanilla.py</code></td>
 <td>SAC from scratch on the bare env — the control arm</td>
 <td><code>--steps 200000</code> <code>--algo sac</code> <code>--lr 3e-4</code> <code>--seed 0</code></td>
 </tr>
 <tr>
-<td><code>scripts/train_reacher_residual.py</code></td>
+<td><code>scripts/train/train_reacher_residual.py</code></td>
 <td>zero-init SAC residual over the frozen clone</td>
 <td><code>--clone data/dagger_clone_r3.pt</code> <code>--residual-frac 1.0</code> (<strong>pass <code>2.0</code></strong> — see above) <code>--steps 200000</code></td>
 </tr>

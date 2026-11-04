@@ -1110,6 +1110,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1856,6 +1862,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-warm-start-dip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19. The warm-start dip
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-residual-cold-critic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20. Residual RL's cold critic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-quadruped-deepc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    21. Quadruped DeePC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2111,7 +2201,7 @@ subspace</strong> — exactly <code>7 − 3</code>, the self-motion manifold, co
 linear algebra what <code>PandaReachEnv.y_ext</code>'s docstring measured globally from 132
 configuration pairs. Putting <code>q</code> in the output fixes it (<code>cond ≈ 98</code> against
 <code>1e13</code>–<code>1e20</code> for tip-only), which is why the plan's <code>y = [q; …]</code> is right.</p>
-<p>Reproduce: <code>scripts/plot_panda_analysis.py --figure statespace</code>.</p>
+<p>Reproduce: <code>scripts/plot/plot_panda_analysis.py --figure statespace</code>.</p>
 <h2 id="considered">Considered<a class="headerlink" href="#considered" title="Permanent link">&para;</a></h2>
 <h3 id="the-output-the-plans-d_g-vs-the-tip-vector">The output: the plan's <code>d_g</code> vs the tip vector<a class="headerlink" href="#the-output-the-plans-d_g-vs-the-tip-vector" title="Permanent link">&para;</a></h3>
 <p>The plan specifies <code>y = [q; ‖p_ee − p_g‖]</code>. Splitting the §8 prediction error by

@@ -1110,6 +1110,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1762,6 +1768,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-warm-start-dip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19. The warm-start dip
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-residual-cold-critic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20. Residual RL's cold critic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-quadruped-deepc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    21. Quadruped DeePC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1920,7 +2010,7 @@ the fix, they narrowed.</p>
 <p>120 held-out scenarios (<code>--seed 90000</code>, disjoint from every training stream), full
 horizon, early stopping <strong>off</strong> (<code>scripts/eval_reacher_residual.py</code>). Every row
 below was evaluated under the same tree — see "The eval-drift catch". Figure:
-<code>docs/reference/reacher_residual_rl.png</code> (<code>scripts/plot_reacher_residual_rl.py</code>);
+<code>docs/reference/reacher_residual_rl.png</code> (<code>scripts/plot/plot_reacher_residual_rl.py</code>);
 the per-scenario CSV records are gitignored like all CSVs — regenerate them
 with <code>scripts/eval_reacher_residual.py</code> (~13 min).</p>
 <table>
@@ -2319,7 +2409,7 @@ never outside ±6 pp after that — this seed ends at −0.8 pp (119 vs 120).</p
 <p>Rerun across <strong>five training seeds</strong> per arm (seeds 1–4 added 2026-08-24;
 checkpoints and per-seed sweep CSVs in <code>data/reacher_ckpt_seeds/</code>, figure
 <code>docs/reference/reacher_crossover_seeds.png</code> via
-<code>scripts/plot_reacher_crossover_seeds.py</code>; CSVs are gitignored repo-wide), the
+<code>scripts/plot/plot_reacher_crossover_seeds.py</code>; CSVs are gitignored repo-wide), the
 crossover survives but its location does not. The residual leads on 5/5 seeds
 at 25k and 50k (pooled +25 and +43 pp over 600 episodes) and vanilla leads on
 5/5 seeds only from 375k on (pooled 600 vs 583, then 599 vs 589 at 400k) —

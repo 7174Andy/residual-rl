@@ -1110,6 +1110,12 @@
       
         
       
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1767,6 +1773,90 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-warm-start-dip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19. The warm-start dip
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-residual-cold-critic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    20. Residual RL's cold critic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-quadruped-deepc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    21. Quadruped DeePC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2048,13 +2138,12 @@ motion; left published, right annealed:</p>
 <h2 id="outcome">Outcome<a class="headerlink" href="#outcome" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>scripts/sweep_checkpoints_perscn.py</code> — per-scenario checkpoint sweep (the
-  aggregate sweep hid the whole story); <code>scripts/plot_tail_figures.py</code> — this
-  entry's four figures from that CSV.</li>
-<li><code>rl/sb3.py::AnnealTargetEntropyCallback</code> + <code>train_reacher_window.py
-  --anneal-entropy-from/--anneal-entropy-to</code>, opt-in, default off;
-  <code>tests/test_entropy_anneal.py</code> pins the ramp and the SB3 attribute it
-  relies on. Artifacts: <code>data/reacher_bcinit_anneal_400k.zip</code> and its
-  checkpoint dir.</li>
+  aggregate sweep hid the whole story). The script that drew this entry's four
+  figures was removed on 2026-11-04; the figures are the record.</li>
+<li><code>rl/sb3.py::AnnealTargetEntropyCallback</code> and the <code>--anneal-entropy-*</code>
+  flags (Reacher and Panda) were removed on 2026-11-04: annealing was a wash
+  here and made no difference on the Panda (journey 18). Artifacts:
+  <code>data/reacher_bcinit_anneal_400k.zip</code> and its checkpoint dir.</li>
 <li><strong>Reporting change</strong>: sweeps report P50/P90 final distance next to reach
   rate. And scn052's touch-and-go exposes that <code>reached</code> (ever inside) can
   mask non-stabilizing behaviour — final-distance-under-tolerance is the
