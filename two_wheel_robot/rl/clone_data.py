@@ -207,3 +207,29 @@ def generate_clone_dataset(
 def save_dataset(path: str, ds: dict) -> None:
     """Save a dataset dict to a .npz."""
     np.savez(path, **ds)
+
+
+def dagger_rollout(deepc, res_env, seed: int):
+    """DAgger round: the CLONE drives, canonical DeePC labels every state it visits.
+
+    `res_env` is a `ResidualDeePCEnv` stepped with a zero residual, which is exactly
+    the clone's closed loop. Each label primes DeePC with the clone's actual past
+    (`_label`), so the expert never answers for a trajectory that did not happen --
+    the stale-buffer trap `reacher/clone_data.py::dagger_rollout` patches by hand.
+    Returns `(features, targets, library_idx, reached)`; QP failures are skipped.
+    """
+    res_env.reset(seed=seed)
+    feats, targs, idxs = [], [], []
+    term = trunc = False
+    info: dict = {}
+    while not (term or trunc):
+        u_buf, y_buf = res_env._u_buf.copy(), res_env._y_buf.copy()
+        y_cur = res_env.base.y
+        labeled = _label(deepc, u_buf, y_buf, y_cur, res_env.base.goal)
+        if labeled is not None:
+            u_t, idx, y_ref = labeled
+            feats.append(featurize(u_buf, y_buf, y_cur, y_ref, res_env.anchors))
+            targs.append(u_t)
+            idxs.append(idx)
+        _, _, term, trunc, info = res_env.step(np.zeros(2))
+    return feats, targs, idxs, bool(info.get("reached", False))

@@ -211,3 +211,17 @@ def test_default_Q_is_3x3_with_heading_weight_two():
     env = UnicycleGoalEnv()
     assert env.Q.shape == (3, 3)
     assert env.Q[2, 2] == 2.0
+
+
+def test_linear_reward_is_distance_plus_control_cost():
+    env = UnicycleGoalEnv(reward="linear")
+    env.reset(seed=3)
+    u = np.array([10.0, 0.5])
+    _, r, *_ = env.step(u)
+    d = np.linalg.norm(env.state[:2] - env.goal)
+    assert r == pytest.approx(-(d + u @ env.R @ u))
+
+
+def test_unknown_reward_mode_rejected():
+    with pytest.raises(ValueError):
+        UnicycleGoalEnv(reward="sparse")

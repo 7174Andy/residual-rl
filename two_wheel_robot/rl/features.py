@@ -80,3 +80,33 @@ def featurize(
     onehot[idx] = 1.0
 
     return np.concatenate([buf.reshape(-1), cur, goal, onehot])
+
+
+def egocentric(features: np.ndarray, T_ini: int) -> np.ndarray:
+    """Re-express `featurize` output in the robot's current body frame.
+
+    Every past position and the goal become `R(-δ0)(p - p0)` and every past heading
+    `δ - δ0`, where `(p0, δ0)` is the current measurement, which itself becomes the
+    constant `(0, 0, sin 0, cos 0)`. Inputs `(v, w)` and the library one-hot are
+    unchanged. The unicycle task is invariant to where the robot is and how the world
+    is rotated; the world-frame window makes a learner rediscover that at every pose,
+    the arms' base-frame windows do not. Works on one vector or a `(n, d)` batch.
+    """
+    f = np.array(features, dtype=np.float64)
+    one = f.ndim == 1
+    f = np.atleast_2d(f)
+    cur = 6 * T_ini
+    x0, y0, s0, c0 = (f[:, cur + k].copy() for k in range(4))
+
+    def to_body(px, py):
+        dx, dy = px - x0, py - y0
+        return c0 * dx + s0 * dy, -s0 * dx + c0 * dy
+
+    for t in range(T_ini):
+        j = 6 * t
+        f[:, j], f[:, j + 1] = to_body(f[:, j], f[:, j + 1])
+        s, c = f[:, j + 2].copy(), f[:, j + 3].copy()
+        f[:, j + 2], f[:, j + 3] = s * c0 - c * s0, c * c0 + s * s0   # sin, cos of δ - δ0
+    f[:, cur + 4], f[:, cur + 5] = to_body(f[:, cur + 4], f[:, cur + 5])   # goal
+    f[:, cur:cur + 4] = (0.0, 0.0, 0.0, 1.0)
+    return f[0] if one else f

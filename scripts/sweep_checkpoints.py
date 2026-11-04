@@ -29,7 +29,7 @@ import time
 import numpy as np
 
 from two_wheel_robot.rl.deepc_setup import canonical_action_bounds
-from two_wheel_robot.rl.residual_env import ResidualDeePCEnv
+from two_wheel_robot.rl.residual_env import ResidualDeePCEnv, WarmDeePCEnv
 from two_wheel_robot.rl.residual_eval import (
     episode_return,
     run_residual_closed_loop_with_actions,
@@ -101,6 +101,12 @@ def main() -> int:
     p.add_argument("--libraries", default="data/libraries_v0.npz")
     p.add_argument("--residual-frac", type=float, default=2.0)
     p.add_argument("--algo", default="td3", choices=["td3", "sac"])
+    p.add_argument("--warm", action="store_true",
+                   help="the residual arm's checkpoints are warm-start runs "
+                        "(train_residual.py --warm); --clone is then the squash clone")
+    p.add_argument("--body-obs", action="store_true", help="--warm runs trained with --body-obs")
+    p.add_argument("--std-obs", action="store_true", help="--warm runs trained with --std-obs")
+    p.add_argument("--ego-obs", action="store_true", help="--warm runs trained with --ego-obs")
     p.add_argument("--n_seeds", type=int, default=78)
     p.add_argument("--base_seed", type=int, default=4104626029)
     p.add_argument("--device", default="cpu")
@@ -117,10 +123,12 @@ def main() -> int:
     wanted = [a.strip() for a in args.arms.split(",") if a.strip()]
     envs = {}
     if "residual" in wanted:
-        envs["residual"] = ResidualDeePCEnv(
-            clone_path=args.clone, libraries_path=args.libraries,
-            residual_frac=args.residual_frac, device=args.device,
-        )
+        envs["residual"] = (
+            WarmDeePCEnv(args.clone, args.libraries, device=args.device, body_obs=args.body_obs,
+                         std_obs=args.std_obs, ego_obs=args.ego_obs)
+            if args.warm
+            else ResidualDeePCEnv(clone_path=args.clone, libraries_path=args.libraries,
+                                  residual_frac=args.residual_frac, device=args.device))
     if "vanilla" in wanted:
         envs["vanilla"] = vanilla_rl_env(canonical_action_bounds(args.libraries))
     rows = []

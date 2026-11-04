@@ -29,7 +29,7 @@ import two_wheel_robot.env  # noqa: F401  registers Gym ID
 from two_wheel_robot.env.env import UnicycleGoalEnv
 from rl.clone import load_clone
 from two_wheel_robot.rl.deepc_setup import bearing_y_ref, build_canonical_deepc
-from two_wheel_robot.rl.features import featurize
+from two_wheel_robot.rl.features import egocentric, featurize
 
 
 class ResidualDeePCEnv(gym.Env):
@@ -44,6 +44,7 @@ class ResidualDeePCEnv(gym.Env):
         device: str = "cpu",
         render_mode: Optional[str] = None,
         perturb=None,
+        reward: str = "deepc",
     ):
         super().__init__()
         self.predictor = load_clone(clone_path, device=device)
@@ -61,7 +62,8 @@ class ResidualDeePCEnv(gym.Env):
         self.render_mode = render_mode
 
         self.env = gym.make(
-            "TwoWheelGoal-v0", action_bounds=self.action_bounds, render_mode=render_mode
+            "TwoWheelGoal-v0", action_bounds=self.action_bounds, render_mode=render_mode,
+            reward=reward,
         )
         # `perturb` (optional): callable wrapping the inner env for robustness
         # benchmarking (see env/perturbations.py). `base` stays the unwrapped env, so
@@ -140,3 +142,47 @@ class ResidualDeePCEnv(gym.Env):
 
     def close(self):
         self.env.close()
+
+
+class WarmDeePCEnv(ResidualDeePCEnv):
+    """Eq. 17 (warm start) counterpart: obs = the clone's raw feature vector, action =
+    the absolute `(v, w)` rescaled to `[-1, 1]^2`, so a squash clone's weights load into
+    the SAC actor directly (`rl/sb3.py::init_actor_from_clone`).
+
+    Reuses the parent's buffer slide with `u_base` pinned at the action-box midpoint and
+    `residual_frac = 1`, which makes the parent's composition `u = mid + half_range * a`.
+    `clone_path` is the squash clone; the parent loads it but never queries it.
+
+    `body_obs` appends the residual arm's normalized body-frame observation after the
+    features (pair with `init_actor_from_clone(..., extra_inputs=N_BODY)`): the raw
+    world-frame features alone leave the critic to learn the goal geometry itself.
+    `ego_obs` emits the robot-centred window (`features.egocentric`; pair with a clone
+    trained by `train_clone.py --ego`). `std_obs` emits the features standardized by the clone's own stats (pair with
+    `obs_standardized=True`): raw, they span ~±10 (positions) to 20 (`v`).
+    """
+
+    def __init__(self, clone_path: str, libraries_path: str = "data/libraries_v0.npz",
+                 device: str = "cpu", render_mode: Optional[str] = None,
+                 body_obs: bool = False, std_obs: bool = False, ego_obs: bool = False,
+                 reward: str = "deepc"):
+        super().__init__(clone_path, libraries_path, residual_frac=1.0,
+                         include_base_in_obs=False, device=device, render_mode=render_mode,
+                         reward=reward)
+        self.body_obs, self.std_obs, self.ego_obs = bool(body_obs), bool(std_obs), bool(ego_obs)
+        # ponytail: unbounded box; SB3 never reads the bounds for MlpPolicy.
+        dim = 6 * self.T_ini + 6 + len(self.anchors) + (len(self._raw_low) if body_obs else 0)
+        self.observation_space = spaces.Box(-np.inf, np.inf, shape=(dim,), dtype=np.float32)
+
+    def _make_obs(self, body_obs: np.ndarray) -> np.ndarray:
+        assert self._u_buf is not None and self._y_buf is not None  # primed by reset()
+        self._u_base = 0.5 * (self.a_low + self.a_high)
+        y_ref = bearing_y_ref(self.base.state, self.base.goal)
+        feat = featurize(self._u_buf, self._y_buf, self.base.y, y_ref, self.anchors)
+        if self.ego_obs:
+            feat = egocentric(feat, self.T_ini)
+        if self.std_obs:
+            feat = (feat - self.predictor.feat_mean) / self.predictor.feat_std
+        if self.body_obs:
+            body = 2.0 * (np.asarray(body_obs, dtype=np.float64) - self._raw_low) / self._raw_span - 1.0
+            feat = np.concatenate([feat, np.clip(body, -1.0, 1.0)])
+        return feat.astype(np.float32)

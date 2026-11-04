@@ -11,26 +11,120 @@ import math
 import numpy as np
 import torch
 from stable_baselines3 import SAC, TD3
-from stable_baselines3.common.callbacks import BaseCallback, CheckpointCallback
+from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.noise import NormalActionNoise
+from stable_baselines3.common.policies import ContinuousCritic
+from stable_baselines3.common.torch_layers import create_mlp
+from stable_baselines3.sac.policies import SACPolicy
 from torch import nn
 
 _ALGOS = {"td3": TD3, "sac": SAC}
 
 
+class LayerNormCritic(ContinuousCritic):
+    """SB3's twin Q-network with LayerNorm after every hidden Linear (before ReLU).
+
+    DAWN's critic normalization (arXiv:2602.10539): it bounds how far Q can
+    extrapolate to actions the data does not cover. `create_mlp` already supports
+    `post_linear_modules`; SB3's critic just doesn't expose it.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        in_dim = self.q_networks[0][0].in_features
+        net_arch = [m.out_features for m in self.q_networks[0] if isinstance(m, nn.Linear)][:-1]
+        for idx in range(self.n_critics):
+            q_net = nn.Sequential(*create_mlp(in_dim, 1, net_arch, nn.ReLU,
+                                              post_linear_modules=[nn.LayerNorm]))
+            self.add_module(f"qf{idx}", q_net)    # replaces the plain head
+            self.q_networks[idx] = q_net
+
+
+class LayerNormSACPolicy(SACPolicy):
+    """SACPolicy whose critic (and so its target) is a `LayerNormCritic`.
+
+    A policy class rather than a post-hoc patch so `.save`/`.load` round-trip:
+    SB3 stores the policy class in the zip and rebuilds it on load.
+    """
+
+    def make_critic(self, features_extractor=None) -> ContinuousCritic:
+        critic_kwargs = self._update_features_extractor(self.critic_kwargs, features_extractor)
+        return LayerNormCritic(**critic_kwargs).to(self.device)
+
+
+def seed_replay_buffer(model, env, base_action, n_steps: int, sigma: float, seed: int,
+                       failures_only: bool = False) -> int:
+    """DAWN's data-anchored warmup: roll `base_action(obs) + N(0, sigma)` for
+    `n_steps` in `env` (a separate instance from the training env) and add every
+    transition to `model`'s replay buffer, where it stays for the whole run.
+
+    Time limits are stored as cut-offs (`TimeLimit.truncated`), so SB3 keeps
+    bootstrapping through them exactly as for online data. Sets
+    `learning_starts = 0`: the buffer is already full, and SB3's default 100
+    uniform-random steps would only dilute the anchor.
+
+    `failures_only` keeps only episodes whose last step did not report
+    `info["reached"]`, still `n_steps` transitions in total: an ablation asking
+    whether the anchor helps by showing the critic successful finishes.
+    """
+    rng = np.random.default_rng(seed)
+    n, ep = 0, 0
+    while n < n_steps:
+        obs, _ = env.reset(seed=seed * 100_000 + 90_000 + ep)
+        ep += 1
+        done, episode, info = False, [], {}
+        while not done and (failures_only or n + len(episode) < n_steps):
+            a = np.clip(base_action(obs) + sigma * rng.standard_normal(env.action_space.shape),
+                        env.action_space.low, env.action_space.high).astype(np.float32)
+            nobs, r, term, trunc, info = env.step(a)
+            episode.append((obs, nobs, a, r, term, trunc))
+            obs, done = nobs, term or trunc
+        if failures_only and info.get("reached", False):
+            continue
+        for o, no, a, r, term, trunc in episode[: n_steps - n]:
+            model.replay_buffer.add(o[None], no[None], a[None], np.array([r]),
+                                    np.array([term or trunc]),
+                                    [{"TimeLimit.truncated": bool(trunc and not term)}])
+        n += min(len(episode), n_steps - n)
+    model.learning_starts = 0
+    return n
+
+
+def set_actor_lr(model, lr: float) -> None:
+    """Give the actor its own learning rate (SB3 uses one rate for every optimizer).
+
+    Wraps `actor.optimizer.step` to set the rate just before each Adam step, because
+    SB3's `_update_learning_rate` resets all optimizers at the start of every
+    `train()` call. The critic and alpha keep the model's rate.
+    """
+    opt = model.actor.optimizer
+    real_step = opt.step
+
+    def step(*args, **kwargs):
+        for group in opt.param_groups:
+            group["lr"] = lr
+        return real_step(*args, **kwargs)
+    opt.step = step
+
+
 def build_model(algo: str, venv, learning_rate, device, seed, verbose, action_noise_sigma,
-                tensorboard_log: str | None = None):
+                tensorboard_log: str | None = None, critic_layernorm: bool = False,
+                ent_coef: str | float = "auto"):
     """Construct the SB3 model. TD3 gets Gaussian action noise; SAC explores via entropy.
 
     ``tensorboard_log`` makes SB3 write its internal scalars (losses, entropy
     coef) to tensorboard — set it when a W&B run has ``sync_tensorboard=True``.
     """
     Algo = _ALGOS[algo]
+    if critic_layernorm and algo == "td3":
+        raise ValueError("--critic-layernorm is implemented for SAC only")
     kwargs = dict(
-        policy="MlpPolicy", env=venv, learning_rate=learning_rate,
+        policy=LayerNormSACPolicy if critic_layernorm else "MlpPolicy", env=venv, learning_rate=learning_rate,
         policy_kwargs=dict(net_arch=[256, 256]), device=device, seed=seed, verbose=verbose,
         tensorboard_log=tensorboard_log,
     )
+    if algo != "td3":
+        kwargs["ent_coef"] = ent_coef   # SB3 forms: "auto", "auto_<init>", or a fixed float
     if algo == "td3":
         n_actions = int(venv.action_space.shape[0])
         kwargs["action_noise"] = NormalActionNoise(
@@ -89,7 +183,8 @@ def zero_init_actor(model) -> None:
 
 def init_actor_from_clone(model, clone_path: str,
                           init_log_std: float = math.log(0.1),
-                          device: str = "cpu") -> None:
+                          device: str = "cpu", extra_inputs: int = 0,
+                          obs_standardized: bool = False) -> None:
     """Initialize an SAC actor's weights from a squash-headed behavioral clone.
 
     The paper's Eq. 17 ("Warm Start RL", arXiv:2510.03354): the actor starts as
@@ -113,8 +208,14 @@ def init_actor_from_clone(model, clone_path: str,
       `clone + N(0, exp(init_log_std))`, matching Algorithm 1's `+ N` and the
       TD3 arms' `--action-noise-sigma`.
 
+    ``extra_inputs``: the observation is the clone's features followed by this many
+    more columns (e.g. a critic-friendly view); the actor's layer-0 weights on them
+    start at zero, so the step-0 actor is still exactly the clone.
+    ``obs_standardized``: the env already emits the clone's standardized features,
+    so layer 0 is copied as is instead of folded.
+
     In place, like `zero_init_actor`. SAC only: TD3's `mu` is a Sequential and
-    would need its own branch, which arrives with the TD3 cell if it is ever run.
+    would need its own branch.
 
     Raises:
         ValueError: on a non-squash checkpoint, a shape mismatch, or a non-SAC
@@ -136,26 +237,30 @@ def init_actor_from_clone(model, clone_path: str,
         raise ValueError(
             "init_actor_from_clone supports SAC only (actor.mu must be the "
             f"mean-head Linear); got {type(actor.mu).__name__}.")
+    dst = [actor.latent_pi[0], actor.latent_pi[2], actor.mu]
 
     net = predictor.model.net           # Linear, ReLU, Linear, ReLU, Linear
     src = [net[0], net[2], net[4]]
-    dst = [actor.latent_pi[0], actor.latent_pi[2], actor.mu]
     for i, (s, d) in enumerate(zip(src, dst)):
-        if s.weight.shape != d.weight.shape:
+        want = (s.weight.shape[0], s.weight.shape[1] + (extra_inputs if i == 0 else 0))
+        if tuple(d.weight.shape) != want:
             raise ValueError(
                 f"layer {i} shape mismatch: clone has "
                 f"{tuple(s.weight.shape)}, actor expects "
                 f"{tuple(d.weight.shape)}. The clone's input_dim is "
                 f"{net[0].in_features} and the env's observation is "
-                f"{actor.latent_pi[0].in_features}-D.")
+                f"{dst[0].in_features}-D.")
 
     # Fold the clone's input standardization into layer 0.
     mean = np.asarray(predictor.feat_mean, dtype=np.float64)
     std = np.asarray(predictor.feat_std, dtype=np.float64)
+    if obs_standardized:
+        mean, std = np.zeros_like(mean), np.ones_like(std)
     w0 = src[0].weight.detach().cpu().numpy().astype(np.float64)
     b0 = src[0].bias.detach().cpu().numpy().astype(np.float64)
     folded_w0 = w0 / std                       # columnwise
     folded_b0 = b0 - w0 @ (mean / std)
+    folded_w0 = np.pad(folded_w0, ((0, 0), (0, extra_inputs)))
 
     with torch.no_grad():
         dst[0].weight.copy_(torch.as_tensor(folded_w0, dtype=torch.float32))
@@ -165,102 +270,6 @@ def init_actor_from_clone(model, clone_path: str,
             d.bias.copy_(s.bias.detach())
         actor.log_std.weight.zero_()
         actor.log_std.bias.fill_(float(init_log_std))
-
-
-class FreezeActorCallback(BaseCallback):
-    """Hold the actor still for the first `n_steps` timesteps so the critic
-    fits the warm-started policy's returns before the actor moves.
-
-    Measured motivation, not a precaution: a warm-started actor reaching 79/120
-    collapses to 12/120 within 2000 steps and 3/120 by 4000, because ~1900 actor
-    updates run against a randomly-initialized critic. The source paper
-    (arXiv:2510.03354 SIII.C) predicts this and recommends pre-training the
-    critic; its remedy trains one in simulation for use on hardware, and the
-    analogue here — no sim-to-real gap — is policy evaluation of the frozen
-    prior before the actor is allowed to move.
-
-    Freezing via the learning rate DOES NOT WORK and was tried first: SAC's
-    `train()` calls `_update_learning_rate([actor.optimizer, critic.optimizer])`
-    at the top of every call, unconditionally overwriting `param_groups["lr"]`
-    with SB3's own (constant) schedule value before any gradient step runs.
-    Measured: lr went 0.0 -> 3e-4 inside the very first `train()` call, and the
-    actor's `mu.weight` moved by 1.29e-02 over a run "frozen" for its entire
-    duration -- a complete no-op that a same-shaped lr-only test could not see.
-
-    So this freezes the optimizer's `step` instead: gradients are still
-    computed and `backward()` still runs (so the critic, whose own optimizer
-    is untouched, keeps training normally), but the actor's `Adam.step` is
-    stubbed to do nothing while frozen. Adam's moment estimates are never
-    touched by a no-op step, so the actor resumes from a clean optimizer state
-    once released.
-    """
-
-    def __init__(self, n_steps: int):
-        super().__init__()
-        self.n_steps = int(n_steps)
-        self._real_step = None
-        self._released = False
-
-    def _on_training_start(self) -> None:
-        if self.n_steps <= 0:
-            self._released = True
-            return
-        opt = self.model.actor.optimizer
-        if self._real_step is None:
-            self._real_step = opt.step
-        opt.step = lambda *args, **kwargs: None
-        self._released = False
-
-    def _on_step(self) -> bool:
-        if not self._released and self.num_timesteps >= self.n_steps:
-            self.model.actor.optimizer.step = self._real_step
-            self._released = True
-        return True
-
-    def _on_training_end(self) -> None:
-        # Never hand back a model whose optimizer is still stubbed out -- a
-        # caller that trains again would silently never update the actor.
-        if not self._released and self._real_step is not None:
-            self.model.actor.optimizer.step = self._real_step
-            self._released = True
-
-
-class AnnealTargetEntropyCallback(BaseCallback):
-    """Linearly lower SAC's target entropy from `start_step` to `total_steps`.
-
-    Measured motivation: on the Reacher tail, the greedy mean parks at a stable
-    point 11-31 mm outside the 10 mm tolerance while SAMPLING from the same
-    policy reaches on 13/19 of those failures -- alpha's auto-tuning holds the
-    policy at its target entropy forever, so the mean never commits to the part
-    of the distribution that already succeeds. Ramping `target_entropy` down
-    over the last stretch of training shrinks sigma and forces the mean onto
-    the sampled behaviour; the actor keeps learning through the ramp, so this
-    is annealing, not a post-hoc squash.
-
-    SAC-only, and only meaningful with `ent_coef='auto'` (the default here):
-    `model.target_entropy` is read inside every `train()` gradient step by the
-    alpha loss, which is why mutating the attribute from a callback works. With
-    a fixed ent_coef the attribute is dead and this callback is a silent no-op.
-    """
-
-    def __init__(self, start_step: int, total_steps: int, final: float):
-        super().__init__()
-        self.start_step = int(start_step)
-        self.total_steps = int(total_steps)
-        self.final = float(final)
-        self._initial: float | None = None
-
-    def _on_training_start(self) -> None:
-        self._initial = float(self.model.target_entropy)
-
-    def _on_step(self) -> bool:
-        if self.num_timesteps > self.start_step:
-            span = max(1, self.total_steps - self.start_step)
-            frac = min(1.0, (self.num_timesteps - self.start_step) / span)
-            assert self._initial is not None
-            self.model.target_entropy = (
-                self._initial + frac * (self.final - self._initial))
-        return True
 
 
 def load_policy(path: str, algo: str = "td3", device: str = "cpu"):

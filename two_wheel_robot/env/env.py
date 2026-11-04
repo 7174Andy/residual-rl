@@ -26,6 +26,7 @@ class UnicycleGoalEnv(gym.Env):
         R: Optional[np.ndarray] = None,
         reach_bonus: float = 100.0,
         render_mode: Optional[str] = None,
+        reward: str = "deepc",
     ):
         super().__init__()
         self.workspace_bounds = np.asarray(workspace_bounds, dtype=np.float64)
@@ -48,6 +49,14 @@ class UnicycleGoalEnv(gym.Env):
             else np.asarray(R, dtype=np.float64)
         )
         self.reach_bonus = float(reach_bonus)
+        # "deepc": the DeePC-form stage cost below (the documented default).
+        # "linear": -||p - g|| - u'Ru + bonus, opt-in for RL -- the squared, heading-
+        # weighted form is dominated by the far-field approach, so return stops
+        # tracking reach (corr 0.56 over 210 checkpoints, 2026-10-27). Mirrors
+        # ReacherGoal-v0's linear-distance reward.
+        if reward not in ("deepc", "linear"):
+            raise ValueError(f"reward must be 'deepc' or 'linear', got {reward!r}")
+        self.reward_mode = reward
         self.render_mode = render_mode
 
         a_low = self.action_bounds[:, 0].astype(np.float32)
@@ -189,8 +198,11 @@ class UnicycleGoalEnv(gym.Env):
         reached = distance < self.goal_tolerance
 
         # Stage cost in DeePC form: ||y - y_ref||_Q^2 + ||u||_R^2.
-        err_y = self.y - self.y_ref
-        cost = float(err_y @ self.Q @ err_y + clipped @ self.R @ clipped)
+        if self.reward_mode == "linear":
+            cost = distance + float(clipped @ self.R @ clipped)
+        else:
+            err_y = self.y - self.y_ref
+            cost = float(err_y @ self.Q @ err_y + clipped @ self.R @ clipped)
         reward = -cost + (self.reach_bonus if reached else 0.0)
 
         terminated = bool(reached)

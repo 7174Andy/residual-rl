@@ -20,6 +20,7 @@ from two_wheel_robot.controllers.data_collection import (
 )
 from core.deepc import DeePC
 from core.hankel import build_hankel
+from core.selectdpc import SelectDPC, trajectory_bank
 from two_wheel_robot.env.dynamics import wrap_to_pi
 from two_wheel_robot.env.env import UnicycleGoalEnv
 
@@ -105,3 +106,39 @@ def build_canonical_deepc(
         "lambda_y": lambda_y,
     }
     return deepc, info
+
+
+def build_canonical_select(
+    libraries_path: str = DEFAULT_LIBRARIES,
+    n_cols: int = 300,
+    n_max: int = 1,
+    carry_prediction: bool = False,
+    T_ini: int = 5,
+    N: int = 12,
+    lambda_g: float = 2.0,
+    lambda_y: float = 3e6,
+):
+    """Select-DPC (journey 12, arXiv:2503.18845) on the canonical unicycle config.
+
+    Identical Q / R / bounds / horizons / regularizers to `build_canonical_deepc`;
+    the only difference is the data: the four libraries' trajectories are pooled
+    into one bank and `n_cols` columns are re-selected every step, instead of one
+    whole library picked by heading. `n_max = 1` per journey 12 (the gain is in
+    the selection, not Algorithm 1's loop). `carry_prediction=False` keeps `act`
+    a pure function of the past window, which a clone needs (`core/selectdpc.py`).
+
+    Returns `(controller, info)` with `info` as in `build_canonical_deepc`.
+    """
+    deepc, info = build_canonical_deepc(libraries_path, T_ini, N, lambda_g, lambda_y)
+    del deepc
+    with np.load(libraries_path) as data:
+        u_list = [data[f"u_{i}"] for i in range(4)]
+        y_list = [data[f"y_{i}"] for i in range(4)]
+    bank = trajectory_bank(u_list, y_list, T_ini, N)
+    ab = info["action_bounds"]
+    ctrl = SelectDPC(
+        bank, anchor_headings=np.zeros(1), Q=info["Q"], R=info["R"], T_ini=T_ini, N=N,
+        lambda_g=lambda_g, lambda_y=lambda_y, u_bounds=(ab[:, 0], ab[:, 1]),
+        n_cols=n_cols, n_max=n_max, carry_prediction=carry_prediction,
+    )
+    return ctrl, info
